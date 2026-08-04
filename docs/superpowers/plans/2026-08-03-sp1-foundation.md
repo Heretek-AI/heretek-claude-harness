@@ -898,7 +898,7 @@ Create `tests/schemas/hooks.schema.json`:
         "timeout": {
           "type": "integer",
           "minimum": 1,
-          "description": "Per-hook timeout in seconds. Layer-1 fast gates use timeout=1 (under 100ms)."
+          "description": "Per-hook timeout in seconds (integer per Claude Code hooks reference). Layer-1 fast gates set timeout=1; the wrapper script enforces the <100ms goal internally and exits fast on overrun."
         },
         "async": {
           "type": "boolean",
