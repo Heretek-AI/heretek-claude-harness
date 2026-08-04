@@ -18,7 +18,7 @@ On first reading, this looks attractive — "scan every edit for security issues
 
 Heretek's existing layering already covers this need better:
 
-- **Layer 1 (fast gates, PreToolUse, <100ms)** — blocks obvious mistakes before the edit lands. Currently `fast_gate.py` does regex secret-pattern + lint checks inline.
+- **Layer 1 (fast gates, PreToolUse, <100ms)** — blocks obvious mistakes before the edit lands. Currently `fast_gate.py` only dispatches to ruff/rustfmt/biome; future Layer 1 secret scanning would be a separate concern, not part of the current implementation.
 - **Layer 2 (slow analyzers, `/quality-gate:run`)** — on-demand full scans with `megalinter`, `tdd-guard`, `sonarqube`. The aitmpl hook would chain semgrep/bandit on every Edit, which is exactly the kind of latency-creep Layer 1 must avoid.
 - **`security` plugin skills + commands** — the security plugin ships audit skills/commands, not auto-firing hooks (D15 strict).
 
