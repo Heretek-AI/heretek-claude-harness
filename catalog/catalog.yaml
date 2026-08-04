@@ -1,0 +1,97 @@
+# heretek marketplace — source of truth.
+# Generated from this file by scripts/generate_marketplace.py; do NOT
+# hand-edit .claude-plugin/marketplace.json (it's regenerated).
+#
+# Schema: see tests/schemas/marketplace.schema.json (for the generated
+# marketplace.json) and tests/fixtures/catalog/* (for the catalog.yaml
+# structure). Every items[] entry must pass D7 vetting; entries without
+# vetting.status: approved + review link fail CI.
+
+marketplace:
+  name: heretek
+  description: "Opinionated Claude Code harness: task plugins, quality-gate hooks, curated MCP/LSP/skills."
+  owner:
+    name: Heretek-AI
+    email: team@heretek.ai
+  metadata:
+    pluginRoot: "./plugins"
+  allowCrossMarketplaceDependenciesOn:
+    - claude-plugins-official
+
+plugins:
+  - name: rust
+    category: task
+    tags: [rust, language]
+    source: { type: relative, path: rust }
+    components: [skills, lsp]
+    items: []
+
+  - name: python
+    category: task
+    tags: [python, language]
+    source: { type: relative, path: python }
+    components: [skills, lsp]
+    items: []
+
+  - name: js-ts
+    category: task
+    tags: [javascript, typescript]
+    source: { type: relative, path: js-ts }
+    components: [skills, lsp]
+    items: []
+
+  - name: web-frontend
+    category: task
+    tags: [frontend, design]
+    source: { type: relative, path: web-frontend }
+    components: [skills, mcp]
+    items: []
+
+  - name: hooks
+    category: cross
+    tags: [hooks, quality-gates, flagship]
+    source: { type: relative, path: hooks }
+    components: [hooks, commands, git-hooks]
+    items: []
+
+  - name: security
+    category: cross
+    tags: [security, audit]
+    source: { type: relative, path: security }
+    components: [skills, commands]
+    items: []
+
+  - name: skills-pack
+    category: cross
+    tags: [skills, generic]
+    source: { type: relative, path: skills-pack }
+    components: [skills]
+    items: []
+
+  - name: mcp-pack
+    category: cross
+    tags: [mcp, generic]
+    source: { type: relative, path: mcp-pack }
+    components: [mcp]
+    items: []
+
+  - name: lsp-pack
+    category: cross
+    tags: [lsp, generic]
+    source: { type: relative, path: lsp-pack }
+    components: [lsp]
+    items: []
+
+  - name: agents
+    category: cross
+    tags: [agents]
+    source: { type: relative, path: agents }
+    components: [agents]
+    items: []
+
+  - name: output-styles
+    category: cross
+    tags: [output-styles]
+    source: { type: relative, path: output-styles }
+    components: [output-styles]
+    items: []
