@@ -1,0 +1,10 @@
+{
+  "name": "lsp-pack",
+  "displayName": "Lsp Pack",
+  "description": "Generic LSP configs: rust-analyzer, basedpyright/oxc, gopls, clangd.",
+  "author": {
+    "name": "Heretek-AI",
+    "url": "https://github.com/Heretek-AI"
+  },
+  "license": "MIT"
+}

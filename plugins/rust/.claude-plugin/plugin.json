@@ -1,0 +1,10 @@
+{
+  "name": "rust",
+  "displayName": "Rust",
+  "description": "Rust task plugin: rust-analyzer LSP, cargo-check skill, task-scoped MCP.",
+  "author": {
+    "name": "Heretek-AI",
+    "url": "https://github.com/Heretek-AI"
+  },
+  "license": "MIT"
+}

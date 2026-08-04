@@ -1,0 +1,10 @@
+{
+  "name": "mcp-pack",
+  "displayName": "Mcp Pack",
+  "description": "Generic MCP servers: context7, github-mcp-server, codebase-memory-mcp, serena.",
+  "author": {
+    "name": "Heretek-AI",
+    "url": "https://github.com/Heretek-AI"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "js-ts",
+  "displayName": "Js Ts",
+  "description": "JavaScript/TypeScript task plugin: biome/oxc LSP+formatter, tsconfig-aware skills.",
+  "author": {
+    "name": "Heretek-AI",
+    "url": "https://github.com/Heretek-AI"
+  },
+  "license": "MIT"
+}

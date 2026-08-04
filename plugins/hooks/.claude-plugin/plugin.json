@@ -1,0 +1,10 @@
+{
+  "name": "hooks",
+  "displayName": "Hooks",
+  "description": "Hooks flagship: 3-layer quality gates (fast blocking, slow on-demand, git pre-commit).",
+  "author": {
+    "name": "Heretek-AI",
+    "url": "https://github.com/Heretek-AI"
+  },
+  "license": "MIT"
+}
