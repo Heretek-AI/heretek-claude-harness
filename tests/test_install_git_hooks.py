@@ -24,11 +24,12 @@ def test_install_sh_fails_outside_git_repo(tmp_path: Path) -> None:
     result = subprocess.run(
         ["bash", str(INSTALL_SH)],
         cwd=tmp_path,
+        env={**__import__("os").environ, "REPO_ROOT": str(tmp_path)},
         capture_output=True,
         text=True,
     )
-    assert result.returncode in (0, 1)
-    assert "install_git_hooks:" in (result.stderr or result.stdout)
+    assert result.returncode == 1
+    assert "not a git repository" in result.stderr.lower()
 
 
 def test_install_sh_idempotent_in_real_repo() -> None:

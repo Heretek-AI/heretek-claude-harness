@@ -2,7 +2,7 @@
 # Installed by /hooks:install-git-hooks; runs on pre-commit + pre-push.
 
 default_install_hook_types: [pre-commit, pre-push]
-default_stages: [pre-commit]
+default_stages: [pre-commit, pre-push]
 
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -16,7 +16,7 @@ repos:
     hooks:
       - id: heretek-fast-gate
         name: heretek fast-gate (Layer 1)
-        entry: python plugins/hooks/scripts/fast_gate.py
+        entry: python3 plugins/hooks/scripts/fast_gate.py
         language: system
         types: [python]
         # Fast gate is also enforced by Claude Code's PreToolUse hook;

@@ -7,7 +7,7 @@ set -euo pipefail
 # 1. Locate the repo root (parent of plugins/hooks where this script lives).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-REPO_ROOT="$(cd "$PLUGIN_ROOT/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT:-$(cd "$PLUGIN_ROOT/../.." && pwd)}"
 PRECOMMIT_CONFIG="$PLUGIN_ROOT/.pre-commit-config.yaml"
 
 # 2. Sanity: must be inside a git repository.
