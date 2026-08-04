@@ -1,0 +1,43 @@
+name: validate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate marketplace + manifests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run schema validation
+        run: python scripts/validate.py
+
+      - name: Regenerate marketplace.json
+        run: python scripts/generate_marketplace.py
+
+      - name: Assert catalog.yaml → marketplace.json is in sync
+        run: |
+          if ! git diff --exit-code .claude-plugin/marketplace.json; then
+            echo "::error::marketplace.json is out of sync with catalog.yaml."
+            echo "::error::Run 'python scripts/generate_marketplace.py' locally and commit the result."
+            exit 1
+          fi
+
+      - name: Run tests
+        run: pytest
