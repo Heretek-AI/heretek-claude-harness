@@ -75,7 +75,10 @@ Reason: MIT, 27,548★, last push 2026-08-04 (well inside D7's
 12-month window), `oraios` org (the upstream owner). One GitHub-
 disclosed GHSA in the last 24 months; rated `high` but patched in
 the current `serena-agent` PyPI release (see vetting checklist).
-Passes every D7 criterion.
+Passes every D7 criterion. Real runtime behavior (`~/.serena/`
+writes, language-server auto-downloads, default-on anonymous usage
+ping) is documented in the source-audit section below; none of
+those touch a D7 gate.
 
 ## Target plugin
 
@@ -88,19 +91,56 @@ Passes every D7 criterion.
       commit `e6b3852117b0e53f9233c03fc2ccaaf8b17b542c`).
 - [x] OSI-approved license — **PASS** MIT (`LICENSE` file in repo
       root, `license.spdx_id = "MIT"` in the GitHub API response).
-- [x] source-audit pass — **PASS** the server is a Python package
+- [x] source-audit pass — **PASS-with-flag** the server is a Python
+      package (`serena-agent` on PyPI, NOT a `serena-mcp` package)
       that wraps an LSP client (`solidlsp`) and a filesystem wrapper,
       speaks MCP JSON-RPC over stdio, and exposes both symbol-level
-      tools and project-memory tools. It does shell out to language
-      servers (the LSP binary per detected language), which is
-      necessary for the symbol-table feature; the shelling-out is
-      restricted to the LSP socket, not arbitrary subprocess exec.
-      It writes project state (`.serena/` per-project directory) into
-      the configured project root, not into the user's home dir.
-      Network egress is restricted to MCP stdio only. Backed by the
-      `oraios` GitHub org (the upstream owner); the project is
-      actively maintained (latest commit closes issue #1805 about
-      ignored-path handling for the file-access tools).
+      tools and project-memory tools. Real behavior, per the upstream
+      configuration docs:
+
+      1. **Writes under `~/.serena/`** — the global config file
+         (`serena_config.yml`), downloaded language-server binaries,
+         logs, and other durable state all live under
+         `~/.serena/` on Linux/macOS/Git-Bash and
+         `%USERPROFILE%\.serena\` on Windows (overridable via
+         `SERENA_HOME` env var). Per-project state goes in
+         `<project>/.serena/`.
+      2. **Downloads language servers on first use** — the LSP
+         abstraction auto-fetches the open-source LSP binary for
+         each detected language (Python, TypeScript, Java, etc.) into
+         `~/.serena/` on first request, unless the user points
+         `ls_path` at an existing binary.
+      3. **Anonymous usage reporting on by default** — on startup,
+         serena reports version, OS, backend, and dashboard status.
+         No source code or query text leaves the machine; opt out via
+         `SERENA_USAGE_REPORTING=false`. The plugin's `.mcp.json`
+         does NOT set this opt-out by default; the plugin README
+         documents it as a recommended env var.
+
+      It does shell out to language-server binaries, which is the
+      necessary feature (the LSP socket, not arbitrary subprocess
+      exec). Backed by the `oraios` GitHub org (the upstream owner);
+      the project is actively maintained (latest commit closes issue
+      #1805 about ignored-path handling for the file-access tools).
+
+      **Accepted risks (with rationale):**
+      - `~/.serena/` writes: the directory is within the user's home
+        and is fully managed by the user (`SERENA_HOME` env var
+        override). No writes outside `~/.serena/` and `<project>`.
+      - Language-server downloads: the downloaded binaries are
+        open-source LSP projects already on the host (the user has
+        them installed anyway if they are working in those languages);
+        serena is just caching them under `~/.serena/lsp_servers/`.
+        The downloads are first-use-only per-language.
+      - Anonymous usage ping: opt-out is a one-env-var setting
+        (`SERENA_USAGE_REPORTING=false`); the ping does not include
+        source code or query text per upstream docs.
+
+      None of these touch D7's gate (which is `critical` CVEs, MIT
+      license, stars ≥ 500, last-commit recency, source-audit pass).
+      The plugin opts out of usage reporting by default in its
+      README; users who want the per-project install path can set
+      `SERENA_HOME` to a project-local directory.
 - [x] no critical CVEs in 24 months — **PASS-with-note** one GHSA in
       the `oraios/serena` Security Advisories endpoint:
       `GHSA-37h2-6p4f-mp3q` (high, CVSS 8.3, published 2026-07-01):
@@ -118,11 +158,19 @@ Passes every D7 criterion.
 ## Implementation note
 
 The plugin ships `.mcp.json` with one `serena` stdio entry:
-`uvx serena-mcp`. The Python package is **not** bundled with the
-plugin — `uvx` (from the Astral `uv` tool, which heretek already
-recommends for Python projects) creates an ephemeral venv and runs
-`serena-mcp` from it. Users without `uv` installed can substitute
-`pipx run serena-agent` or `python -m serena` from a manual
-`pip install serena-agent` venv. The plugin README documents `uvx`
-as the recommended path and notes that the first MCP launch will
-download + cache the package.
+`uvx --from serena-agent serena start-mcp-server --context
+claude-code --project-from-cwd`. The Python package is **not**
+bundled with the plugin — `uvx` (from the Astral `uv` tool, which
+heretek already recommends for Python projects) creates an ephemeral
+venv and runs `serena start-mcp-server` from the `serena-agent`
+package. The correct invocation has been verified against the
+upstream `oraios/serena` README and the
+`oraios.github.io/serena/02-usage/030_clients.html` clients page;
+the previously-written `uvx serena-mcp` form was incorrect (there
+is no `serena-mcp` package on PyPI — the package is
+`serena-agent`, with the binary entrypoint `serena` and the
+subcommand `start-mcp-server`). Users without `uv` installed can
+substitute `pipx run --spec serena-agent serena start-mcp-server
+--context claude-code --project-from-cwd`. The plugin README
+documents `uvx` as the recommended path and notes that the first
+MCP launch will download + cache the package.

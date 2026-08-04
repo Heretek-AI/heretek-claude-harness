@@ -28,11 +28,18 @@ every definition — without leaving the prompt.
   actually works in. See
   `catalog/reviews/mcp-pack-context7.md` for the vetting record.
 - **MCP: `github`** — GitHub's official `github-mcp-server`, launched
-  via `npx -y @modelcontextprotocol/server-github`. Exposes the
-  GitHub REST and GraphQL APIs as a curated set of MCP tools
-  (repositories, issues, pull_requests, actions, code_search,
+  via `docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN
+  ghcr.io/github/github-mcp-server` (the upstream-documented primary
+  install path — image is at `ghcr.io/github/github-mcp-server`,
+  SHA-pinned by tag at fetch time, and signed by SLSA provenance).
+  Exposes the GitHub REST and GraphQL APIs as a curated set of MCP
+  tools (repositories, issues, pull_requests, actions, code_search,
   notifications, secret_scanning, dependabot, security_advisories,
-  etc.) with OAuth scope hints on every tool. See
+  etc.) with OAuth scope hints on every tool. **Not** the deprecated
+  community package `@modelcontextprotocol/server-github` — that
+  npm package points at an older, unmaintained codebase. The vetted
+  code is the `github/github-mcp-server` Go repo, published as the
+  container image at `ghcr.io/github/github-mcp-server`. See
   `catalog/reviews/mcp-pack-github-mcp-server.md`.
 - **MCP: `codebase-memory-mcp`** — `DeusData/codebase-memory-mcp`,
   distributed as a single static C binary. Indexes the working
@@ -41,29 +48,45 @@ every definition — without leaving the prompt.
   as structured MCP tool calls. Pairs with `serena` for a complete
   code-navigation surface. See
   `catalog/reviews/mcp-pack-codebase-memory-mcp.md`.
-- **MCP: `serena`** — `oraios/serena`, launched via `uvx serena-mcp`.
-  LSP-backed symbol lookup (`find_symbol`, `find_referencing_symbols`,
-  `get_symbols_overview`) plus filesystem wrappers
-  (`read_file`, `create_text_file`, `replace_content`,
-  `list_dir`, `find_file`, `search_for_pattern`) and project-memory
-  tools (`read_memory`, `write_memory`). Adapters for Python,
-  TypeScript, Java, C/C++, Rust, Go, C#, Kotlin, and more via
-  `solidlsp`. See `catalog/reviews/mcp-pack-serena.md`.
+- **MCP: `serena`** — `oraios/serena`, launched via
+  `uvx --from serena-agent serena start-mcp-server --context
+  claude-code --project-from-cwd`. LSP-backed symbol lookup
+  (`find_symbol`, `find_referencing_symbols`, `get_symbols_overview`)
+  plus filesystem wrappers (`read_file`, `create_text_file`,
+  `replace_content`, `list_dir`, `find_file`, `search_for_pattern`)
+  and project-memory tools (`read_memory`, `write_memory`). Adapters
+  for Python, TypeScript, Java, C/C++, Rust, Go, C#, Kotlin, and
+  more via `solidlsp`. **Not** `uvx serena-mcp` — the correct
+  package is `serena-agent` on PyPI; the binary entrypoint is
+  `serena` with subcommand `start-mcp-server`. See
+  `catalog/reviews/mcp-pack-serena.md`.
 
 ## Requirements
 
-- **Node.js 22 LTS or later** — `context7` and `github-mcp-server`
-  fetch via `npx` on first MCP launch.
-- **`uv`** (Astral) — `serena` fetches via `uvx` on first MCP launch.
-  Install with `curl -LsSf https://astral.sh/uv/install.sh | sh`.
+- **Node.js 22 LTS or later** — `context7` fetches via `npx` on
+  first MCP launch.
+- **Docker** — `github-mcp-server` ships as the official container
+  image at `ghcr.io/github/github-mcp-server` (the upstream-
+  documented primary install path). Install Docker Desktop or
+  Docker Engine; the `github` MCP entry pulls the image on first
+  MCP launch.
+- **`uv`** (Astral) — `serena` fetches via `uvx` on first MCP
+  launch. Install with `curl -LsSf https://astral.sh/uv/install.sh
+  | sh`.
 - **`codebase-memory-mcp` binary** — download the static binary for
   your platform (Linux x86_64 / macOS arm64) from the
   `DeusData/codebase-memory-mcp` GitHub releases page and place it
-  on `$PATH` as `codebase-memory-mcp`. Other platforms need a from-
-  source build per the upstream README.
-- **`GITHUB_PERSONAL_ACCESS_TOKEN`** env var (recommended) — the
-  `github` MCP server needs an authenticated GitHub identity. A
-  classic PAT with `repo`, `read:org`, `read:user`, and `workflow`
+  on `$PATH` as `codebase-memory-mcp`. The recommended upstream
+  install path is `curl -fsSL
+  https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh
+  | bash` (also installs hooks/skills/agents on detected clients —
+  use `--skip-config` if you want binary-only). The plugin's
+  `.mcp.json` assumes the binary is already on `$PATH`; the
+  install step is documented in the upstream README, not bundled
+  with this plugin.
+- **`GITHUB_PERSONAL_ACCESS_TOKEN`** env var (required for `github`)
+  — the `github` MCP server needs an authenticated GitHub identity.
+  A classic PAT with `repo`, `read:org`, `read:user`, and `workflow`
   scopes covers the typical tool surface; the `github-mcp-server`
   upstream README documents the OAuth device-code flow as the
   alternative.
@@ -71,6 +94,11 @@ every definition — without leaving the prompt.
   unauthenticated rate limit on `context7`. Not required; the server
   works in unauthenticated mode with rate limits per upstream
   README.
+- **`SERENA_USAGE_REPORTING=false`** env var (recommended) — opts
+  out of serena's anonymous startup usage ping. The ping sends
+  version, OS, backend, and dashboard status; it does not send
+  source code or query text, but opting out is the conservative
+  default for heretek.
 
 ## Out of scope (v1)
 

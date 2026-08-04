@@ -7,8 +7,11 @@
     },
     "github": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"]
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
     },
     "codebase-memory-mcp": {
       "type": "stdio",
@@ -18,7 +21,7 @@
     "serena": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["serena-mcp"]
+      "args": ["--from", "serena-agent", "serena", "start-mcp-server", "--context", "claude-code", "--project-from-cwd"]
     },
     "context7-http": {
       "type": "http",

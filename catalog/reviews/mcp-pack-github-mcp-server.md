@@ -88,11 +88,22 @@ in the last 24 months; both are below the D7 `critical` threshold
       the workspace. The only network egress is the OAuth-scoped
       calls to `api.github.com` and the `github.com` GraphQL
       endpoint. Backed by the GitHub org itself (the upstream
-      owner). The plugin's `.mcp.json` invokes the server via
-      `npx -y @modelcontextprotocol/server-github`; auth is via the
-      `GITHUB_PERSONAL_ACCESS_TOKEN` env var (PAT) or the
-      `GITHUB_MCP_SERVER` env-var-driven OAuth flow documented in
-      the upstream README.
+      owner). The plugin's `.mcp.json` invokes the server via the
+      official container image
+      `docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN
+      ghcr.io/github/github-mcp-server` — the upstream-documented
+      primary install path; the image is published by the GitHub
+      org itself, signed with SLSA-3 provenance, and SHA-pinned at
+      fetch time. Auth is via the `GITHUB_PERSONAL_ACCESS_TOKEN`
+      env var (PAT) or the OAuth device-code flow documented in
+      the upstream README. **Note**: the plugin does NOT use the
+      npm package `@modelcontextprotocol/server-github` — that
+      package is the older community MCP server (a different
+      codebase, unmaintained). The vetted code is the Go binary
+      at `github/github-mcp-server`, distributed as the container
+      image above (or as prebuilt release tarballs at
+      `github.com/github/github-mcp-server/releases`, per the
+      alternative install path documented in the upstream README).
 - [x] no critical CVEs in 24 months — **PASS-with-flag** two GHSAs in
       the `github/github-mcp-server` Security Advisories endpoint,
       both below `critical` severity:
@@ -109,17 +120,20 @@ in the last 24 months; both are below the D7 `critical` threshold
         (CVSS ≥ 9.0), which this does not cross.
       Neither advisory is rated `critical`, so D7's "no critical" gate
       is satisfied. Users who want the patched 0.33 behavior can pin
-      `npx -y @modelcontextprotocol/server-github@1.1.2`; the default
-      `npx -y …@latest` pulls whatever GitHub most recently released.
+      to a specific image tag (e.g. `…@v1.1.2`) when pulling the
+      container; the default `ghcr.io/github/github-mcp-server` tag
+      pulls whatever GitHub most recently released.
       Track this advisory in the quarterly refresh; bump to a fixed
       release when GitHub cuts one.
 
 ## Implementation note
 
 The plugin ships `.mcp.json` with one `github` stdio entry:
-`npx -y @modelcontextprotocol/server-github`. The npm package is
-**not** bundled with the plugin — it is fetched on first MCP launch
-via `npx`. The user needs Node.js LTS. Auth is via either a
+`docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN
+ghcr.io/github/github-mcp-server`. The container image is **not**
+bundled with the plugin — it is pulled from `ghcr.io` on first MCP
+launch. The user needs Docker Desktop or Docker Engine running.
+Auth is via either a
 `GITHUB_PERSONAL_ACCESS_TOKEN` env var (simplest; PAT with the
 relevant OAuth scopes) or the OAuth device-code flow documented in
 the upstream README. The plugin README documents the PAT path as the
