@@ -12,7 +12,10 @@ plugin entries to the marketplace.json plugin entry shape:
 Run as CLI:
     python scripts/generate_marketplace.py [--catalog PATH] [--output PATH]
 
-Exit code: 0 on success, 1 on any error. Idempotent: re-running on the
+Exit code: 0 on success, 1 on any error. The CLI catches the full set
+of expected runtime errors (ValueError, KeyError, TypeError, OSError,
+FileNotFoundError, yaml.YAMLError) so the user sees a clear stderr
+message instead of a Python traceback. Idempotent: re-running on the
 same catalog produces byte-identical output (verified by Task 11).
 """
 from __future__ import annotations
@@ -51,18 +54,21 @@ def _normalize_source(source: dict | str) -> dict | str:
 
 def _plugin_entry(catalog_plugin: dict) -> dict:
     """Project a catalog plugin entry into the marketplace.json entry shape."""
+    # Strip catalog-only fields first. _INTERNAL_FIELDS is the canonical
+    # list of fields that must NEVER appear in marketplace.json.
+    filtered = {k: v for k, v in catalog_plugin.items() if k not in _INTERNAL_FIELDS}
     out: dict = {
-        "name": catalog_plugin["name"],
-        "source": _normalize_source(catalog_plugin["source"]),
+        "name": filtered["name"],
+        "source": _normalize_source(filtered["source"]),
     }
     for optional in ("category", "tags", "description", "author"):
-        if optional in catalog_plugin:
-            out[optional] = catalog_plugin[optional]
+        if optional in filtered:
+            out[optional] = filtered[optional]
     # Note: 'version' is intentionally NEVER added — first-party plugins
     # use SHA-ride (D11). 3rd-party entries get their version (if any)
     # from the catalog entry directly.
-    if "version" in catalog_plugin:
-        out["version"] = catalog_plugin["version"]
+    if "version" in filtered:
+        out["version"] = filtered["version"]
     return out
 
 
@@ -97,7 +103,14 @@ def main(argv: Iterable[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         generate(args.catalog, args.output)
-    except (ValueError, FileNotFoundError, yaml.YAMLError) as exc:
+    except (
+        ValueError,
+        KeyError,
+        TypeError,
+        OSError,
+        FileNotFoundError,
+        yaml.YAMLError,
+    ) as exc:
         print(f"generate: error: {exc}", file=sys.stderr)
         return 1
     print(f"generate: wrote {args.output}")
