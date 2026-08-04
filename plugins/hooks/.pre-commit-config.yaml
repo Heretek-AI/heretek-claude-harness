@@ -1,0 +1,23 @@
+# heretek hooks plugin — Layer 3 pre-commit framework config.
+# Installed by /hooks:install-git-hooks; runs on pre-commit + pre-push.
+
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: heretek-fast-gate
+        name: heretek fast-gate (Layer 1)
+        entry: python plugins/hooks/scripts/fast_gate.py
+        language: system
+        types: [python]
+        # Fast gate is also enforced by Claude Code's PreToolUse hook;
+        # this catches git commits that bypass the agent loop.
