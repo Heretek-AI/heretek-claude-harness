@@ -351,7 +351,43 @@ plugins:
     tags: [agents]
     source: { type: relative, path: agents }
     components: [agents]
-    items: []
+    items:
+      - id: code-reviewer
+        kind: agent
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-agent"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
+      - id: security-reviewer
+        kind: agent
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-agent"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
+      - id: test-engineer
+        kind: agent
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-agent"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
 
   - name: output-styles
     category: cross
