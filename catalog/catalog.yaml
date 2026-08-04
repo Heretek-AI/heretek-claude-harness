@@ -24,7 +24,43 @@ plugins:
     tags: [rust, language]
     source: { type: relative, path: rust }
     components: [skills, lsp]
-    items: []
+    items:
+      - id: rust-analyzer
+        kind: lsp
+        upstream: rust-lang/rust-analyzer
+        sha: "987d712f743ecf3651180735a8189b8cb398ec0a"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 16724
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/rust-analyzer.md
+      - id: cargo-check
+        kind: skill
+        upstream: rust-lang/cargo
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 13000
+          last_commit: 2026-08-04
+          cve_scan: not-applicable
+          review: reviews/rust-cargo-check.md
+      - id: cargo-clippy
+        kind: skill
+        upstream: rust-lang/rust-clippy
+        sha: "8c34b94d986619698fd3b4c2c0eb287aeac97d79"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 13424
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/rust-clippy.md
 
   - name: python
     category: task
