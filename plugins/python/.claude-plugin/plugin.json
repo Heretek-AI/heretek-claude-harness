@@ -1,10 +1,13 @@
 {
   "name": "python",
   "displayName": "Python",
-  "description": "Python task plugin: basedpyright LSP, ruff-driven skill, pytest patterns.",
+  "description": "Python task plugin: ruff LSP, ruff-check skill.",
   "author": {
     "name": "Heretek-AI",
     "url": "https://github.com/Heretek-AI"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "lspServers": "./.lsp.json",
+  "skills": "./skills/",
+  "dependencies": []
 }

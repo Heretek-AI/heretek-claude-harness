@@ -67,7 +67,31 @@ plugins:
     tags: [python, language]
     source: { type: relative, path: python }
     components: [skills, lsp]
-    items: []
+    items:
+      - id: ruff-lsp
+        kind: lsp
+        upstream: astral-sh/ruff
+        sha: "e49143a56844560165df2b869a77da80858bca9f"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 49068
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/python-ruff.md
+      - id: ruff-check
+        kind: skill
+        upstream: astral-sh/ruff
+        sha: "e49143a56844560165df2b869a77da80858bca9f"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 49068
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/python-ruff.md
 
   - name: js-ts
     category: task
