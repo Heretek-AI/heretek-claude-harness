@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heretek.ai/schemas/mcp.schema.json",
+  "title": "Claude Code .mcp.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mcpServers"],
+  "properties": {
+    "mcpServers": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/server" }
+    }
+  },
+  "$defs": {
+    "server": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["stdio", "http"] },
+        "command": { "type": "string", "description": "stdio: binary path or interpreter." },
+        "args": { "type": "array", "items": { "type": "string" } },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "url": { "type": "string", "format": "uri", "description": "http: server URL." },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "stdio" } }, "required": ["type"] },
+          "then": { "required": ["command"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "http" } }, "required": ["type"] },
+          "then": { "required": ["url"] }
+        }
+      ]
+    }
+  }
+}
