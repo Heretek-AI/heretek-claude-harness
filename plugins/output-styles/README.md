@@ -6,6 +6,13 @@
 
 Curated output-style presets: terse, detailed, tabular, explanatory.
 
+## Styles
+
+- **terse** — minimal output. No preamble, no apologies, no "I'll do X" narration.
+- **detailed** — thorough output. Include rationale, edge cases, and tradeoffs.
+- **tabular** — structured output. Use tables, lists, and other structured formats where possible.
+- **explanatory** — pedagogical output. Define terms, explain reasoning, walk through examples.
+
 ## Install
 
 ```bash
@@ -14,7 +21,7 @@ Curated output-style presets: terse, detailed, tabular, explanatory.
 
 ## Components
 
-<!-- list the components this plugin ships: skills, mcp, lsp, hooks, agents, output-styles -->
+- `outputStyles`: `./output-styles/` — Claude Code output-style presets (terse, detailed, tabular, explanatory)
 
 ## License
 

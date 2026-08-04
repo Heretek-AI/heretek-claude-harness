@@ -394,4 +394,52 @@ plugins:
     tags: [output-styles]
     source: { type: relative, path: output-styles }
     components: [output-styles]
-    items: []
+    items:
+      - id: terse
+        kind: output-style
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-style"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
+      - id: detailed
+        kind: output-style
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-style"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
+      - id: tabular
+        kind: output-style
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-style"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
+      - id: explanatory
+        kind: output-style
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-style"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
