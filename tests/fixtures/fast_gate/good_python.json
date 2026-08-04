@@ -1,0 +1,8 @@
+{
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "tests/fixtures/fast_gate/good_sample.py",
+    "old_string": "",
+    "new_string": "def hello():\n    print('hello')\n"
+  }
+}
