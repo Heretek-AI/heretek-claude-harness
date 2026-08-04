@@ -186,7 +186,31 @@ plugins:
     tags: [skills, generic]
     source: { type: relative, path: skills-pack }
     components: [skills]
-    items: []
+    items:
+      - id: caveman
+        kind: skill
+        upstream: JuliusBrussee/caveman
+        sha: "ec83e5bace4c20484d704dea21e12fc4eb94e9aa"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 95783
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/skills-pack-caveman.md
+      - id: superpowers
+        kind: skill
+        upstream: obra/superpowers
+        sha: "44c9b2d6e889982ac18c27d05a19fefe335194e1"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 266415
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/skills-pack-superpowers.md
 
   - name: mcp-pack
     category: cross
