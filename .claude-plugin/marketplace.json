@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "allowCrossMarketplaceDependenciesOn": [
+    "claude-plugins-official"
+  ],
+  "description": "Opinionated Claude Code harness: task plugins, quality-gate hooks, curated MCP/LSP/skills.",
+  "metadata": {
+    "pluginRoot": "./plugins"
+  },
+  "name": "heretek",
+  "owner": {
+    "email": "team@heretek.ai",
+    "name": "Heretek-AI"
+  },
+  "plugins": [
+    {
+      "category": "task",
+      "name": "rust",
+      "source": "rust",
+      "tags": [
+        "rust",
+        "language"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "python",
+      "source": "python",
+      "tags": [
+        "python",
+        "language"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "js-ts",
+      "source": "js-ts",
+      "tags": [
+        "javascript",
+        "typescript"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "web-frontend",
+      "source": "web-frontend",
+      "tags": [
+        "frontend",
+        "design"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "hooks",
+      "source": "hooks",
+      "tags": [
+        "hooks",
+        "quality-gates",
+        "flagship"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "security",
+      "source": "security",
+      "tags": [
+        "security",
+        "audit"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "skills-pack",
+      "source": "skills-pack",
+      "tags": [
+        "skills",
+        "generic"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "mcp-pack",
+      "source": "mcp-pack",
+      "tags": [
+        "mcp",
+        "generic"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "lsp-pack",
+      "source": "lsp-pack",
+      "tags": [
+        "lsp",
+        "generic"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "agents",
+      "source": "agents",
+      "tags": [
+        "agents"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "output-styles",
+      "source": "output-styles",
+      "tags": [
+        "output-styles"
+      ]
+    }
+  ]
+}
