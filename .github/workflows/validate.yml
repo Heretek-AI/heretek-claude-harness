@@ -48,5 +48,27 @@ jobs:
                  tests/test_aitmpl_vetting.py
           bash tests/smoke/fast_gate_smoke.sh
 
+      - name: Check plugins have content
+        run: |
+          python -c "
+          import sys, yaml
+          from pathlib import Path
+          catalog = yaml.safe_load(Path('catalog/catalog.yaml').read_text())
+          for p in catalog['plugins']:
+              name = p['name']
+              items = p.get('items') or []
+              assert items, f'{name}: no items — every plugin must have ≥ 1 vetted item'
+              # Approved items must have corresponding content directories
+              for item in items:
+                  if item.get('vetting', {}).get('status') != 'approved':
+                      continue
+                  kind = item['kind']
+                  # We just assert the item has at minimum upstream + license; further
+                  # content-shape assertions live in tests/test_plugin_components.py
+                  assert item.get('upstream'), f'{name}/{item["id"]}: approved item missing upstream'
+                  assert item.get('license'), f'{name}/{item["id"]}: approved item missing license'
+          print(f'all {len(catalog["plugins"])} plugins have vetted items')
+          "
+
       - name: Run tests
         run: pytest
