@@ -272,7 +272,55 @@ plugins:
     tags: [lsp, generic]
     source: { type: relative, path: lsp-pack }
     components: [lsp]
-    items: []
+    items:
+      - id: rust-analyzer
+        kind: lsp
+        upstream: rust-lang/rust-analyzer
+        sha: "8e505372b769fcd787b44fd5391e60fa3ada7f22"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 16724
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/lsp-pack-rust-analyzer.md
+      - id: basedpyright
+        kind: lsp
+        upstream: detachhead/basedpyright
+        sha: "8de94d0d8e9989900ea0758abbda3fac97600dd9"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 3515
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/lsp-pack-basedpyright.md
+      - id: gopls
+        kind: lsp
+        upstream: golang/tools
+        sha: "da22a7bb2f9a909d2663362e582cf97771eeefab"
+        license: BSD-3-Clause
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 7986
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/lsp-pack-gopls.md
+      - id: clangd
+        kind: lsp
+        upstream: clangd/clangd
+        sha: "0d73b70db36385313702175b480183eb80ca6a16"
+        license: Apache-2.0
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 2261
+          last_commit: 2026-07-13
+          cve_scan: 2026-08-04
+          review: reviews/lsp-pack-clangd.md
 
   - name: agents
     category: cross
