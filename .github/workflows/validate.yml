@@ -39,5 +39,14 @@ jobs:
             exit 1
           fi
 
+      - name: Run hooks plugin tests + smoke
+        run: |
+          pytest tests/test_fast_gate.py \
+                 tests/test_quality_gate.py \
+                 tests/test_hooks_manifest.py \
+                 tests/test_install_git_hooks.py \
+                 tests/test_aitmpl_vetting.py
+          bash tests/smoke/fast_gate_smoke.sh
+
       - name: Run tests
         run: pytest
