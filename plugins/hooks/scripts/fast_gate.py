@@ -9,9 +9,9 @@ that file, and enforces a 100 ms self-kill timer. Exit codes:
 
 The wrapper enforces the <100ms goal internally via the `timeout` argument
 to `subprocess.run`, which raises `subprocess.TimeoutExpired` when the
-budget elapses. Claude Code's hook timeout is integer seconds
-(`timeout=1` minimum per Claude Code docs), so the wrapper's
-sub-second self-kill is what makes the <100ms goal real.
+budget elapses. Claude Code's hook timeout is integer seconds (our
+`timeout: 1` is an aggressive override; the wrapper's
+`subprocess.run(timeout=0.1)` enforces the sub-second goal).
 """
 from __future__ import annotations
 
@@ -57,16 +57,8 @@ def parse_payload(payload_text: str) -> dict:
 
 
 def _resolve_binary(preferred: str) -> Optional[str]:
-    """Find the binary on PATH; fall back to npx for biome."""
-    found = shutil.which(preferred)
-    if found:
-        return found
-    if preferred == "biome":
-        # Try `npx @biomejs/biome` instead of plain `biome`.
-        npx = shutil.which("npx")
-        if npx:
-            return npx
-    return None
+    """Find the binary on PATH."""
+    return shutil.which(preferred)
 
 
 def dispatch(file_path: Path, time_budget_s: float = 0.1) -> int:
@@ -82,17 +74,33 @@ def dispatch(file_path: Path, time_budget_s: float = 0.1) -> int:
     if entry is None:
         return 0
     binary, argv_template = entry
-    resolved = _resolve_binary(binary)
-    if resolved is None:
-        print(
-            f"fast_gate: {binary} not installed; failing open for {file_path}",
-            file=sys.stderr,
-        )
-        return 0
-    argv = [resolved] + [arg.replace("{}", str(file_path)) for arg in argv_template[1:]]
-    # If using npx as the biome wrapper, the actual biome binary is the next arg.
-    if binary == "biome" and resolved.endswith("npx"):
-        argv = ["npx", "-y", "@biomejs/biome", "check", "--no-errors-on-unmatched", str(file_path)]
+    # Biome is always invoked via npx so we can pin the major version for
+    # determinism (avoid upstream surprise changes breaking CI).
+    if binary == "biome":
+        npx = shutil.which("npx")
+        if npx is None:
+            print(
+                f"fast_gate: npx not installed; cannot run biome; failing open for {file_path}",
+                file=sys.stderr,
+            )
+            return 0
+        argv = [
+            npx,
+            "-y",
+            "@biomejs/biome@^1.9",
+            "check",
+            "--no-errors-on-unmatched",
+            str(file_path),
+        ]
+    else:
+        resolved = _resolve_binary(binary)
+        if resolved is None:
+            print(
+                f"fast_gate: {binary} not installed; failing open for {file_path}",
+                file=sys.stderr,
+            )
+            return 0
+        argv = [resolved] + [arg.replace("{}", str(file_path)) for arg in argv_template[1:]]
     try:
         result = subprocess.run(
             argv,
