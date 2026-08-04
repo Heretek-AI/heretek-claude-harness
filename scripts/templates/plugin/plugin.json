@@ -1,0 +1,10 @@
+{
+  "name": "<name>",
+  "displayName": "<displayName>",
+  "description": "<description>",
+  "author": {
+    "name": "Heretek-AI",
+    "url": "https://github.com/Heretek-AI"
+  },
+  "license": "MIT"
+}
