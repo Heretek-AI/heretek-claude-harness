@@ -1,0 +1,16 @@
+[project]
+name = "heretek-marketplace"
+version = "0.0.0"
+description = "Opinionated Claude Code plugin marketplace (heretek)"
+requires-python = ">=3.10"
+dependencies = [
+    "PyYAML==6.0.2",
+    "jsonschema==4.23.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.3"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
