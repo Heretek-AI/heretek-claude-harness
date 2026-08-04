@@ -178,8 +178,32 @@ plugins:
     category: cross
     tags: [security, audit]
     source: { type: relative, path: security }
-    components: [skills, commands]
-    items: []
+    components: [skills]  # D15: NO hooks — only the `hooks` plugin ships hooks
+    items:
+      - id: security-research
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # this is the heretek repo itself; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
+      - id: audit-checklist
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # this is the heretek repo itself; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
 
   - name: skills-pack
     category: cross
