@@ -1,0 +1,7 @@
+{
+  "lspServers": {
+    "bad": {
+      "command": 42
+    }
+  }
+}
