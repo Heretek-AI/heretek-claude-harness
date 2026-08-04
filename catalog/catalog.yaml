@@ -217,7 +217,55 @@ plugins:
     tags: [mcp, generic]
     source: { type: relative, path: mcp-pack }
     components: [mcp]
-    items: []
+    items:
+      - id: context7
+        kind: mcp
+        upstream: upstash/context7
+        sha: "594a73133e14631af8c915a1b4f2c8039c964fe1"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 60259
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/mcp-pack-context7.md
+      - id: github-mcp-server
+        kind: mcp
+        upstream: github/github-mcp-server
+        sha: "3778a41476e31a072430cfee7c5d31c5f72def60"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 31961
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/mcp-pack-github-mcp-server.md
+      - id: codebase-memory-mcp
+        kind: mcp
+        upstream: DeusData/codebase-memory-mcp
+        sha: "24bee5703fcc4a967d5af076320cb6e2d00ec871"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 37463
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/mcp-pack-codebase-memory-mcp.md
+      - id: serena
+        kind: mcp
+        upstream: oraios/serena
+        sha: "e6b3852117b0e53f9233c03fc2ccaaf8b17b542c"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 27548
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/mcp-pack-serena.md
 
   - name: lsp-pack
     category: cross
