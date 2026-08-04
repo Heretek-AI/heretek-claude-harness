@@ -1,0 +1,15 @@
+marketplace:
+  name: single-test
+  description: A catalog with one plugin.
+  owner:
+    name: Tester
+  metadata:
+    pluginRoot: "./plugins"
+
+plugins:
+  - name: alpha
+    category: task
+    tags: [example]
+    source: { type: relative, path: alpha }
+    components: [skills]
+    items: []

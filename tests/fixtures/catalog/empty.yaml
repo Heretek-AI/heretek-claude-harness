@@ -1,0 +1,9 @@
+marketplace:
+  name: empty-test
+  description: An empty catalog for testing.
+  owner:
+    name: Tester
+  metadata:
+    pluginRoot: "./plugins"
+
+plugins: []
