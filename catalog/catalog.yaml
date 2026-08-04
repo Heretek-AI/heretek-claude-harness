@@ -56,7 +56,7 @@ plugins:
       - id: heretek-fast-gate
         kind: hook
         upstream: Heretek-AI/heretek-claude-harness
-        sha: "252bc865"  # SP3 first-party-plugins branch HEAD at Task 1
+        sha: "694449d"  # the SP2 merge commit (self-pinning to the version that ships the hook)
         license: MIT
         vetting:
           status: approved

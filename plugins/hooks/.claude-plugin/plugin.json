@@ -11,5 +11,6 @@
   "commands": [
     "./commands/quality-gate.md",
     "./commands/install-git-hooks.md"
-  ]
+  ],
+  "dependencies": []
 }
