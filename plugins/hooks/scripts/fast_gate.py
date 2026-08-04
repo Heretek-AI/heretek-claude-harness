@@ -7,9 +7,11 @@ that file, and enforces a 100 ms self-kill timer. Exit codes:
 - 0: allow (lint passed, or file type is not gated, or time-budget killed us and we fail-open)
 - 2: block (linter reported violations — Claude Code treats exit-2 as deny)
 
-The wrapper enforces the <100ms goal internally because Claude Code's
-hook timeout is integer seconds (timeout=1 minimum per Claude Code docs);
-the wrapper's signal-based self-kill is what makes the <100ms goal real.
+The wrapper enforces the <100ms goal internally via the `timeout` argument
+to `subprocess.run`, which raises `subprocess.TimeoutExpired` when the
+budget elapses. Claude Code's hook timeout is integer seconds
+(`timeout=1` minimum per Claude Code docs), so the wrapper's
+sub-second self-kill is what makes the <100ms goal real.
 """
 from __future__ import annotations
 
@@ -67,12 +69,13 @@ def _resolve_binary(preferred: str) -> Optional[str]:
     return None
 
 
-def dispatch(file_path: Path) -> int:
-    """Run the appropriate linter on file_path. Returns the tool's exit code.
+def dispatch(file_path: Path, time_budget_s: float = 0.1) -> int:
+    """Run the appropriate linter on file_path within time_budget_s seconds.
 
     Returns 0 if the file extension is not gated (allow silently).
     Returns 2 if the linter reports violations.
-    Returns 127 if the binary is not installed (fail-open, allow).
+    Returns 0 if the binary is not installed (fail-open, allow).
+    Returns 0 on time-budget expiry (fail-open, allow).
     """
     ext = file_path.suffix.lower()
     entry = DISPATCH_TABLE.get(ext)
@@ -91,8 +94,20 @@ def dispatch(file_path: Path) -> int:
     if binary == "biome" and resolved.endswith("npx"):
         argv = ["npx", "-y", "@biomejs/biome", "check", "--no-errors-on-unmatched", str(file_path)]
     try:
-        result = subprocess.run(argv, capture_output=True, text=True, check=False)
+        result = subprocess.run(
+            argv,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=time_budget_s,
+        )
     except FileNotFoundError:
+        return 0
+    except subprocess.TimeoutExpired:
+        print(
+            f"fast_gate: {file_path} exceeded {time_budget_s}s — failing open",
+            file=sys.stderr,
+        )
         return 0
     if result.returncode == 0:
         return 0
@@ -115,14 +130,7 @@ def run(payload_text: str, time_budget_s: float = 0.1) -> int:
         print(f"fast_gate: {exc}", file=sys.stderr)
         return 0
     file_path = Path(parsed["file_path"])
-    try:
-        return dispatch(file_path)
-    except subprocess.TimeoutExpired:
-        print(
-            f"fast_gate: {file_path} exceeded {time_budget_s}s — failing open",
-            file=sys.stderr,
-        )
-        return 0
+    return dispatch(file_path, time_budget_s)
 
 
 def main() -> int:

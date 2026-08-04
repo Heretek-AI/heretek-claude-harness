@@ -55,7 +55,7 @@ def test_dispatch_unsupported_extension_returns_zero() -> None:
     reason="ruff not installed",
 )
 def test_dispatch_python_good_returns_zero() -> None:
-    code = fast_gate.dispatch(FIXTURES / "good_sample.py")
+    code = fast_gate.dispatch(FIXTURES / "good_sample.py", time_budget_s=5.0)
     assert code == 0
 
 
@@ -64,7 +64,7 @@ def test_dispatch_python_good_returns_zero() -> None:
     reason="ruff not installed",
 )
 def test_dispatch_python_bad_returns_two() -> None:
-    code = fast_gate.dispatch(FIXTURES / "bad_sample.py")
+    code = fast_gate.dispatch(FIXTURES / "bad_sample.py", time_budget_s=5.0)
     assert code == 2
 
 
@@ -73,7 +73,7 @@ def test_dispatch_python_bad_returns_two() -> None:
     reason="rustfmt not installed",
 )
 def test_dispatch_rust_good_returns_zero() -> None:
-    code = fast_gate.dispatch(FIXTURES / "good_sample.rs")
+    code = fast_gate.dispatch(FIXTURES / "good_sample.rs", time_budget_s=5.0)
     assert code == 0
 
 
@@ -82,7 +82,7 @@ def test_dispatch_rust_good_returns_zero() -> None:
     reason="rustfmt not installed",
 )
 def test_dispatch_rust_bad_returns_two() -> None:
-    code = fast_gate.dispatch(FIXTURES / "bad_sample.rs")
+    code = fast_gate.dispatch(FIXTURES / "bad_sample.rs", time_budget_s=5.0)
     assert code == 2
 
 
@@ -92,7 +92,7 @@ def test_dispatch_rust_bad_returns_two() -> None:
     reason="biome/npx not installed",
 )
 def test_dispatch_js_good_returns_zero() -> None:
-    code = fast_gate.dispatch(FIXTURES / "good_sample.js")
+    code = fast_gate.dispatch(FIXTURES / "good_sample.js", time_budget_s=10.0)
     assert code == 0
 
 
@@ -102,22 +102,31 @@ def test_dispatch_js_good_returns_zero() -> None:
     reason="biome/npx not installed",
 )
 def test_dispatch_js_bad_returns_two() -> None:
-    code = fast_gate.dispatch(FIXTURES / "bad_sample.js")
+    code = fast_gate.dispatch(FIXTURES / "bad_sample.js", time_budget_s=10.0)
     assert code == 2
 
 
 def test_run_fails_open_on_time_budget() -> None:
-    """When the dispatcher exceeds the time budget, exit 0 with a warning."""
+    """When the linter exceeds the time budget, exit 0 with a warning.
+
+    Verifies the timeout is actually enforced by patching ``subprocess.run``
+    to raise ``TimeoutExpired`` (the same exception ``subprocess.run``
+    raises when its ``timeout`` argument elapses), AND by asserting the
+    wrapper passed our ``time_budget_s`` into the ``timeout=`` kwarg.
+    """
     payload = (FIXTURES / "good_python.json").read_text()
-    # Patch dispatch to simulate a slow linter.
-    original_dispatch = fast_gate.dispatch
+    original_run = fast_gate.subprocess.run
+    captured: dict = {}
     try:
-        def slow_dispatch(file_path):
-            import time
-            time.sleep(1.0)
-            return 0
-        fast_gate.dispatch = slow_dispatch  # type: ignore
+        def hang(*_args, **kwargs):
+            captured["timeout"] = kwargs.get("timeout")
+            raise subprocess.TimeoutExpired(
+                cmd=_args[0] if _args else [], timeout=kwargs.get("timeout", 0)
+            )
+        fast_gate.subprocess.run = hang  # type: ignore
         code = fast_gate.run(payload, time_budget_s=0.05)
     finally:
-        fast_gate.dispatch = original_dispatch  # type: ignore
+        fast_gate.subprocess.run = original_run  # type: ignore
     assert code == 0  # fail-open
+    # Verify the wrapper actually passed our budget into subprocess.run.
+    assert captured["timeout"] == 0.05
