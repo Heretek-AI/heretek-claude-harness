@@ -129,7 +129,31 @@ plugins:
     tags: [frontend, design]
     source: { type: relative, path: web-frontend }
     components: [skills, mcp]
-    items: []
+    items:
+      - id: chrome-devtools-mcp
+        kind: mcp
+        upstream: ChromeDevTools/chrome-devtools-mcp
+        sha: "99bd90a7881bea5161d4e6b5ab6da26c2a9a3721"
+        license: Apache-2.0
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 48523
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/web-frontend-chrome-devtools-mcp.md
+      - id: lighthouse
+        kind: skill
+        upstream: GoogleChrome/lighthouse
+        sha: "6908063802da4ad34e17db11384c14bd89b4a69c"
+        license: Apache-2.0
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 30613
+          last_commit: 2026-08-02
+          cve_scan: 2026-08-04
+          review: reviews/web-frontend-lighthouse.md
 
   - name: hooks
     category: cross

@@ -1,7 +1,7 @@
 {
   "name": "web-frontend",
   "displayName": "Web Frontend",
-  "description": "Web frontend task plugin: chrome-devtools-mcp, lighthouse skill, storybook integration.",
+  "description": "Web frontend task plugin: chrome-devtools MCP for browser introspection + lighthouse skill for accessibility/performance/SEO scoring.",
   "author": {
     "name": "Heretek-AI",
     "url": "https://github.com/Heretek-AI"
