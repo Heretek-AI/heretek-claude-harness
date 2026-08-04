@@ -17,7 +17,7 @@ PAYLOAD=$(printf '{"tool_name":"Edit","tool_input":{"file_path":"%s","old_string
 
 # Run the dispatcher via module path.
 set +e
-python -m plugins.hooks.scripts.fast_gate <<<"$PAYLOAD" >/dev/null 2>&1
+python3 -m plugins.hooks.scripts.fast_gate <<<"$PAYLOAD" >/dev/null 2>&1
 EXIT_CODE=$?
 set -e
 
