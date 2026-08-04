@@ -52,7 +52,19 @@ plugins:
     tags: [hooks, quality-gates, flagship]
     source: { type: relative, path: hooks }
     components: [hooks, commands, git-hooks]
-    items: []
+    items:
+      - id: heretek-fast-gate
+        kind: hook
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "252bc865"  # SP3 first-party-plugins branch HEAD at Task 1
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 0  # this is the heretek repo itself; not subject to D7 stars gate
+          last_commit: 2026-08-04
+          cve_scan: not-applicable  # first-party
+          review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
 
   - name: security
     category: cross
