@@ -98,7 +98,31 @@ plugins:
     tags: [javascript, typescript]
     source: { type: relative, path: js-ts }
     components: [skills, lsp]
-    items: []
+    items:
+      - id: biome-lsp
+        kind: lsp
+        upstream: biomejs/biome
+        sha: "6556ca3c11659ba67c33e7be3605d12f33c8616b"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 25496
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/js-ts-biome.md
+      - id: typecheck
+        kind: skill
+        upstream: microsoft/TypeScript
+        sha: "b465fdbfe175304d9b977da137b2c178ae1091d3"
+        license: Apache-2.0
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 110057
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/js-ts-typescript.md
 
   - name: web-frontend
     category: task

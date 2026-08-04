@@ -1,0 +1,15 @@
+{
+  "lspServers": {
+    "typescript": {
+      "command": "biome",
+      "args": ["lsp-proxy"],
+      "extensionToLanguage": {
+        ".js": "javascript",
+        ".ts": "typescript",
+        ".jsx": "javascriptreact",
+        ".tsx": "typescriptreact",
+        ".json": "json"
+      }
+    }
+  }
+}
