@@ -1,0 +1,5 @@
+{
+  "command": "rust-analyzer",
+  "args": [],
+  "rootUri": "https://github.com/rust-lang/rust-analyzer/commit/8e505372b769fcd787b44fd5391e60fa3ada7f22"
+}
