@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-**Email:** security@heretek.ai (placeholder — replace with a real address before public launch)
+**Report via GitHub Security Advisories** on this repository.
 
 Please include:
 - Item name (plugin / skill / MCP / LSP / etc.)
