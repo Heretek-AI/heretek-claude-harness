@@ -34,7 +34,7 @@ def test_generate_single_plugin(tmp_path: Path, fixtures_dir: Path) -> None:
     assert len(result["plugins"]) == 1
     plugin = result["plugins"][0]
     assert plugin["name"] == "alpha"
-    assert plugin["source"] == "alpha"  # relative source becomes a bare string
+    assert plugin["source"] == "./plugins/alpha"  # relative source becomes ./<pluginRoot>/<path>
     assert plugin["category"] == "task"
     assert plugin["tags"] == ["example"]
 

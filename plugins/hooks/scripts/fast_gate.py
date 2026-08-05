@@ -57,8 +57,20 @@ def parse_payload(payload_text: str) -> dict:
 
 
 def _resolve_binary(preferred: str) -> Optional[str]:
-    """Find the binary on PATH."""
+    """Find the binary on PATH.
+
+    Test override: callers (e.g. ``tests/test_fast_gate.py``) may set
+    ``fast_gate._FORCE_BINARY[preferred]`` to a path string to bypass PATH
+    lookup, so timeout/argument-forwarding tests run deterministically
+    regardless of which linters happen to be installed on the host.
+    """
+    forced = _FORCE_BINARY.get(preferred)
+    if forced is not None:
+        return forced
     return shutil.which(preferred)
+
+
+_FORCE_BINARY: dict[str, str] = {}
 
 
 def dispatch(file_path: Path, time_budget_s: float = 0.1) -> int:

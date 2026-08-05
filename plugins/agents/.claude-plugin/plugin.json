@@ -7,6 +7,5 @@
     "url": "https://github.com/Heretek-AI"
   },
   "license": "MIT",
-  "agents": "./agents/",
   "dependencies": []
 }
