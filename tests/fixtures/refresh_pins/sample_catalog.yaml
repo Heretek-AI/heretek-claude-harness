@@ -1,0 +1,39 @@
+marketplace:
+  name: test-mp
+  owner: { name: Tester }
+plugins:
+  - name: ok-plugin
+    category: task
+    source: { type: relative, path: ok-plugin }
+    components: [lsp]
+    items:
+      - id: rust-analyzer
+        kind: lsp
+        upstream: rust-lang/rust-analyzer
+        sha: "0123456789abcdef0123456789abcdef01234567"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 16000
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/test.md
+
+  - name: stale-plugin
+    category: task
+    source: { type: relative, path: stale-plugin }
+    components: [lsp]
+    items:
+      - id: ghost-tool
+        kind: lsp
+        upstream: someorg/ghost-tool-that-no-longer-exists
+        sha: "0000000000000000000000000000000000000000"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2025-01-01
+          stars: 999999
+          last_commit: 2024-01-01
+          cve_scan: 2026-08-04
+          review: reviews/test.md
