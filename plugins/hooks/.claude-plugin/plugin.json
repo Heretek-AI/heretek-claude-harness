@@ -7,7 +7,6 @@
     "url": "https://github.com/Heretek-AI"
   },
   "license": "MIT",
-  "hooks": "./hooks/hooks.json",
   "commands": [
     "./commands/quality-gate.md",
     "./commands/install-git-hooks.md"
