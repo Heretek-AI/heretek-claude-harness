@@ -72,3 +72,39 @@ jobs:
 
       - name: Run tests
         run: pytest
+
+  refresh-pins:
+    name: Quarterly SHA refresh check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Only run on schedule or manual dispatch — NOT on push or PR (this is a
+    # maintenance check, not a gate; non-fresh items are flagged for review).
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install deps
+        run: pip install -r requirements-dev.txt
+
+      - name: Run refresh-pins check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/refresh_pins.py --github-token "$GITHUB_TOKEN" | tee refresh-pins.txt
+          RC=${PIPESTATUS[0]}
+          echo "## refresh-pins summary" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          head -50 refresh-pins.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ $RC -ne 0 ]; then
+            echo "::warning::Some items are stale. See refresh-pins.txt for details. Maintainer should review."
+          fi
+          # Exit non-zero so the job fails visibly. This is a maintenance signal,
+          # not a merge gate (PRs still merge even when this job fails).
+          exit $RC
