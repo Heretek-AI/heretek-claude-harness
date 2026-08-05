@@ -10,6 +10,12 @@ on:
     - cron: "0 6 * * *"
   workflow_dispatch:  # Allow manual trigger from Actions tab
 
+# Default permissions: read-only. The smoke test only reads the marketplace
+# manifest and runs `claude plugin install` against a local path; no writes
+# to repo contents are required.
+permissions:
+  contents: read
+
 jobs:
   smoke:
     name: Smoke test — install + fast-gate trigger

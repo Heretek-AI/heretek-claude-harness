@@ -9,6 +9,12 @@ on:
     - cron: "0 6 * * 1"   # Mondays at 06:00 UTC (weekly refresh)
   workflow_dispatch:
 
+# Default permissions: read-only. `refresh-pins` only needs to call public
+# GitHub API GET endpoints and write $GITHUB_STEP_SUMMARY (which is a
+# built-in, not a token permission), so contents:read is sufficient.
+permissions:
+  contents: read
+
 jobs:
   validate:
     name: Validate marketplace + manifests
