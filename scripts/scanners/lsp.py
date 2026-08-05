@@ -63,6 +63,23 @@ def _find_config(path: Path) -> Optional[Path]:
     return None
 
 
+def _block_invalid(item_id: str, rel_cfg: str, field: str, message: str) -> ScannerReport:
+    """Helper: build a blocking lsp-config-invalid report."""
+    return ScannerReport(
+        item_id=item_id,
+        scanner="config-lint",
+        severity="block",
+        findings=[
+            Finding(
+                path=f"{rel_cfg}:{field}",
+                line=None,
+                message=message,
+                rule_id="lsp-config-invalid",
+            )
+        ],
+    )
+
+
 def scan_lsp(
     path: Path, *, item_id: str, pinned_sha: Optional[str] = None
 ) -> ScannerReport:
@@ -103,7 +120,26 @@ def scan_lsp(
         )
 
     rel_cfg = str(cfg_path.relative_to(path))
+
+    # D11 shape check: top-level must be a JSON object.
+    if not isinstance(cfg, dict):
+        return _block_invalid(
+            item_id,
+            rel_cfg,
+            "<root>",
+            f"LSP config top-level must be a JSON object, got {type(cfg).__name__}",
+        )
+
+    # D11 shape check: 'command' must be a string (lists are unhashable vs allowlist).
     command = cfg.get("command", "")
+    if not isinstance(command, str):
+        return _block_invalid(
+            item_id,
+            rel_cfg,
+            "command",
+            f"LSP 'command' must be a string, got {type(command).__name__}",
+        )
+
     if command not in ALLOWLIST:
         findings.append(
             Finding(
@@ -117,11 +153,21 @@ def scan_lsp(
             )
         )
 
-    # If a rootUri is a github commit URL, check it matches the pinned sha
+    # D11 shape check: 'rootUri' / 'url' must be a string (or absent).
+    # If a rootUri is a github commit URL, check it matches the pinned sha.
+    # Non-github URLs are permitted (caller's choice) and do NOT block; only
+    # an SHA mismatch against pinned_sha triggers the lsp-url-drift finding.
     for url_field in ("rootUri", "url"):
         url = cfg.get(url_field)
-        if not url:
+        if url is None:
             continue
+        if not isinstance(url, str):
+            return _block_invalid(
+                item_id,
+                rel_cfg,
+                url_field,
+                f"LSP '{url_field}' must be a string, got {type(url).__name__}",
+            )
         m = GITHUB_COMMIT_RE.match(url)
         if m and pinned_sha and m.group(1) != pinned_sha:
             findings.append(

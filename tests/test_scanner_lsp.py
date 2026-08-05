@@ -52,3 +52,51 @@ def test_scan_lsp_block_when_command_is_unknown_binary() -> None:
             cfg.unlink()
         else:
             cfg.write_text(original)
+
+
+def _write_lsp_config(parent: Path, payload: object) -> Path:
+    """Helper: write `payload` as the .lsp.json for a fresh dir under `parent`."""
+    d = parent / "lsp_item"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / ".lsp.json").write_text(json.dumps(payload))
+    return d
+
+
+def test_scan_lsp_block_when_top_level_is_array(tmp_path: Path) -> None:
+    """D11: top-level must be a JSON object; arrays/strings must block."""
+    d = _write_lsp_config(tmp_path, [])
+    report = scan_lsp(d, item_id="array-cfg")
+    assert report.severity == "block"
+    assert any(f.rule_id == "lsp-config-invalid" for f in report.findings)
+
+
+def test_scan_lsp_block_when_command_is_list(tmp_path: Path) -> None:
+    """D11: 'command' must be a string. Lists are unhashable vs the allowlist."""
+    d = _write_lsp_config(tmp_path, {"command": ["npx", "tsc"]})
+    report = scan_lsp(d, item_id="list-cmd")
+    assert report.severity == "block"
+    assert any(f.rule_id == "lsp-config-invalid" for f in report.findings)
+    assert any("command" in f.path for f in report.findings)
+
+
+def test_scan_lsp_block_when_rootUri_is_not_a_string(tmp_path: Path) -> None:
+    """D11: 'rootUri' must be a string when present; numeric/boolean must block."""
+    d = _write_lsp_config(tmp_path, {"command": "rust-analyzer", "rootUri": 42})
+    report = scan_lsp(d, item_id="num-rooturi")
+    assert report.severity == "block"
+    assert any(f.rule_id == "lsp-config-invalid" for f in report.findings)
+    assert any("rootUri" in f.path for f in report.findings)
+
+
+def test_scan_lsp_clean_when_rootUri_is_non_github_url(tmp_path: Path) -> None:
+    """A non-GitHub URL is permitted (caller's choice) — no regex match, no drift."""
+    d = _write_lsp_config(
+        tmp_path,
+        {
+            "command": "rust-analyzer",
+            "rootUri": "https://example.com/not-github/123",
+        },
+    )
+    report = scan_lsp(d, item_id="nongithub-rooturi", pinned_sha="anything")
+    assert report.severity == "clean"
+    assert report.findings == []
