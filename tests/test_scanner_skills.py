@@ -102,3 +102,31 @@ def test_skills_scanner_class_implements_protocol(skill_dir: Path) -> None:
         )
         report = scanner.scan(skill_dir, item_id="my-skill")
     assert report.severity == "clean"
+
+
+@pytest.mark.integration
+class TestRealSkillSpector:
+    """Runs the REAL SkillSpector CLI against planted fixtures.
+    Skipped by default; run with `pytest -m integration`."""
+
+    @pytest.fixture
+    def fixtures_dir(self) -> Path:
+        return Path(__file__).resolve().parent.parent / "tests/fixtures/security_scan"
+
+    def test_good_skill_is_clean(self, fixtures_dir: Path) -> None:
+        report = scan_skill(fixtures_dir / "good_skill", item_id="good-skill")
+        # SkillSpector may produce info-level findings on perfectly clean
+        # content; we assert NO block or warn severity.
+        assert report.severity in ("clean", "info")
+
+    def test_prompt_inject_skill_is_blocked(self, fixtures_dir: Path) -> None:
+        report = scan_skill(fixtures_dir / "bad_skill_prompt_inject", item_id="bad-skill-inject")
+        assert report.severity in ("block", "warn"), (
+            f"SkillSpector should have flagged prompt injection but got {report.severity}"
+        )
+
+    def test_exfil_skill_is_blocked(self, fixtures_dir: Path) -> None:
+        report = scan_skill(fixtures_dir / "bad_skill_exfil", item_id="bad-skill-exfil")
+        assert report.severity in ("block", "warn"), (
+            f"SkillSpector should have flagged curl|bash but got {report.severity}"
+        )

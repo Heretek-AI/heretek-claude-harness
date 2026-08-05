@@ -112,3 +112,22 @@ def test_scan_mcp_skips_vt_when_no_token(mcp_dir: Path) -> None:
         report = scan_mcp(mcp_dir, item_id="evil-mcp", vt_token=None)
     assert report.severity == "clean"
     mock_vt.assert_not_called()
+
+
+@pytest.mark.integration
+class TestRealMcpScan:
+    """Real SkillSpector against planted MCP fixtures. Skipped by default."""
+
+    @pytest.fixture
+    def fixtures_dir(self) -> Path:
+        return Path(__file__).resolve().parent.parent / "tests/fixtures/security_scan"
+
+    def test_good_mcp_is_clean(self, fixtures_dir: Path) -> None:
+        report = scan_mcp(fixtures_dir / "good_mcp", item_id="good-mcp")
+        assert report.severity in ("clean", "info")
+
+    def test_bad_mcp_exfil_is_blocked(self, fixtures_dir: Path) -> None:
+        report = scan_mcp(fixtures_dir / "bad_mcp_hash_mismatch", item_id="bad-mcp")
+        assert report.severity in ("block", "warn"), (
+            f"SkillSpector should have flagged the exfil pattern but got {report.severity}"
+        )
