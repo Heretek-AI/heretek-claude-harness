@@ -1,0 +1,8 @@
+# Default owners
+*                                       @Heretek-AI/security-maintainers
+
+# Security-sensitive paths require explicit review from the security owner
+# Suppressions + new workflows get a tighter gate.
+/catalog/reviews/                       @Heretek-AI/security-maintainers
+/.github/workflows/                     @Heretek-AI/security-maintainers
+/.github/CODEOWNERS                     @Heretek-AI/security-maintainers
