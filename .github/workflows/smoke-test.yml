@@ -57,6 +57,9 @@ jobs:
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 
+      - name: Install ruff (required for fast-gate trigger below)
+        run: pip install ruff
+
       - name: Add heretek marketplace locally
         run: claude plugin marketplace add heretek .
         env:
