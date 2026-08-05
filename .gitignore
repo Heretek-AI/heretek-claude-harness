@@ -3,8 +3,12 @@
 .omo/
 .serena/
 .codegraph
-.agents/
-.claude/
+.agents/*
+!.agents/skills/
+!.agents/skills/**
+.claude/*
+!.claude/skills/
+!.claude/skills/**
 .harness/
 *.local.yml
 
