@@ -61,7 +61,7 @@ jobs:
         run: pip install ruff
 
       - name: Add heretek marketplace locally
-        run: claude plugin marketplace add heretek .
+        run: claude plugin marketplace add ./
         env:
           CI: "true"
 

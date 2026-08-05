@@ -113,20 +113,30 @@ def test_run_fails_open_on_time_budget() -> None:
     to raise ``TimeoutExpired`` (the same exception ``subprocess.run``
     raises when its ``timeout`` argument elapses), AND by asserting the
     wrapper passed our ``time_budget_s`` into the ``timeout=`` kwarg.
+
+    Uses ``fast_gate._FORCE_BINARY`` so the test is independent of which
+    linter binaries are installed on the host — the timeout-propagation
+    contract is what we're verifying.
     """
     payload = (FIXTURES / "good_python.json").read_text()
     original_run = fast_gate.subprocess.run
+    original_forced = dict(fast_gate._FORCE_BINARY)
     captured: dict = {}
     try:
+        fast_gate._FORCE_BINARY["ruff"] = "/usr/bin/true"  # any resolvable path
+
         def hang(*_args, **kwargs):
             captured["timeout"] = kwargs.get("timeout")
             raise subprocess.TimeoutExpired(
                 cmd=_args[0] if _args else [], timeout=kwargs.get("timeout", 0)
             )
+
         fast_gate.subprocess.run = hang  # type: ignore
         code = fast_gate.run(payload, time_budget_s=0.05)
     finally:
         fast_gate.subprocess.run = original_run  # type: ignore
+        fast_gate._FORCE_BINARY.clear()
+        fast_gate._FORCE_BINARY.update(original_forced)
     assert code == 0  # fail-open
     # Verify the wrapper actually passed our budget into subprocess.run.
     assert captured["timeout"] == 0.05
