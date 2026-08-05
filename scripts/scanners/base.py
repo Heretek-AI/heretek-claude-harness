@@ -36,6 +36,10 @@ class ScannerReport:
 
 
 class Scanner(Protocol):
-    """The interface every wrapper in this package implements."""
+    """The interface every wrapper in this package implements.
 
-    def scan(self, path: Path, *, token: str | None = None) -> ScannerReport: ...
+    `item_id` identifies the catalog item being scanned. Implementations
+    may derive it from the path when not provided, but prefer explicit.
+    """
+
+    def scan(self, path: Path, *, item_id: str | None = None) -> ScannerReport: ...

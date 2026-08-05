@@ -137,7 +137,5 @@ def scan_skill(path: Path, *, item_id: str) -> ScannerReport:
 class SkillsScanner:
     """Object-oriented wrapper around `scan_skill` for the Protocol."""
 
-    def scan(
-        self, path: Path, *, token: str | None = None, item_id: str | None = None
-    ) -> ScannerReport:
+    def scan(self, path: Path, *, item_id: str | None = None) -> ScannerReport:
         return scan_skill(path, item_id=item_id or path.name)
