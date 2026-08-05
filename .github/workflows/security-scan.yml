@@ -1,0 +1,51 @@
+name: security-scan (daily)
+
+on:
+  schedule:
+    - cron: '17 3 * * *'   # 03:17 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write           # draft PR
+  issues: write             # tracking issue
+  pull-requests: write
+
+jobs:
+  scan:
+    name: Run per-kind scanners against latest upstream
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2 # D20
+
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0 # D20
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0 # D20
+        with:
+          node-version: "20"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Warm SkillSpector npx cache
+        run: npx --yes @nvidia/skillspector --version
+
+      - name: Run security scan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VT_TOKEN: ${{ secrets.VT_TOKEN }}
+        run: |
+          python scripts/security_scan.py \
+            --output reports/ \
+            --github-token "$GH_TOKEN" \
+            --vt-token "$VT_TOKEN"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2 # D20
+        if: always()
+        with:
+          name: scan-reports
+          path: reports/
