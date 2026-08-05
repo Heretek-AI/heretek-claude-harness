@@ -16,7 +16,7 @@
     {
       "category": "task",
       "name": "rust",
-      "source": "rust",
+      "source": "./plugins/rust",
       "tags": [
         "rust",
         "language"
@@ -25,7 +25,7 @@
     {
       "category": "task",
       "name": "python",
-      "source": "python",
+      "source": "./plugins/python",
       "tags": [
         "python",
         "language"
@@ -34,7 +34,7 @@
     {
       "category": "task",
       "name": "js-ts",
-      "source": "js-ts",
+      "source": "./plugins/js-ts",
       "tags": [
         "javascript",
         "typescript"
@@ -43,7 +43,7 @@
     {
       "category": "task",
       "name": "web-frontend",
-      "source": "web-frontend",
+      "source": "./plugins/web-frontend",
       "tags": [
         "frontend",
         "design"
@@ -52,7 +52,7 @@
     {
       "category": "cross",
       "name": "hooks",
-      "source": "hooks",
+      "source": "./plugins/hooks",
       "tags": [
         "hooks",
         "quality-gates",
@@ -62,7 +62,7 @@
     {
       "category": "cross",
       "name": "security",
-      "source": "security",
+      "source": "./plugins/security",
       "tags": [
         "security",
         "audit"
@@ -71,7 +71,7 @@
     {
       "category": "cross",
       "name": "skills-pack",
-      "source": "skills-pack",
+      "source": "./plugins/skills-pack",
       "tags": [
         "skills",
         "generic"
@@ -80,7 +80,7 @@
     {
       "category": "cross",
       "name": "mcp-pack",
-      "source": "mcp-pack",
+      "source": "./plugins/mcp-pack",
       "tags": [
         "mcp",
         "generic"
@@ -89,7 +89,7 @@
     {
       "category": "cross",
       "name": "lsp-pack",
-      "source": "lsp-pack",
+      "source": "./plugins/lsp-pack",
       "tags": [
         "lsp",
         "generic"
@@ -98,7 +98,7 @@
     {
       "category": "cross",
       "name": "agents",
-      "source": "agents",
+      "source": "./plugins/agents",
       "tags": [
         "agents"
       ]
@@ -106,7 +106,7 @@
     {
       "category": "cross",
       "name": "output-styles",
-      "source": "output-styles",
+      "source": "./plugins/output-styles",
       "tags": [
         "output-styles"
       ]

@@ -3,8 +3,10 @@
 catalog.yaml is the source of truth (spec §5). The generator maps catalog
 plugin entries to the marketplace.json plugin entry shape:
 
-- relative source `{type: relative, path: rust}` → bare string `"rust"`
-  (resolved against metadata.pluginRoot by Claude Code)
+- relative source `{type: relative, path: rust}` → `"./plugins/rust"`
+  (resolved against metadata.pluginRoot per the canonical marketplace.json
+  schema; Claude Code requires the `./<pluginRoot>/<path>` form)
+- bare-string sources (already in canonical `./...` form) → pass through
 - git-subdir / github / url / npm source objects → pass through unchanged
 - catalog-only fields (components, items) → stripped from the output
 - first-party plugin entries have no `version` field (D11 SHA-ride)
@@ -36,13 +38,24 @@ DEFAULT_OUTPUT = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 _INTERNAL_FIELDS = {"components", "items"}
 
 
-def _normalize_source(source: dict | str) -> dict | str:
-    """Translate the catalog's source shape into the marketplace.json shape."""
+def _normalize_source(
+    source: dict | str, plugin_root: str | None = None
+) -> dict | str:
+    """Translate the catalog's source shape into the marketplace.json shape.
+
+    Relative sources are resolved against ``plugin_root`` (the catalog's
+    ``metadata.pluginRoot``, defaulting to ``"./plugins"``) and emitted as
+    the canonical ``./<pluginRoot>/<path>`` form expected by Claude Code's
+    marketplace.json schema. Bare-string sources (already in canonical form)
+    are passed through unchanged.
+    """
     if isinstance(source, str):
         return source
     src_type = source.get("type")
     if src_type == "relative":
-        return source["path"]
+        path = source["path"]
+        root = (plugin_root or "./plugins").lstrip("./").rstrip("/")
+        return f"./{root}/{path}"
     # 3rd-party object: translate to the Claude Code marketplace shape
     # (which uses `source:` discriminator, not `type:`).
     out = {"source": src_type}
@@ -52,14 +65,16 @@ def _normalize_source(source: dict | str) -> dict | str:
     return out
 
 
-def _plugin_entry(catalog_plugin: dict) -> dict:
+def _plugin_entry(
+    catalog_plugin: dict, plugin_root: str | None = None
+) -> dict:
     """Project a catalog plugin entry into the marketplace.json entry shape."""
     # Strip catalog-only fields first. _INTERNAL_FIELDS is the canonical
     # list of fields that must NEVER appear in marketplace.json.
     filtered = {k: v for k, v in catalog_plugin.items() if k not in _INTERNAL_FIELDS}
     out: dict = {
         "name": filtered["name"],
-        "source": _normalize_source(filtered["source"]),
+        "source": _normalize_source(filtered["source"], plugin_root=plugin_root),
     }
     for optional in ("category", "tags", "description", "author"):
         if optional in filtered:
@@ -83,7 +98,8 @@ def generate(catalog_path: Path, output_path: Path) -> dict:
         raise ValueError(f"{catalog_path}: 'plugins' must be a list")
 
     marketplace_section = catalog["marketplace"]
-    plugins = [_plugin_entry(p) for p in catalog["plugins"]]
+    plugin_root = marketplace_section.get("metadata", {}).get("pluginRoot")
+    plugins = [_plugin_entry(p, plugin_root=plugin_root) for p in catalog["plugins"]]
 
     generated = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
