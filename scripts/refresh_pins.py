@@ -33,9 +33,13 @@ STALENESS_WINDOW_DAYS = 365
 GITHUB_API = "https://api.github.com"
 
 
-def _days_since(date_str: str) -> int:
+def _days_since(date_val) -> int:
+    # PyYAML parses unquoted ISO dates (e.g. `date: 2026-08-04`) as
+    # datetime.date objects, not strings. Accept either form.
+    if isinstance(date_val, dt.date):
+        return (dt.date.today() - date_val).days
     try:
-        d = dt.date.fromisoformat(date_str)
+        d = dt.date.fromisoformat(str(date_val))
     except (TypeError, ValueError):
         return 10**9
     return (dt.date.today() - d).days

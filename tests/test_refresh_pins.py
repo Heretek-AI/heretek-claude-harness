@@ -1,4 +1,5 @@
 """Tests for scripts/refresh_pins.py."""
+import datetime as dt
 import sys
 from pathlib import Path
 
@@ -12,8 +13,8 @@ import refresh_pins  # noqa: E402
 FIXTURE = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
 
 
-def test_check_item_offline_returns_ok_or_stale_without_network() -> None:
-    """Without a token, `check_item` does NOT call GitHub; it compares the stored sha against a derived expectation."""
+def test_check_item_offline_returns_skipped_without_network() -> None:
+    """Without a token, `check_item` does NOT call GitHub and returns `skipped` for fresh items."""
     item = {
         "id": "rust-analyzer",
         "kind": "lsp",
@@ -23,9 +24,10 @@ def test_check_item_offline_returns_ok_or_stale_without_network() -> None:
         "vetting": {"status": "approved", "date": "2026-08-04", "stars": 16000, "last_commit": "2026-08-04"},
     }
     status, details = refresh_pins.check_item(item, gh_token=None)
-    # Without a token, the tool cannot make API calls; it should report "skipped" or surface a clear reason.
-    assert status in {"skipped", "ok", "stale_stars", "stale_commit", "license_drift"}
-    assert "reason" in details or status == "skipped"
+    # For a fresh item with no token, the offline branch returns "skipped" exactly.
+    # A regression that re-introduces PyYAML date-object parsing will surface here as "stale_commit".
+    assert status == "skipped"
+    assert "reason" in details
 
 
 def test_check_item_detects_stale_last_commit() -> None:
@@ -55,6 +57,32 @@ def test_check_catalog_returns_list_per_item(tmp_path: Path, monkeypatch: pytest
     ids = {item_id for _, _, item_id, _ in results}
     assert "rust-analyzer" in ids
     assert "ghost-tool" in ids
+
+
+def test_check_catalog_fresh_yaml_entry_is_not_stale_commit() -> None:
+    """Regression test for C1: PyYAML parses unquoted ISO dates as `datetime.date` objects.
+
+    After loading `sample_catalog.yaml`, the fresh item (`rust-analyzer`, vetting.date
+    2026-08-04) must NOT be flagged as `stale_commit`. With no GITHUB_TOKEN, offline
+    check returns `skipped`; before the fix, the date-object parsing bug caused the
+    stale-date branch to mis-fire.
+    """
+    import yaml as _yaml
+
+    data = _yaml.safe_load(FIXTURE.read_text())
+    # Verify the precondition that PyYAML gives us a datetime.date object here.
+    fresh_item = data["plugins"][0]["items"][0]
+    assert isinstance(fresh_item["vetting"]["date"], dt.date)
+
+    results = refresh_pins.check_catalog(FIXTURE, gh_token=None)
+    by_id = {item_id: (status, details) for status, _, item_id, details in results}
+
+    status, details = by_id["rust-analyzer"]
+    assert status == "skipped", (
+        f"Fresh YAML-loaded item must be `skipped`, got `{status}` "
+        f"(reason={details.get('reason')!r})"
+    )
+    assert "GITHUB_TOKEN" in details.get("reason", "")
 
 
 def test_bump_sha_returns_updated_item() -> None:
