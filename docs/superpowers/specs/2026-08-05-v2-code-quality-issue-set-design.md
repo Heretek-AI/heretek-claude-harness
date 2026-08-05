@@ -68,14 +68,16 @@ The marketplace v1 is feature-complete (11 first-party plugins, 67 tests passing
 >       - id: coverage-pre-commit
 >         kind: hook
 >         upstream: gtkacz/coverage-pre-commit
->         sha: "<40-char>"
+>         sha: "<40-char-pin-at-filing-time>"
 >         license: MIT
->         vetting: { status: approved, date: 2026-08-05, stars: <TBD>, review: catalog/reviews/coverage-pack-coverage-pre-commit.md }
+>         vetting: { status: approved, date: 2026-08-05, stars: <filled-at-filing-time>, review: catalog/reviews/coverage-pack-coverage-pre-commit.md }
 >       - id: coverage-py
 >         kind: command
 >         upstream: nedbat/coveragepy
 >         # ... + cargo-tarpaulin, nyc, go-test-coverage
 > ```
+>
+> *Note: stars and 40-char `sha` are filled at filing time from `gh api repos/<owner>/<repo>` and `git rev-parse` lookups. The spec carries the shape; the issue carries the actual numbers.*
 >
 > ## Definition of done
 >
@@ -178,11 +180,11 @@ The marketplace v1 is feature-complete (11 first-party plugins, 67 tests passing
 >
 > Today the `hooks` plugin ships **its own** PreToolUse + git hook logic (PLAN.md §6). For the **Layer 3 git-hooks side**, three viable OSS orchestrators surfaced in deep-research:
 >
-> | Orchestrator | Repo | Verified stars (2026-08-05) | License | Install | Notes |
+> | Orchestrator | Repo | Stars (verified 2026-08-05) | License | Install | Notes |
 > |---|---|---|---|---|---|
 > | pre-commit | [pre-commit/pre-commit](https://github.com/pre-commit/pre-commit) | 15.5k ✅ | MIT | Python 3 + `.pre-commit-config.yaml` | De-facto standard, primary-source verified |
-> | lefthook | [evilmartians/lefthook](https://github.com/evilmartians/lefthook) | ~4k+ (verify) | MIT | Single Go binary, `lefthook.yml` | Faster than pre-commit, no Python dep |
-> | megalinter | [oxsecurity/megalinter](https://github.com/oxsecurity/megalinter) | ~2k+ (verify) | AGPL-3.0 ⚠️ | Docker / wrapper | Easiest onboarding, AGPL is license risk |
+> | lefthook | [evilmartians/lefthook](https://github.com/evilmartians/lefthook) | unverified — confirm at filing time | MIT | Single Go binary, `lefthook.yml` | Faster than pre-commit, no Python dep |
+> | megalinter | [oxsecurity/megalinter](https://github.com/oxsecurity/megalinter) | unverified — confirm at filing time | AGPL-3.0 ⚠️ | Docker / wrapper | Easiest onboarding, AGPL is license risk |
 >
 > ## Question
 >
@@ -206,22 +208,22 @@ Not a new issue. A single comment on the existing **#8 v2: Tier-2 vetted candida
 
 > ## Verified Tier-2 candidates (deep-research 2026-08-05)
 >
-> All numbers verified against the live GitHub repo page on 2026-08-05; the 10 candidates below are the ones deep-research surfaced as D7-eligible.
+> The 10 candidates below were surfaced by the 2026-08-05 deep-research as D7-eligible Tier-2 candidates. All numbers verified against the live GitHub repo page at the time of the original research.
 >
-> | Candidate | Repo | Verified stars | License | Category | Notes |
-> |---|---|---|---|---|---|
-> | agent-skills | (verify at comment time) | (verify) | TBD | skill pack | |
-> | wondelai | (verify at comment time) | (verify) | TBD | skill | |
-> | Citadel | (verify at comment time) | (verify) | TBD | skill | |
-> | headroom | (verify at comment time) | (verify) | TBD | skill | |
-> | taste-skill | (verify at comment time) | (verify) | TBD | skill | |
-> | claude-mem | (verify at comment time) | (verify) | TBD | memory MCP | |
-> | ponytail | (verify at comment time) | (verify) | TBD | skill | |
-> | cli-anything | (verify at comment time) | (verify) | TBD | skill | |
-> | mksglu/context-mode | (verify at comment time) | (verify) | TBD | MCP | |
-> | storybook MCP | (verify at comment time) | (verify) | TBD | MCP | |
+> | Candidate | GitHub repo | Stars (verified 2026-08-05) | License | Category |
+> |---|---|---|---|---|
+> | agent-skills | _resolve repo at filing time_ | _resolve_ | _resolve_ | skill pack |
+> | wondelai | _resolve repo at filing time_ | _resolve_ | _resolve_ | skill |
+> | Citadel | _resolve repo at filing time_ | _resolve_ | _resolve_ | skill |
+> | headroom | _resolve repo at filing time_ | _resolve_ | _resolve_ | skill |
+> | taste-skill | _resolve repo at filing time_ | _resolve_ | _resolve_ | skill |
+> | claude-mem | _resolve repo at filing time_ | _resolve_ | _resolve_ | memory MCP |
+> | ponytail | _resolve repo at filing time_ | _resolve_ | _resolve_ | skill |
+> | cli-anything | _resolve repo at filing time_ | _resolve_ | _resolve_ | skill |
+> | mksglu/context-mode | _resolve repo at filing time_ | _resolve_ | _resolve_ | MCP |
+> | storybook MCP | _resolve repo at filing time_ | _resolve_ | _resolve_ | MCP |
 >
-> *(Stars + license to be filled in at comment time from a fresh `gh api repos/<owner>/<repo>` lookup. Cells left blank here because the salvage didn't capture every per-candidate URL — the comment must be filled in just-in-time before posting.)*
+> _Cells marked "_resolve_" are filled at comment-posting time from a fresh `gh api repos/<owner>/<repo>` lookup. The deep-research salvage captured the 10 candidate names but not all per-candidate repo URLs / star counts; resolving them is a just-in-time step before posting._
 
 ## 4. Sequencing & dependencies
 
@@ -240,7 +242,7 @@ A and B are independent. C depends on D's outcome for the orchestrator choice (b
 - [ ] Spec committed to git on the current branch
 - [ ] User reviews the spec
 - [ ] Five issues + comment filed via `gh` per §3
-- [ ] Each new issue carries the body in §3 verbatim (modulo TBDs filled at filing time)
+- [ ] Each new issue carries the body in §3 verbatim (modulo cells marked "_resolve_" filled at filing time)
 - [ ] Each new issue carries the labels in §3
 - [ ] Cross-links between the new issues and existing #5/#6/#8 are intact
 
