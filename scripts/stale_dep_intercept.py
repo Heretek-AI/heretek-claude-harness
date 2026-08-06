@@ -1,7 +1,7 @@
 """Stale-dep intercept hook (#37) — D15 PostToolUse hook for dep manifests.
 
-Watches Edit events on requirements*.txt and pyproject.toml. If a pinned
-dep is >1 minor behind the freshness cache, emits a warning via
+Watches Edit/Write/MultiEdit events on requirements*.txt and pyproject.toml.
+If a pinned dep is >1 minor behind the freshness cache, emits a warning via
 additionalContext. Per spec §2 latency budget: blocking stays <100ms,
 async checks ≤2s.
 
@@ -75,6 +75,27 @@ def _check_content(file_path: str, new_content: str) -> list[str]:
     return warnings
 
 
+def _extract_content_candidates(tool_name: str, tool_input: dict) -> list[str]:
+    """Return the list of new_content strings to scan, based on tool event shape.
+
+    Edit → tool_input.new_string
+    Write → tool_input.content
+    MultiEdit → each tool_input.edits[*].new_string
+    """
+    if tool_name == "Edit":
+        return [tool_input.get("new_string", "")]
+    if tool_name == "Write":
+        return [tool_input.get("content", "")]
+    if tool_name == "MultiEdit":
+        edits = tool_input.get("edits") or []
+        return [e.get("new_string", "") for e in edits]
+    # Unknown / future tool name — defensively try common fields.
+    return [
+        tool_input.get("new_string", ""),
+        tool_input.get("content", ""),
+    ]
+
+
 def main() -> int:
     try:
         payload = json.loads(sys.stdin.read())
@@ -83,12 +104,15 @@ def main() -> int:
 
     tool_input = payload.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
-    new_content = tool_input.get("new_string", "")
+    tool_name = payload.get("tool_name", "")
 
     if not _is_dep_file(file_path):
         return 0
 
-    warnings = _check_content(file_path, new_content)
+    warnings: list[str] = []
+    for content in _extract_content_candidates(tool_name, tool_input):
+        if content:
+            warnings.extend(_check_content(file_path, content))
     if not warnings:
         return 0
 
