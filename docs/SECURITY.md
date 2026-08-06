@@ -2,10 +2,11 @@
 
 ## Reporting a vulnerability
 
-Please report security issues to **security@heretek.ai** (or via GitHub
-private vulnerability reporting). Do not file a public issue.
+Please report security issues to **security@heretek.ai** (primary) or via
+GitHub private vulnerability reporting (secondary). The mailbox is
+monitored; we aim to acknowledge within 2 business days.
 
-We aim to acknowledge within 2 business days.
+Do not file a public issue.
 
 ## Supply-chain reporting
 
