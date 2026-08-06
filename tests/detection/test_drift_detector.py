@@ -179,3 +179,154 @@ def test_drift_detector_silent_when_import_referenced(monkeypatch, tmp_path, cap
         capsys,
     )
     assert out2 == {}, f"referenced import should not warn, got: {out2}"
+
+
+def test_drift_detector_migrates_legacy_state_with_length_key(
+    monkeypatch, tmp_path, capsys
+):
+    """Re-review I-NEW-1: legacy edit records use `length` instead of `diff_size`.
+
+    Pre-populate a state file with the old schema, then ensure the hook loads
+    it without KeyError and behaves correctly (no crash, no spurious warning).
+    """
+    monkeypatch.setattr(hook, "SESSION_STATE_DIR", tmp_path)
+    sid = "test-session-legacy"
+    target = tmp_path / "foo.py"
+    state_file = tmp_path / f"{sid}.json"
+    # 2 legacy entries for the SAME path the next edit will target.
+    state_file.write_text(json.dumps({
+        "edits": [
+            {"file": str(target), "length": 5},
+            {"file": str(target), "length": 7},
+        ],
+        "imports": {},
+    }))
+
+    # If migration fails, recent_diffs lookup will raise KeyError and the
+    # hook will exit non-zero — guard against that regression.
+    out = _capture_output(
+        monkeypatch,
+        _build_payload(sid, str(target), "x" * 10),
+        capsys,
+    )
+    # Edit count is now 3 → repeated-edit warning is expected and proves the
+    # legacy records were loaded successfully.
+    ctx = out.get("hookSpecificOutput", {}).get("additionalContext", "")
+    assert "drift" in ctx.lower(), f"expected drift warning after legacy migration, got: {out}"
+
+
+def test_drift_detector_ignores_reimports_from_old_string(
+    monkeypatch, tmp_path, capsys
+):
+    """Re-review I-NEW-2: imports that exist in old_string are NOT new.
+
+    If an import appears in both old_string and new_string, it must not be
+    queued as pending — it's not new, just re-stated.
+    """
+    monkeypatch.setattr(hook, "SESSION_STATE_DIR", tmp_path)
+    sid = "test-session-reimport"
+    target = tmp_path / "mod.py"
+
+    # Edit 1: file had `import os; x=1` → `import os; x=2`. Both old and new
+    # contain `os`, so `os` is NOT new.
+    out1 = _capture_output(
+        monkeypatch,
+        _build_payload(sid, str(target), "import os\nx = 2\n", "import os\nx = 1\n"),
+        capsys,
+    )
+    assert out1 == {}, f"first edit (re-import) should be silent: {out1}"
+
+    # Edit 2: replace with code that does NOT include `import os` and doesn't
+    # reference it. With the bug, `os` was queued in edit 1 → warns. With the
+    # fix, `os` was never new → no warning about `os`.
+    out2 = _capture_output(
+        monkeypatch,
+        _build_payload(sid, str(target), "x = 3\n", "import os\nx = 2\n"),
+        capsys,
+    )
+    ctx2 = out2.get("hookSpecificOutput", {}).get("additionalContext", "")
+    assert "added import(s) not referenced" not in ctx2, (
+        f"re-imported symbol must not warn about being unreferenced: {out2}"
+    )
+
+
+def test_drift_detector_ignores_imports_used_in_same_edit(
+    monkeypatch, tmp_path, capsys
+):
+    """Re-review I-NEW-2: imports used in the SAME edit are not pending.
+
+    A single edit that introduces and uses an import (e.g., `import os;
+    os.getcwd()`) must not flag `os` as pending, because the import was
+    already used in the introducing edit.
+    """
+    monkeypatch.setattr(hook, "SESSION_STATE_DIR", tmp_path)
+    sid = "test-session-same-edit"
+    target = tmp_path / "mod.py"
+
+    # Edit 1: introduces AND uses `os` in the same edit.
+    out1 = _capture_output(
+        monkeypatch,
+        _build_payload(sid, str(target), "import os\nx = os.getcwd()\n"),
+        capsys,
+    )
+    assert out1 == {}, f"first edit (introduce+use same edit) should be silent: {out1}"
+
+    # Edit 2: replace with code that drops the import and doesn't reference `os`.
+    # With the bug, `os` was queued in edit 1 → warns. With the fix, `os` was
+    # used in edit 1 → never queued.
+    out2 = _capture_output(
+        monkeypatch,
+        _build_payload(
+            sid, str(target), "y = 1\n", "import os\nx = os.getcwd()\n"
+        ),
+        capsys,
+    )
+    ctx2 = out2.get("hookSpecificOutput", {}).get("additionalContext", "")
+    assert "added import(s) not referenced" not in ctx2, (
+        f"import used in same edit must not warn on next, got: {out2}"
+    )
+
+
+def test_drift_detector_warns_once_per_unreferenced_import(
+    monkeypatch, tmp_path, capsys
+):
+    """Re-review M-NEW: unreferenced imports warn on next edit only, then drop.
+
+    Import added and never referenced → warns on edit 2 but NOT on edit 3,
+    because the import is dropped from pending after the first warning.
+    """
+    monkeypatch.setattr(hook, "SESSION_STATE_DIR", tmp_path)
+    sid = "test-session-warn-once"
+    target = tmp_path / "mod.py"
+
+    # Edit 1: add `import os` (silent).
+    out1 = _capture_output(
+        monkeypatch,
+        _build_payload(sid, str(target), "import os\n"),
+        capsys,
+    )
+    assert out1 == {}, f"first edit should be silent: {out1}"
+
+    # Edit 2: replace with code that does NOT reference `os` → warns.
+    out2 = _capture_output(
+        monkeypatch,
+        _build_payload(sid, str(target), "x = 1\n", "import os\n"),
+        capsys,
+    )
+    ctx2 = out2.get("hookSpecificOutput", {}).get("additionalContext", "")
+    assert "added import(s) not referenced" in ctx2, (
+        f"expected unreferenced-import warning on edit 2, got: {out2}"
+    )
+
+    # Edit 3: another edit that still doesn't reference `os` → must NOT
+    # re-warn about `os` (dropped from pending after edit 2).
+    # Repeated-edit warnings may still fire, so check for the import text.
+    out3 = _capture_output(
+        monkeypatch,
+        _build_payload(sid, str(target), "x = 2\n", "x = 1\n"),
+        capsys,
+    )
+    ctx3 = out3.get("hookSpecificOutput", {}).get("additionalContext", "")
+    assert "added import(s) not referenced" not in ctx3, (
+        f"third edit must not re-warn about dropped import, got: {out3}"
+    )

@@ -40,6 +40,12 @@ def _load_state(session_id: str) -> dict:
     # Migrate older state files missing the "imports" key.
     state.setdefault("edits", [])
     state.setdefault("imports", {})
+    # Re-review I-NEW-1: legacy edit records used `length` instead of
+    # `diff_size`. Rename in-place so recent_diffs lookups don't KeyError.
+    # Preserves session history rather than dropping records.
+    for edit in state["edits"]:
+        if "length" in edit and "diff_size" not in edit:
+            edit["diff_size"] = edit.pop("length")
     return state
 
 
@@ -133,6 +139,7 @@ def _detect_warnings(
 
     if file_path.endswith(".py"):
         new_refs = _extract_references(new_string)
+
         # Anything still pending and not referenced in this edit stays pending.
         pending = [imp for imp in pending if imp not in new_refs]
 
@@ -141,10 +148,18 @@ def _detect_warnings(
                 f"drift: {Path(file_path).name} added import(s) not referenced "
                 f"in subsequent edits: {', '.join(sorted(pending))}"
             )
+            # Re-review M-NEW: emit warning once per unreferenced import, then
+            # drop from pending so the same warning doesn't fire on every
+            # subsequent edit.
+            pending = []
 
-        # Add this edit's imports to the pending set.
+        # Re-review I-NEW-2: only queue imports that are genuinely new.
+        # Truly new = (imports in new_string - imports in old_string)
+        #              minus imports used in the same edit.
+        old_imports = _extract_imports(old_string)
         new_imports = _extract_imports(new_string)
-        for imp in new_imports:
+        truly_new = (new_imports - old_imports) - new_refs
+        for imp in truly_new:
             if imp not in pending:
                 pending.append(imp)
 
