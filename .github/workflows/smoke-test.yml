@@ -127,3 +127,36 @@ jobs:
           echo "- Marketplace install: completed" >> $GITHUB_STEP_SUMMARY
           echo "- All 11 plugins registered: see step output above" >> $GITHUB_STEP_SUMMARY
           echo "- Fast-gate trigger: see step output above" >> $GITHUB_STEP_SUMMARY
+
+  freshness-enforced-coding-smoke:
+    name: Freshness-enforced coding smoke (Plans A+B+C)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only run on schedule or manual dispatch — NOT on push or PR (this is a
+    # full-stack exercise that touches every enforcement hook; expensive).
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install runtime + dev deps
+        run: pip install -r requirements-dev.txt ast-grep-cli
+
+      - name: Populate freshness cache
+        run: python -m scripts.freshness_index --all
+
+      - name: Run all enforcement tests
+        run: pytest tests/freshness_eval/ tests/detection/ tests/enforcement/ -v
+
+      - name: Render freshness tokens (model = qwen3.6-27b)
+        run: HERETEK_ACTIVE_MODEL=qwen3.6-27b python -m scripts.freshness_tokens
+
+      - name: Render freshness tokens (model = claude-opus-4)
+        run: HERETEK_ACTIVE_MODEL=claude-opus-4 python -m scripts.freshness_tokens
