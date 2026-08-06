@@ -205,7 +205,7 @@ All 18 issues filed in one batch (matching v2-code-quality-issue-set precedent).
 
 - [ ] Spec committed to git on current branch
 - [ ] User reviews the spec before any issues are filed
-- [ ] All 18 issues filed via `gh issue create` per §3 (item list) — numbered #36–#53
+- [ ] All 18 issues filed via `gh issue create` per §3 (item list) — GitHub-assigned numbers (spec-draft #36–#53 map to actual #s; see [numbering ADR](2026-08-06-freshness-roadmap-numbering-decision.md))
 - [ ] Each new issue body carries all required sections per §4 (template)
 - [ ] Each new issue carries type-appropriate sections (D5/D7 + catalog shape for SHIP; hypothesis + method for SPIKE; measurement framework for TEST)
 - [ ] Each new issue carries cross-references per §6
@@ -215,7 +215,11 @@ All 18 issues filed in one batch (matching v2-code-quality-issue-set precedent).
   - SPIKE: `enhancement` (no second label — `research` is not in heretek's existing label set per §2 non-goals)
   - TEST: `enhancement` + `question` + `testing`
 - [ ] Each ideation-test issue (#50–53) links from its `Measurement framework` to every roadmap item with the matching approach column populated
-- [ ] Final check: `gh issue list --label freshness-roadmap` returns all 18 with no duplicates
+- [ ] Final check (per-item-type label verification per [label ADR](2026-08-06-freshness-roadmap-label-decision.md)):
+  - SHIP: `gh issue list --label enhancement --label security-scan` returns ≥7
+  - SPIKE: `gh issue list --label enhancement` filtered to title contains "(spike)" returns ≥6
+  - TEST: `gh issue list --label enhancement --label question --label testing` returns 4
+  - Total across all 4 phases: `gh issue list --state open | grep -c "^v[1-4]"` returns 18
 
 ## 9. Open questions & risks
 
