@@ -7,5 +7,6 @@
     "url": "https://github.com/Heretek-AI"
   },
   "license": "MIT",
-  "keywords": ["lsp", "rust-analyzer", "basedpyright", "gopls", "clangd", "rust", "python", "go", "cpp"]
+  "keywords": ["lsp", "rust-analyzer", "basedpyright", "gopls", "clangd", "rust", "python", "go", "cpp"],
+  "dependencies": []
 }

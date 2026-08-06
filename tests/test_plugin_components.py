@@ -76,3 +76,20 @@ def test_each_plugin_has_a_plugin_json(catalog: dict) -> None:
 def test_hooks_plugin_ships_hooks(catalog: dict) -> None:
     hooks = next(p for p in catalog["plugins"] if p["name"] == "hooks")
     assert "hooks" in hooks["components"], "hooks plugin must declare hooks in components"
+
+
+def test_all_plugin_jsons_have_dependencies_field() -> None:
+    """Every plugin.json declares `dependencies: []` explicitly (consistency, #9)."""
+    import json
+    from pathlib import Path
+
+    plugins_dir = REPO_ROOT / "plugins"
+    for plugin_json in sorted(plugins_dir.glob("*/.claude-plugin/plugin.json")):
+        data = json.loads(plugin_json.read_text())
+        assert "dependencies" in data, (
+            f"{plugin_json.relative_to(REPO_ROOT)} missing 'dependencies' field "
+            f"(should be [] for plugins with no marketplace-wide deps)"
+        )
+        assert data["dependencies"] == [], (
+            f"{plugin_json.relative_to(REPO_ROOT)} has non-empty 'dependencies': {data['dependencies']}"
+        )
