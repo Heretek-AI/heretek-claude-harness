@@ -160,7 +160,9 @@ from pathlib import Path
 import pytest
 
 WORKFLOW_DIR = Path(__file__).resolve().parent.parent / ".github" / "workflows"
-USES_RE = re.compile(r"^\s*uses:\s*([\w./\-]+)@([^\s]+)\s*$")
+# Matches both `- uses: foo/bar@<ref>` (YAML list form) and `uses: foo/bar@<ref>`.
+# `[^\s#]+` allows inline comments like `# v4.2.2` after the ref without breaking capture.
+USES_RE = re.compile(r"^\s*-?\s*uses:\s*([\w./\-]+)@([^\s#]+)")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
