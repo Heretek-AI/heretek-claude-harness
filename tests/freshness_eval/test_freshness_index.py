@@ -1,62 +1,67 @@
-"""Tests for freshness_index.py (#36)."""
-import subprocess
-import sys
-from pathlib import Path
+"""Tests for freshness_index.py (#36).
 
-import pytest
+All tests are fully isolated: PyPI HTTP responses are mocked via
+`unittest.mock.patch` and the on-disk cache directory is redirected to a
+per-test `tmp_path` via `monkeypatch`. No test ever touches the real
+catalog/freshness/ tree or makes a network call.
+"""
+from unittest.mock import MagicMock, patch
 
-CACHE_DIR = Path("catalog/freshness")
+import yaml
+
+from scripts.freshness_index import main
 
 
-def test_freshness_index_writes_yaml_for_known_lib():
+def _fake_pypi_response(version: str = "6.0.3", upload_time: str = "2025-09-25T21:31:46"):
+    """Build a mock matching PyPI's /pypi/<lib>/json schema."""
+    mock = MagicMock()
+    mock.json.return_value = {
+        "info": {"version": version},
+        "releases": {version: [{"upload_time": upload_time}]},
+    }
+    mock.raise_for_status.return_value = None
+    return mock
+
+
+def test_freshness_index_writes_yaml_for_known_lib(monkeypatch, tmp_path):
     """#36: freshness_index --lib pyyaml produces catalog/freshness/pyyaml.yaml."""
-    cache_file = CACHE_DIR / "pyyaml.yaml"
-    if cache_file.exists():
-        cache_file.unlink()
+    # Isolate on-disk cache from the real catalog/freshness/ tree.
+    monkeypatch.setattr("scripts.freshness_index.CACHE_DIR", tmp_path)
 
-    result = subprocess.run(
-        [sys.executable, "-m", "scripts.freshness_index", "--lib", "pyyaml"],
-        capture_output=True, text=True, timeout=30,
-    )
-    assert result.returncode == 0, f"stderr: {result.stderr}"
+    # Block the real PyPI HTTP call.
+    with patch("requests.get", return_value=_fake_pypi_response()):
+        assert main(["--lib", "pyyaml"]) == 0
+
+    cache_file = tmp_path / "pyyaml.yaml"
     assert cache_file.exists(), f"expected {cache_file} to exist after run"
 
-    content = cache_file.read_text()
-    # Schema check
-    assert "latest_version:" in content
-    assert "latest_release_date:" in content
-    assert "eol_date:" in content
-    assert "cve_count_critical:" in content
+    # Parse-assert schema check (stronger than substring assertions).
+    data = yaml.safe_load(cache_file.read_text())
+    assert data["latest_version"] == "6.0.3"
+    assert data["latest_release_date"] == "2025-09-25T21:31:46"
+    assert data["eol_date"] is None
+    assert data["cve_count_critical"] == 0
 
 
-def test_freshness_index_is_idempotent():
-    """#36: re-running freshness_index does not change output for unchanged registry."""
-    cache_file = CACHE_DIR / "pyyaml.yaml"
-    if not cache_file.exists():
-        pytest.skip("cache file does not exist; run test_freshness_index_writes_yaml_for_known_lib first")
+def test_freshness_index_is_idempotent(monkeypatch, tmp_path):
+    """#36: re-running freshness_index yields identical output for unchanged registry."""
+    monkeypatch.setattr("scripts.freshness_index.CACHE_DIR", tmp_path)
 
-    before = cache_file.read_text()
-    result = subprocess.run(
-        [sys.executable, "-m", "scripts.freshness_index", "--lib", "pyyaml"],
-        capture_output=True, text=True, timeout=30,
-    )
-    assert result.returncode == 0
-    after = cache_file.read_text()
+    with patch("requests.get", return_value=_fake_pypi_response()):
+        assert main(["--lib", "pyyaml"]) == 0
+        before = (tmp_path / "pyyaml.yaml").read_text()
+
+        assert main(["--lib", "pyyaml"]) == 0
+        after = (tmp_path / "pyyaml.yaml").read_text()
+
     assert before == after, "freshness_index output is not idempotent"
 
 
-def test_freshness_index_dry_run_does_not_write():
-    """#36: --dry-run mode must not write to catalog/freshness/."""
-    cache_file = CACHE_DIR / "pyyaml.yaml"
-    expected = cache_file.read_text() if cache_file.exists() else None
+def test_freshness_index_dry_run_does_not_write(monkeypatch, tmp_path):
+    """#36: --dry-run mode must not write to the cache directory."""
+    monkeypatch.setattr("scripts.freshness_index.CACHE_DIR", tmp_path)
 
-    result = subprocess.run(
-        [sys.executable, "-m", "scripts.freshness_index", "--lib", "pyyaml", "--dry-run"],
-        capture_output=True, text=True, timeout=30,
-    )
-    assert result.returncode == 0
+    with patch("requests.get", return_value=_fake_pypi_response()):
+        assert main(["--lib", "pyyaml", "--dry-run"]) == 0
 
-    if expected is None:
-        assert not cache_file.exists(), "dry-run wrote a file"
-    else:
-        assert cache_file.read_text() == expected, "dry-run modified file"
+    assert not (tmp_path / "pyyaml.yaml").exists(), "dry-run wrote a file"
