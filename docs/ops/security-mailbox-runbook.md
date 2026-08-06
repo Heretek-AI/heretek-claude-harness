@@ -31,7 +31,6 @@ In the Google Admin console for `heretek.ai`:
 
 - Users → find or create `team@heretek.ai`
 - Add alias `security@heretek.ai` → routes to `team@heretek.ai`
-- Enable catch-all forwarding to `security@` if needed
 
 Verify by sending a test email from a personal account; check the inbox.
 
@@ -45,7 +44,7 @@ In `Heretek-AI/heretek-claude-harness → Settings → Code security & analysis`
 
 ### 4. Update SECURITY.md
 
-After Steps1–3 succeed, edit `docs/SECURITY.md`:
+After Steps1–3 succeed, edit `docs/SECURITY.md` (this PR pre-commits the SECURITY.md update so the documentation lands atomically with the runbook):
 
 ```diff
 -Please report security issues to **security@heretek.ai** (or via GitHub
