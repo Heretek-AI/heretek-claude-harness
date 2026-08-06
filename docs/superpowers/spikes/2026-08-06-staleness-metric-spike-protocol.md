@@ -16,7 +16,7 @@ A per-commit "staleness score" — sum of (pinned-version-distance-from-latest) 
 
 ## Deliverables
 
-- [ ] Prototype script
-- [ ] Pilot CSV
-- [ ] Trend plot (manual)
-- [ ] Results document
+- [x] Prototype script (`scripts/staleness_metric_spike.py`)
+- [x] Pilot CSV (`/tmp/staleness.csv`, 5 data rows + 1 header)
+- [ ] Trend plot (manual) — explicitly deferred: pilot scores are all 0.0 due to a parser defect (see results doc); a trend plot of a flat-zero series conveys no signal and would be misleading. Plot will be produced after the follow-up parser fix lands and the pilot re-runs.
+- [x] Results document (`docs/superpowers/spikes/2026-08-06-staleness-metric-results.md`)
