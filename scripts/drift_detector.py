@@ -16,8 +16,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _allowlist import require_session_id  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts._allowlist import require_session_id  # noqa: E402
 
 SESSION_STATE_DIR = Path(os.environ.get(
     "HERETEK_SESSION_STATE_DIR",
