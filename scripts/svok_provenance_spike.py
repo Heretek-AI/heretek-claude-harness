@@ -15,9 +15,8 @@ from pathlib import Path
 import yaml
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / "catalog" / "freshness"
-# Match `import X` / `from X import Y` for top-level imports + common usage forms
+# Match `import X` / `from X import Y` for top-level imports
 IMPORT_RE = re.compile(r"^(?:from|import)\s+([a-zA-Z_][a-zA-Z0-9_.]*)", re.MULTILINE)
-USAGE_RE = re.compile(r"\b([a-zA-Z_][a-zA-Z0-9_.]*)\.")
 # Python import name -> catalog/freshness name aliases (catalog files are
 # spelled by package name on PyPI, not by import name).
 _PACKAGE_ALIASES: dict[str, str] = {
