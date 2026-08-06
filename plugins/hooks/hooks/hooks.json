@@ -50,6 +50,17 @@
             "timeout": 500
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ${CLAUDE_PROJECT_DIR}/scripts/lookup_gate.py",
+            "async": true,
+            "timeout": 500
+          }
+        ]
       }
     ]
   }
