@@ -212,7 +212,7 @@ All 18 issues filed in one batch (matching v2-code-quality-issue-set precedent).
 - [ ] Each new issue's `## Per-item Definition of Done` references its position in §7 sequencing table
 - [ ] Labels applied per item type:
   - SHIP: `enhancement` + domain (`security-scan`, `tech-debt`, `testing`)
-  - SPIKE: `enhancement` + `research`
+  - SPIKE: `enhancement` (no second label — `research` is not in heretek's existing label set per §2 non-goals)
   - TEST: `enhancement` + `question` + `testing`
 - [ ] Each ideation-test issue (#50–53) links from its `Measurement framework` to every roadmap item with the matching approach column populated
 - [ ] Final check: `gh issue list --label freshness-roadmap` returns all 18 with no duplicates
