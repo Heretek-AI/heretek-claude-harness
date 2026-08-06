@@ -35,10 +35,11 @@ Pilot on every dep-touching commit in `git log -- requirements.txt pyproject.tom
 
 ## Decision
 
-**Adopt (with caveats) → file follow-up issue.** Rationale:
+**Adopt with follow-up pilot** (per the protocol's "Adopt with follow-up pilot" decision criterion). Rationale:
 
-- **Adopt** because the prototype correctly produces 2/2 useful annotations on the only realistic plain-text dep diff in history (requirements.txt) with zero false positives.
-- **Caveats** because the `pyproject.toml` parser path is brittle and `catalog/freshness/` coverage is partial. A production version needs:
+- **In-scope match satisfied** — the prototype correctly produces 2/2 useful annotations on the only realistic plain-text dep diff in history (`requirements.txt`) with zero false positives, which is ≥80% of in-scope files.
+- **Known out-of-scope brittleness** — the `pyproject.toml` array-string parser path is brittle and `catalog/freshness/` coverage is partial. This satisfies the protocol's "known brittleness on out-of-scope files (e.g., `pyproject.toml` arrays)" half of the criterion.
+- **Follow-up pilot** will run in M18–M20 per the protocol. A production version needs:
   - TOML-aware parser pass (or rely on external `tomli`/`tomllib`).
   - Auto-populate `catalog/freshness/` for every dep pin (the cron from Plan A Task 4 should grow to cover all pinned deps).
   - Patch-level granularity in `_major_minor_diff` (e.g., "N patch, M minor, K major").

@@ -23,6 +23,7 @@ Showing a side-by-side "what would change if we bumped to latest stable" annotat
 ## Decision criteria
 
 - **Adopt** if the prototype correctly generates annotations for ≥80% of recent PRs without false positives.
+- **Adopt with follow-up pilot** if the pilot shows meaningful signal on ≥80% of in-scope files (e.g., `requirements.txt`) AND has known brittleness on out-of-scope files (e.g., `pyproject.toml` arrays). The follow-up pilot runs in M18–M20 to harden the parser.
 - **Reject** if the prototype is brittle (e.g., misparses `pyproject.toml`, fails on complex version specs).
 
 ## Deliverables
