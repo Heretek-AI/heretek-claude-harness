@@ -99,3 +99,71 @@ def test_main_no_token_prints_table(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert rc in (0, 1)  # 0 = all fresh; 1 = some stale; both are non-error
     captured = capsys.readouterr()
     assert "rust-analyzer" in captured.out or "ghost-tool" in captured.out
+
+
+def test_update_shas_writes_new_head_sha(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """--update-shas fetches upstream HEAD and writes it back to the catalog."""
+    import shutil
+
+    fixture = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
+    catalog = tmp_path / "catalog.yaml"
+    shutil.copy(fixture, catalog)
+
+    # Mock GitHub API to return a deterministic new HEAD SHA.
+    new_sha = "f" * 40
+
+    def fake_get(path: str, gh_token):
+        if path.endswith("/git/ref/heads/master"):
+            return {"object": {"sha": new_sha}}
+        # /repos/{org}/{repo} has exactly 3 slashes (leading + 2 separators).
+        if path.startswith("/repos/") and path.count("/") == 3:
+            return {"default_branch": "master"}
+        return {}
+
+    monkeypatch.setattr(refresh_pins, "_github_get", fake_get)
+
+    updates = refresh_pins.update_shas(catalog, gh_token="test-token")
+    # At least one item should have been updated (rust-analyzer has upstream set).
+    assert any(item_id == "rust-analyzer" and new_sha == new for item_id, _, new in updates)
+
+    # Catalog was modified on disk with the new SHA.
+    import yaml as _yaml
+    new_data = _yaml.safe_load(catalog.read_text())
+    items = new_data["plugins"][0]["items"]
+    rust = next(it for it in items if it["id"] == "rust-analyzer")
+    assert rust["sha"] == new_sha
+
+
+def test_update_shas_requires_token(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+    """--update-shas without a GitHub token is refused."""
+    fixture = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
+    catalog = tmp_path / "catalog.yaml"
+    import shutil
+    shutil.copy(fixture, catalog)
+
+    with pytest.raises(SystemExit) as exc_info:
+        refresh_pins.update_shas(catalog, gh_token=None)
+    # Error message goes to stderr; the SystemExit carries only the exit code.
+    assert exc_info.value.code == 2
+    captured = capsys.readouterr()
+    assert "GITHUB_TOKEN" in captured.err or "github-token" in captured.err
+
+
+def test_update_shas_preserves_comments(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Round-trip preserves inline `# review` comments (regression for f60cfa2)."""
+    fixture = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
+    catalog = tmp_path / "catalog.yaml"
+    import shutil
+    shutil.copy(fixture, catalog)
+
+    new_sha = "a" * 40
+    monkeypatch.setattr(refresh_pins, "_github_get", lambda *_a, **_k: {
+        "default_branch": "master",
+        "object": {"sha": new_sha},
+    })
+
+    refresh_pins.update_shas(catalog, gh_token="t")
+    text = catalog.read_text()
+    # The fixture has a top-level `# heretek marketplace — source of truth.` comment;
+    # ruamel.yaml must preserve it.
+    assert "# heretek marketplace" in text or "# source of truth" in text

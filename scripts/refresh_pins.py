@@ -120,6 +120,46 @@ def bump_sha(item: dict, new_sha: str) -> dict:
     return out
 
 
+def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[str, str, str]]:
+    """Re-fetch upstream HEAD SHA per item and write it back to catalog_path.
+
+    Round-trips via ruamel.yaml to preserve comments (the catalog is hand-edited).
+    Returns a list of (item_id, old_sha, new_sha) tuples for items that changed.
+    """
+    if not gh_token:
+        print("error: --update-shas requires --github-token / GITHUB_TOKEN", file=sys.stderr)
+        raise SystemExit(2)
+
+    from ruamel.yaml import YAML  # local import — optional dep, only needed here.
+
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    data = yaml.load(catalog_path.read_text())
+
+    updates: list[tuple[str, str, str]] = []
+    for plugin in data.get("plugins", []):
+        for item in plugin.get("items", []):
+            upstream = item.get("upstream")
+            sha = item.get("sha")
+            if not upstream or "/" not in upstream or not sha:
+                continue
+            if str(sha).startswith("first-party-"):
+                continue
+            repo_meta = _github_get(f"/repos/{upstream}", gh_token)
+            default_branch = repo_meta.get("default_branch") or "main"
+            ref = _github_get(f"/repos/{upstream}/git/ref/heads/{default_branch}", gh_token)
+            new_sha = (ref.get("object") or {}).get("sha")
+            if new_sha and new_sha != sha:
+                item["sha"] = new_sha
+                updates.append((item.get("id", "?"), sha, new_sha))
+
+    if updates:
+        with catalog_path.open("w") as f:
+            yaml.dump(data, f)
+
+    return updates
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
@@ -127,6 +167,11 @@ def main(argv: Optional[list[str]] = None) -> int:
                         help="Write updated SHAs back to the catalog (requires --github-token).")
     parser.add_argument("--github-token", default=os.environ.get("GITHUB_TOKEN"))
     args = parser.parse_args(argv)
+    if args.update_shas:
+        updates = update_shas(args.catalog, gh_token=args.github_token)
+        for item_id, old, new in updates:
+            print(f"updated {item_id}: {old[:7]} -> {new[:7]}")
+        return 0
     results = check_catalog(args.catalog, gh_token=args.github_token)
     rc = 0
     print(f"{'STATUS':<14} {'PLUGIN':<24} {'ITEM':<28} DETAIL")

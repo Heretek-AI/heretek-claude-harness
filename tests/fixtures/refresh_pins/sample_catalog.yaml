@@ -1,3 +1,12 @@
+# heretek marketplace — source of truth.
+# Generated from this file by scripts/generate_marketplace.py; do NOT
+# hand-edit .claude-plugin/marketplace.json (it's regenerated).
+#
+# Schema: see tests/schemas/marketplace.schema.json (for the generated
+# marketplace.json) and tests/fixtures/catalog/* (for the catalog.yaml
+# structure). Every items[] entry must pass D7 vetting; entries without
+# vetting.status: approved + review link fail CI.
+
 marketplace:
   name: test-mp
   owner: { name: Tester }
