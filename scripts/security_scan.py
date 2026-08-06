@@ -22,6 +22,9 @@ from datetime import date
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _allowlist import require_id_segment, require_sha, require_upstream  # noqa: E402
+
 import requests
 import yaml
 
@@ -63,6 +66,8 @@ def _get_latest_release_sha(
 
 def _shallow_clone(upstream: str, sha: str, target: Path) -> None:
     """git clone --depth 1 <upstream> @<sha> into target."""
+    require_upstream(upstream)
+    require_sha(sha)
     if target.exists():
         shutil.rmtree(target)
     target.mkdir(parents=True, exist_ok=True)
@@ -125,6 +130,8 @@ def _commit_catalog_bump(
     Returns the new branch name (`security-scan/<item>-<sha12>`).
     """
     # 1. Edit catalog.yaml in place (sha + vetting.date).
+    require_id_segment("item_id", item_id)
+    require_sha(new_sha)
     bump_item_sha(catalog_path, plugin, item_id, new_sha, vetting_date)
 
     branch = f"security-scan/{item_id}-{new_sha[:12]}"

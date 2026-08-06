@@ -1,4 +1,4 @@
-"""Centralized allowlist patterns for catalog-controlled strings (issue #93).
+"""Centralized allowlist patterns for catalog-controlled strings (issues #93, #94).
 
 Catalog entries flow into URL paths, branch names, and session-state filenames.
 Validate against these regexes before any interpolation. Grow this module as
@@ -15,6 +15,13 @@ UPSTREAM_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 # slash, dash. No shell metacharacters.
 REF_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._/-]+$")
 
+# item id — used as branch-name component. Letters, digits, dot, underscore, dash.
+# No slashes (would create nested refs), no `..`.
+ID_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+
+# 40-char lowercase hex SHA.
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
 
 def require_upstream(value: str) -> None:
     if not UPSTREAM_RE.match(value):
@@ -26,3 +33,15 @@ def require_ref_segment(label: str, value: str) -> None:
         raise ValueError(f"{label} {value!r} contains path-traversal or is empty")
     if not REF_SEGMENT_RE.match(value):
         raise ValueError(f"{label} {value!r} failed ref-segment allowlist")
+
+
+def require_id_segment(label: str, value: str) -> None:
+    if not value or ".." in value:
+        raise ValueError(f"{label} {value!r} contains path-traversal or is empty")
+    if not ID_SEGMENT_RE.match(value):
+        raise ValueError(f"{label} {value!r} failed id-segment allowlist")
+
+
+def require_sha(value: str) -> None:
+    if not SHA_RE.match(value or ""):
+        raise ValueError(f"sha {value!r} failed 40-hex allowlist")
