@@ -1,0 +1,21 @@
+# Model profile for Claude Opus 4.x.
+# Lightest enforcement: trust model judgment; mandatory lookup off by default.
+version: 1
+model_id: claude-opus-4
+model_class: frontier
+notes: >
+  Strongest tested model. Empirically near-zero deprecated-API output
+  on the Phase 1 eval set. Trust the model; minimal enforcement.
+
+enforcement:
+  promote_to_block: []
+  demote_to_warn:
+    - py-yaml-load-without-loader
+    - py-os-popen
+    - js-var-declaration
+
+mandatory_lookup: []  # off by default; user can opt in per-project
+
+freshness_token_ttl_hours: 720  # 30 days
+
+drift_sensitivity: 0.7

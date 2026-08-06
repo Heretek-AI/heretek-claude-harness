@@ -1,0 +1,23 @@
+# Model profile for Gemini 2.5.
+# Similar to Claude profile; the two are interchangeable for most cases.
+version: 1
+model_id: gemini-2.5
+model_class: frontier
+notes: >
+  Frontier-class model, comparable to Claude Opus on the Phase 1 eval.
+  Note: Google ships Gemini API Docs MCP (see research report); profiles
+  can opt into MCP-driven lookup via mandatory_lookup.
+
+enforcement:
+  promote_to_block: []
+  demote_to_warn:
+    - py-yaml-load-without-loader
+    - py-os-popen
+    - js-var-declaration
+
+mandatory_lookup:
+  - pyyaml  # Google's docs MCP covers it natively
+
+freshness_token_ttl_hours: 720
+
+drift_sensitivity: 0.7

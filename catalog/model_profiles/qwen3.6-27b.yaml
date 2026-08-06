@@ -1,0 +1,33 @@
+# Model profile for Qwen3.6 27B (local LLM class).
+# Strictest profile: most patterns ask-blocking, mandatory lookup on more libs,
+# fastest freshness-token TTL (24h).
+version: 1
+model_id: qwen3.6-27b
+model_class: local-27b
+notes: >
+  Smallest tested model. Empirically produces the most deprecated-API output
+  (per Phase 1 #38 eval harness baseline). Strictest enforcement applied.
+
+enforcement:
+  # Patterns promoted from warn → ask based on this profile
+  promote_to_block:
+    - py-yaml-load-without-loader
+    - py-os-popen
+    - js-var-declaration
+  # Patterns demoted from error → warn for this profile (none for Qwen)
+  demote_to_warn: []
+
+# Libraries that require mandatory freshness lookup before any Edit
+mandatory_lookup:
+  - pyyaml
+  - jsonschema
+  - requests
+  - ruamel-yaml
+  - pytest
+  - ruff
+
+# Freshness-token TTL — shorter for weaker models (data goes stale faster relative to recall)
+freshness_token_ttl_hours: 24
+
+# Drift-detector sensitivity multiplier (1.0 = baseline, higher = more sensitive)
+drift_sensitivity: 1.5

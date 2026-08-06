@@ -1,0 +1,22 @@
+# Model profile for deepseek-v3 (frontier class).
+# Moderate enforcement: fewer ask-promotions, mandatory lookup only on
+# rapidly-changing libraries.
+version: 1
+model_id: deepseek-v3
+model_class: frontier
+notes: >
+  Frontier-class model. Empirically strong at avoiding deprecated APIs.
+  Default-warn enforcement; mandatory lookup only on fast-moving libs.
+
+enforcement:
+  promote_to_block: []
+  demote_to_warn:
+    - js-var-declaration  # acceptable in legacy code
+
+mandatory_lookup:
+  - requests  # security-relevant
+  - pytest   # fast-moving
+
+freshness_token_ttl_hours: 168  # 1 week
+
+drift_sensitivity: 1.0  # baseline
