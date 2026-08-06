@@ -23,6 +23,17 @@
             "timeout": 2000
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ${CLAUDE_PROJECT_DIR}/scripts/scanners/forbidden_pattern_scanner.py",
+            "async": true,
+            "timeout": 2000
+          }
+        ]
       }
     ]
   }
