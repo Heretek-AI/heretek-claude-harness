@@ -17,6 +17,18 @@ from pathlib import Path
 
 import yaml
 
+# Allow `python scripts/scanners/forbidden_pattern_scanner.py` (subprocess run
+# by the scanner test) to resolve the `scripts` package from the repo root.
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from scripts.model_profile_loader import (
+    apply_profile_to_pattern,
+    load_profile,
+    resolve_active_model_id,
+)
+
 CATALOG = Path(__file__).resolve().parent.parent.parent / "catalog" / "forbidden_patterns.yaml"
 EXT_TO_LANG = {
     ".py": "python",
@@ -41,9 +53,16 @@ def _scan(file_path: str, content: str) -> list[str]:
     if not ast_grep:
         return []
 
-    patterns = [p for p in _load_catalog() if p["language"] == lang]
-    warnings = []
+    try:
+        profile = load_profile(resolve_active_model_id())
+    except FileNotFoundError:
+        profile = None
 
+    patterns = [p for p in _load_catalog() if p["language"] == lang]
+    if profile is not None:
+        patterns = [apply_profile_to_pattern(p, profile) for p in patterns]
+
+    warnings = []
     for pattern_def in patterns:
         rule = yaml.safe_dump(
             {
@@ -58,8 +77,9 @@ def _scan(file_path: str, content: str) -> list[str]:
             input=content, capture_output=True, text=True, timeout=2,
         )
         if result.returncode == 0 and result.stdout.strip():
+            severity_marker = "🚫" if pattern_def["severity"] == "error" else "⚠️"
             warnings.append(
-                f"[{pattern_def['id']}] {pattern_def['reason']} "
+                f"{severity_marker} [{pattern_def['id']}] {pattern_def['reason']} "
                 f"Replacement: {pattern_def['replacement']}"
             )
 
