@@ -16,6 +16,9 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _allowlist import require_session_id  # noqa: E402
+
 SESSION_STATE_DIR = Path(os.environ.get(
     "HERETEK_SESSION_STATE_DIR",
     Path.cwd() / ".heretek" / "session_state",
@@ -25,6 +28,7 @@ MONOTONIC_DIFF_THRESHOLD = 3
 
 
 def _session_state_path(session_id: str) -> Path:
+    require_session_id(session_id)
     SESSION_STATE_DIR.mkdir(parents=True, exist_ok=True)
     return SESSION_STATE_DIR / f"{session_id}.json"
 
