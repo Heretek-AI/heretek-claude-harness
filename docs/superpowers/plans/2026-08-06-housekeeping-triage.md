@@ -12,7 +12,7 @@
 
 Copied verbatim from `docs/superpowers/specs/2026-08-06-housekeeping-triage-design.md`:
 
-- Reuse only existing repo labels: `{chore, tech-debt, bug, help wanted, documentation, enhancement, question}`. **No new labels created.**
+- Reuse only existing repo labels (verified at Task 1 dispatch): `{bug, documentation, duplicate, enhancement, good first issue, help wanted, invalid, question, wontfix, dependencies, python, github_actions, security-scan, tech-debt, testing, v1.1, portability, tracking}`. **`chore` is NOT present in this repo — do not attempt to apply it.** **No new labels created.**
 - Issue titles use a mix of conventional-commit prefixes (`chore:`, `fix:`, `docs:`) and label-derived prefixes (`enhancement:`, `question:`). Lowercase after the colon. ≤70 chars.
 - Each issue body follows §4 template: `## Problem` → `## Origin / cross-references` → `## Recommended fix sketch` → `## Definition of done`.
 - Cross-links always include the local `docs/superpowers/...` path; GitHub issue/PR links included only when the issue/PR already exists. No external URLs in the body unless the upstream is the source of truth (e.g., licenses).
@@ -25,7 +25,7 @@ Copied verbatim from `docs/superpowers/specs/2026-08-06-housekeeping-triage-desi
 
 ### Task 1: File issue #1 — `chore: add .coverage to .gitignore + configure coverage.xml for CI`
 
-**Issue produces:** GitHub issue with title `chore: add .coverage to .gitignore + configure coverage.xml for CI`, labels `chore` + `tech-debt`, P1 body signal.
+**Issue produces:** GitHub issue with title `chore: add .coverage to .gitignore + configure coverage.xml for CI`, label `tech-debt` (note: `chore` label does not exist in this repo; only `tech-debt` is applied), P1 body signal.
 
 **Files:** None locally modified. Produces one GitHub issue.
 
@@ -110,7 +110,7 @@ gh issue view "$ISSUE_1" --repo Heretek-AI/heretek-claude-harness \
   | jq -r '.title, (.labels | map(.name) | join(",")), .body'
 ```
 
-Expected: title matches exactly, labels are `chore,tech-debt`, body has all 4 sections (`## Problem`, `## Origin`, `## Recommended`, `## Definition`).
+Expected: title matches exactly, labels are `tech-debt` (single label, no `chore`), body has all 4 sections (`## Problem`, `## Origin`, `## Recommended`, `## Definition`).
 
 ---
 
@@ -204,7 +204,7 @@ Expected: title matches, labels are `bug,help wanted`, body has 4 sections.
 
 ### Task 3: File issue #3 — `chore: commit untracked tests/fixtures/fast_gate/ files (post-#15 SP3 fix artifacts)`
 
-**Issue produces:** GitHub issue with title `chore: commit untracked tests/fixtures/fast_gate/ files (post-#15 SP3 fix artifacts)`, labels `chore` + `tech-debt`, P1 body signal.
+**Issue produces:** GitHub issue with title `chore: commit untracked tests/fixtures/fast_gate/ files (post-#15 SP3 fix artifacts)`, label `tech-debt` (note: `chore` label does not exist in this repo), P1 body signal.
 
 **Files:** None locally modified. Produces one GitHub issue.
 
@@ -264,7 +264,7 @@ Run:
 gh issue create \
   --repo Heretek-AI/heretek-claude-harness \
   --title "chore: commit untracked tests/fixtures/fast_gate/ files (post-#15 SP3 fix artifacts)" \
-  --label "chore,tech-debt" \
+  --label "tech-debt" \
   --body "$(cat <<'BODY_EOF'
 <insert Step 2 body here, verbatim>
 BODY_EOF
@@ -282,7 +282,7 @@ gh issue view "$ISSUE_3" --repo Heretek-AI/heretek-claude-harness \
   | jq -r '.title, (.labels | map(.name) | join(",")), (.body | length)'
 ```
 
-Expected: title matches, labels are `chore,tech-debt`, body length > 500 chars.
+Expected: title matches, labels are `tech-debt` (single label, no `chore`), body length > 500 chars.
 
 ---
 
@@ -370,7 +370,7 @@ Expected: title matches, labels are `documentation,tech-debt`.
 
 ### Task 5: File issue #5 — `chore: clean up empty reports/baseline/ directory`
 
-**Issue produces:** GitHub issue with title `chore: clean up empty reports/baseline/ directory`, labels `chore` + `tech-debt`, P2 body signal.
+**Issue produces:** GitHub issue with title `chore: clean up empty reports/baseline/ directory`, label `tech-debt` (note: `chore` label does not exist in this repo), P2 body signal.
 
 **Files:** None locally modified. Produces one GitHub issue.
 
@@ -423,7 +423,7 @@ Run:
 gh issue create \
   --repo Heretek-AI/heretek-claude-harness \
   --title "chore: clean up empty reports/baseline/ directory" \
-  --label "chore,tech-debt" \
+  --label "tech-debt" \
   --body "$(cat <<'BODY_EOF'
 <insert Step 2 body here, verbatim>
 BODY_EOF
@@ -441,7 +441,7 @@ gh issue view "$ISSUE_5" --repo Heretek-AI/heretek-claude-harness \
   | jq -r '.title, (.labels | map(.name) | join(","))'
 ```
 
-Expected: title matches, labels are `chore,tech-debt`.
+Expected: title matches, labels are `tech-debt` (single label, no `chore`).
 
 ---
 
@@ -808,7 +808,7 @@ Expected: title matches, labels are `enhancement,help wanted`.
 
 ### Task 10: File issue #10 — `chore: file per-item ADRs for 6 D7-passing Tier-2 candidates`
 
-**Issue produces:** GitHub issue with title `chore: file per-item ADRs for 6 D7-passing Tier-2 candidates (agent-skills, wondelai, headroom, taste-skill, claude-mem, CLI-Anything)`, labels `chore` + `enhancement` + `help wanted`, P3 body signal.
+**Issue produces:** GitHub issue with title `chore: file per-item ADRs for 6 D7-passing Tier-2 candidates (agent-skills, wondelai, headroom, taste-skill, claude-mem, CLI-Anything)`, labels `enhancement` + `help wanted` (note: `chore` label does not exist in this repo), P3 body signal.
 
 **Files:** None locally modified. Produces one GitHub issue.
 
@@ -890,7 +890,7 @@ Run:
 gh issue create \
   --repo Heretek-AI/heretek-claude-harness \
   --title "chore: file per-item ADRs for 6 D7-passing Tier-2 candidates (agent-skills, wondelai, headroom, taste-skill, claude-mem, CLI-Anything)" \
-  --label "chore,enhancement,help wanted" \
+  --label "enhancement,help wanted" \
   --body "$(cat <<'BODY_EOF'
 <insert Step 2 body here, verbatim>
 BODY_EOF
@@ -908,7 +908,7 @@ gh issue view "$ISSUE_10" --repo Heretek-AI/heretek-claude-harness \
   | jq -r '.title, (.labels | map(.name) | join(","))'
 ```
 
-Expected: title matches, labels are `chore,enhancement,help wanted`.
+Expected: title matches, labels are `enhancement,help wanted` (no `chore`).
 
 ---
 
@@ -988,7 +988,7 @@ Run:
 gh issue create \
   --repo Heretek-AI/heretek-claude-harness \
   --title "chore: append mksglu/context-mode to catalog/rejected.md (D7 fail: Elastic License 2.0 not OSI-approved)" \
-  --label "chore,documentation" \
+  --label "documentation" \
   --body "$(cat <<'BODY_EOF'
 <insert Step 2 body here, verbatim>
 BODY_EOF

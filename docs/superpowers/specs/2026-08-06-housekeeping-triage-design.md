@@ -103,14 +103,14 @@ just enough that the implementer doesn't re-derive the approach.>
 - **Issue titles** use a mix of conventional-commit prefixes (`chore:`, `fix:`, `docs:`) and label-derived prefixes (`enhancement:`, `question:`). Lowercase after the colon. Title fits in ~70 chars. The label-derived prefixes mirror the issue's primary label so the title and labels read coherently: an `enhancement` label is paired with an `enhancement:` prefix, a `question` label with `question:`.
 - **Cross-links** always include the local `docs/superpowers/...` path. GitHub issue/PR links included only when the issue/PR already exists. No external URLs in the body unless the upstream is the source of truth (e.g., licenses).
 - **DoD** items are concrete and verifiable. No "tests pass" without specifying which tests; no "works" without specifying how to confirm.
-- **Labels** reused only. Mapping:
-  - `chore` + `tech-debt` → internal hygiene (#1, #3, #5)
+- **Labels** reused only. **Note discovered at Task 1 dispatch (2026-08-06):** the `chore` label does NOT exist in `Heretek-AI/heretek-claude-harness`. Actual label inventory: `{bug, documentation, duplicate, enhancement, good first issue, help wanted, invalid, question, wontfix, dependencies, python, github_actions, security-scan, tech-debt, testing, v1.1, portability, tracking}`. The mapping below reflects the **corrected** labels (drop `chore` where it was incorrectly listed). Mapping:
+  - `tech-debt` (single label) → internal hygiene (#1, #3, #5) — `chore` dropped, doesn't exist
   - `bug` + `help wanted` → sync/contract violation (#2)
   - `documentation` + `tech-debt` → doc wart (#4)
   - `enhancement` + `help wanted` → spec drift / CI inclusion (#6, #8, #9)
   - `question` + `documentation` → ADR-needed decision (#7)
-  - `chore` + `enhancement` + `help wanted` → ADR-writing batch (#10)
-  - `chore` + `documentation` → D7 reject finalization (#11)
+  - `enhancement` + `help wanted` → ADR-writing batch (#10) — `chore` dropped
+  - `documentation` (single label) → D7 reject finalization (#11) — `chore` dropped
 
 ## 5. Sequencing (filing order)
 
