@@ -34,6 +34,17 @@
             "timeout": 2000
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ${CLAUDE_PROJECT_DIR}/scripts/drift_detector.py",
+            "async": true,
+            "timeout": 500
+          }
+        ]
       }
     ]
   }
