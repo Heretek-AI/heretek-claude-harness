@@ -15,7 +15,7 @@ All notable changes to the `heretek` Claude Code marketplace are recorded here. 
 ### Fixed
 
 - **#11** `scripts/refresh_pins.py --update-shas` now writes new SHAs back to the catalog (round-tripped via ruamel.yaml to preserve comments).
-- **#16** Bumped `jsonschema`, `PyYAML`, `pytest`, and `ruamel.yaml` to versions resolving Dependabot moderate CVEs.
+- **#16** Bumped `jsonschema`, `PyYAML`, and `pytest` to versions resolving Dependabot moderate CVEs (`jsonschema` 4.23.0 → 4.26.0; `PyYAML` 6.0.2 → 6.0.3; `pytest` 9.0.3 → 9.1.1). `ruamel.yaml` remains at 0.18.6 — its CVE bump lives on an unmerged dependabot branch.
 
 ### Deferred to v1.0.1
 
