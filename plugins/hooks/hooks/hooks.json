@@ -8,6 +8,11 @@
             "type": "command",
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/fast_gate.py",
             "timeout": 1
+          },
+          {
+            "type": "command",
+            "command": "python ${CLAUDE_PROJECT_DIR}/scripts/scanners/ast_grep_scanner.py",
+            "timeout": 1000
           }
         ]
       }
