@@ -38,17 +38,35 @@ def load_profile(model_id: str) -> dict:
 def apply_profile_to_pattern(pattern: dict, profile: dict) -> dict:
     """Apply a profile's enforcement rules to a single pattern definition.
 
-    Promotes warn → error for IDs in profile.enforcement.promote_to_block.
-    Demotes error → warn for IDs in profile.enforcement.demote_to_warn.
-    Other severities are unchanged.
+    Promote/demote semantics:
+      * Ids in ``profile.enforcement.promote_to_block`` are upgraded
+        ``warn → error`` (errors remain errors).
+      * Ids in ``profile.enforcement.demote_to_warn`` are downgraded
+        ``error → warn`` (warns remain warns).
+      * Ids in neither list are passed through unchanged.
+
+    Collision guard: if a pattern ``id`` appears in BOTH
+    ``promote_to_block`` and ``demote_to_warn`` for the same profile,
+    the ordering is ambiguous, so this raises :class:`ValueError` rather
+    than silently picking one. Resolve the collision in the profile YAML
+    before applying.
     """
     pid = pattern["id"]
     severity = pattern["severity"]
     enforcement = profile.get("enforcement", {})
 
-    if pid in enforcement.get("promote_to_block", []) and severity == "warn":
+    promote = enforcement.get("promote_to_block", [])
+    demote = enforcement.get("demote_to_warn", [])
+
+    if pid in promote and pid in demote:
+        raise ValueError(
+            f"profile collision for id {pid!r}: appears in both "
+            f"promote_to_block and demote_to_warn"
+        )
+
+    if pid in promote and severity == "warn":
         severity = "error"
-    if pid in enforcement.get("demote_to_warn", []) and severity == "error":
+    if pid in demote and severity == "error":
         severity = "warn"
 
     return {**pattern, "severity": severity}
