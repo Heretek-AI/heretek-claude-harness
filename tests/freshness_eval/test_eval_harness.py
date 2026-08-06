@@ -43,11 +43,15 @@ def test_eval_detection_rate_on_stale_fixture():
     assert warnings >= 2, f"expected ≥2 stale warnings, got {warnings}: {output}"
 
 
-def test_eval_false_positive_rate_on_good_fixture():
-    """#38: hook must NOT warn when pins are >= latest."""
+def test_eval_false_positive_rate_on_good_fixture(tmp_path):
+    """#38: hook must NOT warn when pins are >= latest.
+
+    Builds the pyproject content directly into tmp_path from the live cache
+    state. Uses PEP 621 quoted-string format (matches the production format
+    that PIN_RE now supports).
+    """
     import yaml
 
-    # Build a good fixture dynamically from cache state
     libs = ["requests", "pyyaml", "ruff"]
     pins = []
     for lib in libs:
@@ -56,19 +60,19 @@ def test_eval_false_positive_rate_on_good_fixture():
             latest = yaml.safe_load(cache_file.read_text())["latest_version"]
             pins.append(f'"{lib}=={latest}"')
 
-    good = FIXTURES / "good_pyproject.toml"
-    dynamic = good.read_text().replace(
-        "# dynamic substitution below",
-        ",\n    ".join(pins) + ",\n",
+    dynamic_file = tmp_path / "good_pyproject.toml"
+    dynamic_file.write_text(
+        "[project]\n"
+        'name = "good-fixture"\n'
+        "version = \"0.1.0\"\n"
+        "dependencies = [\n"
+        + ",\n".join(f"    {p}" for p in pins)
+        + ",\n]\n"
     )
-    dynamic_file = good.parent / "_dynamic_good_pyproject.toml"
-    dynamic_file.write_text(dynamic)
 
     output = _run_hook_on_file(dynamic_file)
     assert "is stale" not in json.dumps(output), \
         f"false positive on fresh pins: {output}"
-
-    dynamic_file.unlink()
 
 
 def test_eval_freshness_index_coverage():

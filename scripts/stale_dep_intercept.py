@@ -20,8 +20,13 @@ DEP_FILE_PATTERNS = (
     re.compile(r"requirements.*\.txt$"),
     re.compile(r"pyproject\.toml$"),
 )
-# Match `name==X.Y.Z` or `name>=X.Y.Z` etc. (simple regex; semver is overkill for "is it stale")
-PIN_RE = re.compile(r"^\s*([a-zA-Z0-9_.+-]+)\s*([=<>~!]=)\s*([0-9][^,;\s]*)", re.MULTILINE)
+# Match `name==X.Y.Z` or `name>=X.Y.Z` etc. (simple regex; semver is overkill for "is it stale").
+# Tolerates optional single or double quotes around the package name so PEP 621 quoted
+# strings (e.g. `"requests==2.20.0"` inside `dependencies = [...]`) parse correctly.
+PIN_RE = re.compile(
+    r"^\s*[\"']?([a-zA-Z0-9_.+-]+)[\"']?\s*([=<>~!]=)\s*([0-9][^,;\s]*)",
+    re.MULTILINE,
+)
 
 
 def _is_dep_file(path: str) -> bool:

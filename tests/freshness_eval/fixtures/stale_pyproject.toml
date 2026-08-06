@@ -1,11 +1,8 @@
 [project]
 name = "stale-fixture"
 version = "0.1.0"
-# Unquoted on purpose: the #37 hook's PIN_RE matches pin expressions
-# directly (name==X.Y.Z) at the start of a line; PEP 621 quoted strings
-# are a follow-up. See report for details.
 dependencies = [
-    requests==2.20.0,  # Old; latest is 2.34+
-    pyyaml==5.1,       # Old; latest is 6.0+
-    ruff==0.1.0,       # Old; latest is 0.16+
+    "requests==2.20.0",  # Old; latest is 2.34+
+    "pyyaml==5.1",       # Old; latest is 6.0+
+    "ruff==0.1.0",       # Old; latest is 0.16+
 ]
