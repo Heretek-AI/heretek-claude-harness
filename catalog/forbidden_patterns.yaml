@@ -1,0 +1,76 @@
+# Forbidden-pattern registry (#40)
+# Each pattern is an ast-grep rule. Patterns ship as warn-only by default;
+# CI promotion to error requires a separate ADR (see Task 2).
+#
+# Schema:
+#   id: kebab-case identifier, globally unique
+#   language: python | javascript | typescript | rust
+#   pattern: ast-grep pattern syntax (https://ast-grep.github.io/)
+#   severity: warn | error
+#   reason: human-readable explanation
+#   replacement: suggested modern equivalent
+#   references: [list of URLs from research]
+
+version: 1
+patterns:
+
+  # === Python ===
+
+  - id: py-yaml-load-without-loader
+    language: python
+    pattern: 'yaml.load($YAML)'
+    severity: warn
+    reason: "yaml.load() without Loader= is unsafe; defaults to FullLoader in PyYAML 6+ but the API is deprecated."
+    replacement: "yaml.safe_load($YAML) for trusted input, or yaml.load($YAML, Loader=yaml.SafeLoader) explicitly."
+    references:
+      - https://github.com/yaml/pyyaml/wiki/PyYAML-yaml.load(input)-Deprecation
+      - https://docs.bswen.com/blog/2026-03-17-prevent-ai-hallucinations-outdated-docs/
+
+  - id: py-os-popen
+    language: python
+    pattern: 'os.popen($CMD)'
+    severity: warn
+    reason: "os.popen is older API; missing timeout, no way to capture stderr cleanly, security risk if $CMD is interpolated."
+    replacement: "subprocess.run($CMD, shell=True, capture_output=True, text=True, timeout=$TIMEOUT)"
+    references:
+      - https://docs.python.org/3/library/subprocess.html#replacing-the-popen-functions
+
+  # === JavaScript / TypeScript ===
+
+  - id: js-var-declaration
+    language: javascript
+    pattern: 'var $NAME = $VALUE'
+    severity: warn
+    reason: "var declarations are hoisted and function-scoped; const/let is block-scoped and prevents accidental redeclaration."
+    replacement: "const $NAME = $VALUE (or let if reassignment is needed)"
+    references:
+      - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/var
+
+  - id: js-callback-hell
+    language: javascript
+    pattern: 'foo(function() { $$$BODY })'
+    severity: warn
+    reason: "Nested callback pattern is anti-pattern in modern JS; use async/await or Promise chains."
+    replacement: "Refactor to async function with await, or chain .then() handlers."
+    references:
+      - https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Promises
+
+  # === Rust ===
+
+  - id: rust-unwrap-in-production
+    language: rust
+    pattern: '$EXPR.unwrap()'
+    severity: warn
+    reason: ".unwrap() panics on Err/None; acceptable in tests, risky in production paths."
+    replacement: "Use ? operator, .expect(\"context\"), or pattern-match on the Result/Option."
+    references:
+      - https://doc.rust-lang.org/std/result/enum.Result.html#method.unwrap
+
+  - id: rust-todo-macro
+    language: rust
+    pattern: 'todo!()'
+    severity: error
+    reason: "todo!() panics at runtime; should never appear in committed code."
+    replacement: "Implement the function or remove the call site."
+    references:
+      - https://doc.rust-lang.org/std/macro.todo.html
