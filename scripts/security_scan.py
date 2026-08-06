@@ -1,6 +1,7 @@
 """Security scan orchestrator. Walks catalog.yaml, finds items whose
 upstream SHA differs from the pinned SHA, runs the per-kind scanner,
-emits per-item JSON reports.
+emits per-item JSON reports, bumps the catalog SHA on a new branch,
+and drafts a PR against it.
 
 CLI:
     python scripts/security_scan.py                  # daily cron mode
@@ -13,9 +14,11 @@ import argparse
 import dataclasses
 import json
 import logging
+import os
 import shutil
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 from typing import Optional
 
@@ -103,6 +106,73 @@ def _dispatch_scanner(item: dict, path: Path, *, vt_token: Optional[str]) -> Sca
     )
 
 
+def _commit_catalog_bump(
+    *,
+    catalog_path: Path,
+    repo_root: Path,
+    plugin: str,
+    item_id: str,
+    new_sha: str,
+    vetting_date: str,
+) -> str:
+    """Bump catalog.yaml, create a security-scan branch, commit + push.
+
+    The caller is responsible for being on a clean main branch before calling
+    this function. After the bump, the new branch is pushed so the subsequent
+    draft_issue_and_pr call can attach the PR to a branch with the catalog
+    edit already in its commit log.
+
+    Returns the new branch name (`security-scan/<item>-<sha12>`).
+    """
+    # 1. Edit catalog.yaml in place (sha + vetting.date).
+    bump_item_sha(catalog_path, plugin, item_id, new_sha, vetting_date)
+
+    branch = f"security-scan/{item_id}-{new_sha[:12]}"
+
+    # 2. Create the branch from current HEAD (assumed to be main); the
+    # uncommitted catalog.yaml change stays in the working tree and will be
+    # committed onto the new branch.
+    subprocess.run(
+        ["git", "checkout", "-b", branch],
+        cwd=str(repo_root),
+        check=True,
+        capture_output=True,
+    )
+
+    # 3. Stage + commit the bump on the new branch.
+    rel_catalog = str(catalog_path.relative_to(repo_root))
+    subprocess.run(
+        ["git", "add", rel_catalog],
+        cwd=str(repo_root),
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        ["git", "commit", "-m", f"bump {plugin}/{item_id} to {new_sha[:12]}"],
+        cwd=str(repo_root),
+        check=True,
+        capture_output=True,
+    )
+
+    # 4. Push so the PR can be opened against this branch.
+    subprocess.run(
+        ["git", "push", "origin", branch],
+        cwd=str(repo_root),
+        check=True,
+        capture_output=True,
+    )
+
+    # 5. Return to main so the next item starts from a clean state.
+    subprocess.run(
+        ["git", "checkout", "main"],
+        cwd=str(repo_root),
+        check=True,
+        capture_output=True,
+    )
+
+    return branch
+
+
 def run(
     catalog_path: Path,
     output_dir: Path,
@@ -111,8 +181,12 @@ def run(
     vt_token: Optional[str] = None,
     dry_run: bool = False,
     item_filter: Optional[str] = None,
+    repo_root: Optional[Path] = None,
 ) -> ScanSummary:
     """Run the full scan. Emit per-item JSON reports under output_dir."""
+    if repo_root is None:
+        repo_root = Path(os.environ.get("GITHUB_WORKSPACE", os.getcwd()))
+
     output_dir.mkdir(parents=True, exist_ok=True)
     catalog = yaml.safe_load(catalog_path.read_text())
 
@@ -133,7 +207,7 @@ def run(
                 log.warning("skipping malformed upstream: %s/%s", plugin_name, item.get("id"))
                 continue
 
-            latest_sha, tag = _get_latest_release_sha(upstream, gh_token=gh_token)
+            latest_sha, _ = _get_latest_release_sha(upstream, gh_token=gh_token)
             if latest_sha is None:
                 log.warning("no release found for %s/%s", plugin_name, item.get("id"))
                 error_count += 1
@@ -171,6 +245,28 @@ def run(
                 continue
 
             if not dry_run and gh_token:
+                # C1 (final-review fix): bump catalog.yaml + push the new
+                # branch BEFORE drafting the PR. Otherwise the daily cron
+                # opens empty draft PRs with no catalog edit in the diff.
+                try:
+                    _commit_catalog_bump(
+                        catalog_path=catalog_path,
+                        repo_root=repo_root,
+                        plugin=plugin_name,
+                        item_id=item["id"],
+                        new_sha=latest_sha,
+                        vetting_date=date.today().isoformat(),
+                    )
+                except subprocess.CalledProcessError as e:
+                    log.exception(
+                        "git commit/push failed for %s/%s: %s",
+                        plugin_name,
+                        item.get("id"),
+                        e,
+                    )
+                    error_count += 1
+                    continue
+
                 issue_url, pr_url = draft_issue_and_pr(
                     report,
                     gh_token=gh_token,
@@ -203,6 +299,7 @@ def main(argv: list[str] | None = None) -> int:
         vt_token=args.vt_token,
         dry_run=args.dry_run or not args.github_token,
         item_filter=args.item,
+        repo_root=Path(os.environ.get("GITHUB_WORKSPACE", os.getcwd())),
     )
     print(f"reports={summary.report_count} errors={summary.error_count}")
     return 0 if summary.error_count == 0 else 1

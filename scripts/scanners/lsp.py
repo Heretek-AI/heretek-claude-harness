@@ -17,14 +17,11 @@ carry it for LSPs today; TODO if we add a sha field for LSPs in v2).
 from __future__ import annotations
 
 import json
-import logging
 import re
 from pathlib import Path
 from typing import Optional
 
 from .base import Finding, ScannerReport, Severity
-
-log = logging.getLogger(__name__)
 
 # Allowlist of LSP server binary names. Anything else is a block.
 # Extend with care: each new entry needs to be vetted per D7.

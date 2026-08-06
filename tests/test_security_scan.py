@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from scripts.security_scan import run
-from scripts.scanners.base import Finding, ScannerReport
+from scripts.scanners.base import ScannerReport
 
 
 @pytest.fixture
@@ -104,3 +104,78 @@ def test_scan_summary_dataclass_basic() -> None:
     from scripts.security_scan import ScanSummary
     s = ScanSummary(report_count=0, error_count=0)
     assert s.report_count == 0
+
+
+@patch("scripts.security_scan.draft_issue_and_pr")
+@patch("scripts.security_scan.bump_item_sha")
+@patch("scripts.security_scan.subprocess.run")
+@patch("scripts.security_scan.scan_skill")
+@patch("scripts.security_scan._get_latest_release_sha")
+def test_run_commits_catalog_bump_before_drafting_pr(
+    mock_sha: MagicMock,
+    mock_scan: MagicMock,
+    mock_subprocess: MagicMock,
+    mock_bump: MagicMock,
+    mock_draft: MagicMock,
+    sample_catalog: Path,
+    tmp_path: Path,
+) -> None:
+    """C1: when upstream changes, bump_item_sha + git commit/push must
+    happen BEFORE draft_issue_and_pr so the daily cron opens PRs with
+    the catalog.yaml edit already in their diff."""
+    mock_sha.return_value = ("a" * 40, "v1.0.0")
+
+    call_order: list[str] = []
+
+    def bump_side(*args, **kwargs):
+        call_order.append("bump_item_sha")
+
+    def subprocess_side(*args, **kwargs):
+        cmd = args[0] if args else kwargs.get("args", [])
+        if isinstance(cmd, list) and cmd:
+            label = cmd[1] if len(cmd) > 1 else cmd[0]
+            call_order.append(f"git:{label}")
+        # Make git clone create the scratch dir so dispatch_scanner gets a path.
+        if isinstance(cmd, list) and len(cmd) >= 3 and cmd[1] == "clone":
+            cwd = kwargs.get("cwd", "/")
+            Path(cwd).mkdir(parents=True, exist_ok=True)
+            (Path(cwd) / "SKILL.md").write_text("# fake")
+        return MagicMock(returncode=0, stderr="", stdout="")
+
+    def draft_side(*args, **kwargs):
+        call_order.append("draft_issue_and_pr")
+        return ("http://issue", "http://pr")
+
+    mock_bump.side_effect = bump_side
+    mock_subprocess.side_effect = subprocess_side
+    mock_scan.return_value = ScannerReport(
+        item_id="context7", scanner="skillspector", severity="clean"
+    )
+    mock_draft.side_effect = draft_side
+
+    summary = run(
+        catalog_path=sample_catalog,
+        output_dir=tmp_path,
+        gh_token="fake-token",
+        repo_root=tmp_path,
+    )
+
+    assert summary.report_count == 1
+    # bump_item_sha must be called before draft_issue_and_pr.
+    assert "bump_item_sha" in call_order, call_order
+    assert "draft_issue_and_pr" in call_order, call_order
+    bump_idx = call_order.index("bump_item_sha")
+    draft_idx = call_order.index("draft_issue_and_pr")
+    assert bump_idx < draft_idx, f"bump must precede draft: {call_order}"
+    # git commit must happen before draft_issue_and_pr.
+    commit_idx = next(
+        (i for i, c in enumerate(call_order) if c == "git:commit"), -1
+    )
+    assert commit_idx >= 0, f"expected git commit, got: {call_order}"
+    assert commit_idx < draft_idx, f"git commit must precede draft: {call_order}"
+    # git push must happen before draft_issue_and_pr.
+    push_idx = next(
+        (i for i, c in enumerate(call_order) if c == "git:push"), -1
+    )
+    assert push_idx >= 0, f"expected git push, got: {call_order}"
+    assert push_idx < draft_idx, f"git push must precede draft: {call_order}"
