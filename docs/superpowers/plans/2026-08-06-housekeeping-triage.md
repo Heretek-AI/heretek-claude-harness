@@ -220,25 +220,35 @@ for f in tests/fixtures/fast_gate/*; do
 done
 ```
 
-Verify each file is a real test input (e.g., `bad_sample.py` contains a deliberate lint error), not a generated artifact. If they look generated, skip this task — add discovery note.
+Verify each file is a real test input (e.g., `bad_sample.py` contains a deliberate lint error), not a generated artifact. **Note:** the implementer at the 2026-08-06 run discovered 14 untracked files (7 sample + 7 .json fixtures referenced by commit `d38c700`), not the 7 mentioned in the original brief. The body composition step below reflects this broader scope. If they look generated, skip this task — add discovery note.
 
 - [ ] **Step 2: Compose the issue body**
 
 ```markdown
 ## Problem
 
-Seven test fixture files in `tests/fixtures/fast_gate/` are untracked:
-`bad_sample.{js,py,rs}`, `good_sample.{js,py,rs}`, and `sample.md`. These
-look like deliberate bad/good lint inputs for the fast-gate smoke test
-(`tests/smoke/fast_gate_smoke.sh`). They were probably added as part of
-the SP3 fix for the rust-clippy skill (#15, commit 02ccd83) but never
-committed. Untracked fixtures cannot be referenced reliably by CI.
+Fourteen test fixture files in `tests/fixtures/fast_gate/` are untracked.
+Two sets:
+
+1. **Sample files** (7): `bad_sample.{js,py,rs}`, `good_sample.{js,py,rs}`,
+   `sample.md` — deliberate bad/good lint inputs likely added by the SP3
+   fix for the rust-clippy skill (#15, commit 02ccd83) but never committed.
+
+2. **JSON fixtures** (7): `bad_js.json`, `bad_python.json`, `bad_rust.json`,
+   `good_js.json`, `good_python.json`, `good_rust.json`, `unsupported_ext.json`
+   — referenced by commit `d38c700 feat(hooks): Layer-1 fast-gate dispatcher`
+   but never committed.
+
+Untracked fixtures cannot be referenced reliably by CI, and the JSON
+fixtures specifically are likely consumed by a separate test runner
+(uncovered by `tests/smoke/fast_gate_smoke.sh`, which uses its own
+temp files).
 
 ## Origin / cross-references
 
-- Working-tree hygiene: `git status` shows 7 untracked fixture files
-- Original context: issue #15 (SP3: rust-clippy skill file missing) closed
-  in PR #40 (commit 02ccd83) — fixtures likely added then
+- Working-tree hygiene: `git status` shows 14 untracked fixture files in `tests/fixtures/fast_gate/`
+- Original context: issue #15 (SP3: rust-clippy skill file missing) closed in PR #40 (commit 02ccd83) — sample fixtures likely added then
+- JSON fixtures referenced by commit `d38c700 feat(hooks): Layer-1 fast-gate dispatcher`
 
 ## Recommended fix sketch
 
@@ -250,7 +260,7 @@ committed. Untracked fixtures cannot be referenced reliably by CI.
 
 ## Definition of done
 
-- [ ] All 7 fixture files committed
+- [ ] All 14 fixture files committed
 - [ ] `git status` clean for `tests/fixtures/fast_gate/`
 - [ ] `tests/smoke/fast_gate_smoke.sh` still passes
 - [ ] `pytest -q` exits 0
@@ -282,7 +292,7 @@ gh issue view "$ISSUE_3" --repo Heretek-AI/heretek-claude-harness \
   | jq -r '.title, (.labels | map(.name) | join(",")), (.body | length)'
 ```
 
-Expected: title matches, labels are `tech-debt` (single label, no `chore`), body length > 500 chars.
+Expected: title matches, labels are `tech-debt` (single label, no `chore`), body length > 500 chars, body mentions all 14 fixture files (7 sample + 7 JSON) with cross-link to commit `d38c700`.
 
 ---
 
