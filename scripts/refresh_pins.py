@@ -26,7 +26,9 @@ from typing import Any, Optional
 
 import yaml
 
-from _allowlist import require_ref_segment, require_upstream
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts._allowlist import require_ref_segment, require_upstream
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CATALOG = REPO_ROOT / "catalog" / "catalog.yaml"
@@ -66,6 +68,14 @@ def _github_get(path: str, gh_token: Optional[str]) -> dict:
         return {}
 
 
+def _get_latest_release_sha(upstream: str, *, gh_token: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+    """Return (sha, tag) of upstream's latest release, or (None, None)."""
+    data = _github_get(f"/repos/{upstream}/releases/latest", gh_token)
+    if not data:
+        return None, None
+    return data.get("target_commitish"), data.get("tag_name")
+
+
 def check_item(item: dict, *, gh_token: Optional[str]) -> tuple[str, dict]:
     """Return (status, details). status in {ok, skipped, stale_stars, stale_commit, license_drift, cve_alert}."""
     details: dict[str, Any] = {"id": item.get("id"), "upstream": item.get("upstream")}
@@ -90,9 +100,13 @@ def check_item(item: dict, *, gh_token: Optional[str]) -> tuple[str, dict]:
         details["reason"] = f"stars={stars} < 500"
         return "stale_stars", details
     spdx = (data.get("license") or {}).get("spdx_id") or "NOASSERTION"
-    if spdx != (item.get("license") or "").upper():
-        details["reason"] = f"license drifted: upstream={spdx} vs catalog={item.get('license')}"
-        return "license_drift", details
+    catalog_license = (item.get("license") or "").upper()
+    # Missing catalog license OR upstream NOASSERTION/UNKNOWN — treat as
+    # "unknown, not drift" (closes #96 item 2).
+    if catalog_license and spdx not in ("NOASSERTION", "UNKNOWN"):
+        if spdx != catalog_license:
+            details["reason"] = f"license drifted: upstream={spdx} vs catalog={catalog_license}"
+            return "license_drift", details
     advisories = _github_get(f"/repos/{upstream}/security-advisories", gh_token)
     critical = [a for a in advisories if (a.get("severity") or "").upper() == "CRITICAL"]
     if critical:
@@ -151,8 +165,9 @@ def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[st
             repo_meta = _github_get(f"/repos/{upstream}", gh_token)
             default_branch = repo_meta.get("default_branch") or "main"
             require_ref_segment("default_branch", default_branch)
-            ref = _github_get(f"/repos/{upstream}/git/ref/heads/{default_branch}", gh_token)
-            new_sha = (ref.get("object") or {}).get("sha")
+            # Pin to the latest release tag, not HEAD (HEAD may be unreleased
+            # or malicious; release tags are the security-reviewed commit set).
+            new_sha, _tag = _get_latest_release_sha(upstream, gh_token=gh_token)
             if new_sha and new_sha != sha:
                 item["sha"] = new_sha
                 updates.append((item.get("id", "?"), sha, new_sha))

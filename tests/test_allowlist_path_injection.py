@@ -90,7 +90,11 @@ def test_update_shas_accepts_well_formed_upstream(
         refresh_pins,
         "_github_get",
         lambda path, _tok: (
-            {"default_branch": "main"} if path.endswith("/rust-lang/rust-analyzer") else {"object": {"sha": new_sha}}
+            {"default_branch": "main"}
+            if path.endswith("/rust-lang/rust-analyzer")
+            else {"target_commitish": new_sha, "tag_name": "v1.0.0"}
+            if path.endswith("/releases/latest")
+            else {}
         ),
     )
 

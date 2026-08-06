@@ -101,21 +101,19 @@ def test_main_no_token_prints_table(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert "rust-analyzer" in captured.out or "ghost-tool" in captured.out
 
 
-def test_update_shas_writes_new_head_sha(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """--update-shas fetches upstream HEAD and writes it back to the catalog."""
+def test_update_shas_writes_new_release_sha(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """--update-shas fetches upstream's latest release SHA and writes it back."""
     import shutil
 
     fixture = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
     catalog = tmp_path / "catalog.yaml"
     shutil.copy(fixture, catalog)
 
-    # Mock GitHub API to return a deterministic new HEAD SHA.
     new_sha = "f" * 40
 
     def fake_get(path: str, gh_token):
-        if path.endswith("/git/ref/heads/master"):
-            return {"object": {"sha": new_sha}}
-        # /repos/{org}/{repo} has exactly 3 slashes (leading + 2 separators).
+        if path.endswith("/releases/latest"):
+            return {"target_commitish": new_sha, "tag_name": "v1.0.0"}
         if path.startswith("/repos/") and path.count("/") == 3:
             return {"default_branch": "master"}
         return {}
@@ -123,7 +121,6 @@ def test_update_shas_writes_new_head_sha(tmp_path: Path, monkeypatch: pytest.Mon
     monkeypatch.setattr(refresh_pins, "_github_get", fake_get)
 
     updates = refresh_pins.update_shas(catalog, gh_token="test-token")
-    # At least one item should have been updated (rust-analyzer has upstream set).
     assert any(item_id == "rust-analyzer" and new_sha == new for item_id, _, new in updates)
 
     # Catalog was modified on disk with the new SHA.

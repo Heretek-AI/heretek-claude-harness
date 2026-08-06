@@ -22,8 +22,8 @@ from datetime import date
 from pathlib import Path
 from typing import Optional
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _allowlist import require_id_segment, require_sha, require_upstream  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts._allowlist import require_id_segment, require_sha, require_upstream  # noqa: E402
 
 import requests
 import yaml
@@ -147,7 +147,12 @@ def _commit_catalog_bump(
     )
 
     # 3. Stage + commit the bump on the new branch.
-    rel_catalog = str(catalog_path.relative_to(repo_root))
+    try:
+        rel_catalog = str(catalog_path.relative_to(repo_root))
+    except ValueError:
+        # catalog_path is outside repo_root (e.g. absolute path passed by
+        # an external caller). Compute a relative path so `git add` works.
+        rel_catalog = os.path.relpath(catalog_path, repo_root)
     subprocess.run(
         ["git", "add", rel_catalog],
         cwd=str(repo_root),
@@ -169,9 +174,11 @@ def _commit_catalog_bump(
         capture_output=True,
     )
 
-    # 5. Return to main so the next item starts from a clean state.
+    # 5. Return to the repo's default branch so the next item starts from a
+    # clean state. Default is `main`; override with HERETEK_DEFAULT_BRANCH env.
+    default_branch = os.environ.get("HERETEK_DEFAULT_BRANCH", "main")
     subprocess.run(
-        ["git", "checkout", "main"],
+        ["git", "checkout", default_branch],
         cwd=str(repo_root),
         check=True,
         capture_output=True,
