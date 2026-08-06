@@ -18,3 +18,6 @@ addopts = "-v --tb=short -m \"not integration\""
 markers = [
     "integration: tests that require external scanners / network / secrets (run with `pytest -m integration`)",
 ]
+
+[tool.coverage]
+xml_output = "coverage.xml"
