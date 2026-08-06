@@ -126,11 +126,7 @@ def draft_issue_and_pr(
         )
 
     # Get the SHA of the base branch to create a new branch from.
-    # Defensive lookup: tolerate transient API shape drift without
-    # crashing the orchestrator (Task 8). A real GitHub response has
-    # {"object": {"sha": ...}}; fall back to a zero SHA if the shape
-    # is unexpected (e.g. transient API outage). Concern documented
-    # in task-7-report.md.
+    # GitHub API call; loud failure per spec §8.1 — see issue #30.
     try:
         r = requests.get(
             f"{GITHUB_API}/repos/{repo}/git/ref/heads/{base_branch}",
@@ -138,10 +134,12 @@ def draft_issue_and_pr(
             timeout=10,
         )
         r.raise_for_status()
-        base_ref = r.json().get("object", {}).get("sha") or ("0" * 40)
     except requests.HTTPError as e:
-        log.warning("base ref lookup failed for %s: %s", base_branch, e)
-        base_ref = "0" * 40
+        raise RuntimeError(
+            f"base ref lookup failed for {base_branch}: {e}"
+        ) from e
+    # JSON-shape fallback: response was 2xx but missing {"object": {"sha": ...}}.
+    base_ref = r.json().get("object", {}).get("sha") or ("0" * 40)
 
     branch = f"security-scan/{item}-{new_sha[:12]}"
     try:

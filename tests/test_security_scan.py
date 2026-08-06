@@ -85,6 +85,50 @@ def test_run_emits_report_when_upstream_changed(
     assert report["severity"] == "clean"
 
 
+@patch("scripts.security_scan.draft_issue_and_pr")
+@patch("scripts.security_scan._shallow_clone")
+@patch("scripts.security_scan._get_latest_release_sha")
+@patch("scripts.security_scan.scan_skill")
+def test_run_errors_when_latest_sha_is_zero_fallback(
+    mock_scan: MagicMock,
+    mock_sha: MagicMock,
+    mock_clone: MagicMock,
+    mock_draft: MagicMock,
+    tmp_path: Path,
+) -> None:
+    """Orchestrator guards scripts/issue_drafter.py's JSON-shape-zero-SHA fallback
+    (line 238). Upstream changes to a zero SHA → error_count++, no draft."""
+    p = tmp_path / "catalog.yaml"
+    p.write_text(
+        """plugins:
+  - name: mcp-pack
+    items:
+      - id: context7
+        upstream: upstash/context7
+        sha: "abc123abc123abc123abc123abc123abc123abcd"
+        license: MIT
+        kind: skill
+        vetting:
+          status: approved
+          date: 2026-08-04
+"""
+    )
+    mock_sha.return_value = ("0" * 40, "tag")  # upstream SHA "changed" to zero
+    mock_clone.return_value = None
+    mock_scan.return_value = ScannerReport(
+        item_id="context7", scanner="skillspector", severity="clean"
+    )
+    summary = run(
+        catalog_path=p,
+        output_dir=tmp_path,
+        dry_run=False,
+        gh_token="fake",
+    )
+    assert summary.report_count == 1
+    assert summary.error_count == 1
+    mock_draft.assert_not_called()
+
+
 def test_run_skips_first_party_items(tmp_path: Path) -> None:
     p = tmp_path / "catalog.yaml"
     p.write_text(
