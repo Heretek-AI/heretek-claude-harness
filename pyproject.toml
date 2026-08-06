@@ -6,6 +6,7 @@ requires-python = ">=3.10"
 dependencies = [
     "PyYAML==6.0.3",
     "jsonschema==4.26.0",
+    "requests==2.32.3",
 ]
 
 [project.optional-dependencies]
