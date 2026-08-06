@@ -175,8 +175,19 @@ def _commit_catalog_bump(
     )
 
     # 5. Return to the repo's default branch so the next item starts from a
-    # clean state. Default is `main`; override with HERETEK_DEFAULT_BRANCH env.
-    default_branch = os.environ.get("HERETEK_DEFAULT_BRANCH", "main")
+    # clean state. Auto-detect via `git rev-parse --abbrev-ref HEAD`
+    # (falls back to "main" if detection fails; HERETEK_DEFAULT_BRANCH
+    # overrides for CI / scripted environments).
+    default_branch = os.environ.get("HERETEK_DEFAULT_BRANCH")
+    if not default_branch:
+        probe = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        default_branch = probe.stdout.strip() if probe.returncode == 0 else "main"
     subprocess.run(
         ["git", "checkout", default_branch],
         cwd=str(repo_root),
