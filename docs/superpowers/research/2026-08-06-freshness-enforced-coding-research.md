@@ -41,3 +41,8 @@ status: complete
 - Empirically, does the 5-line directive generalize to heretek's specific hooks context? (#39)
 - Does RLM actually reduce stale-output rate when running on Qwen3.6 27B-class models? (#42)
 - Is forbidden-pattern AST mining sufficient, or do we need LLM-driven pattern detection? (#40, #43)
+
+## Phase 4 results (added 2026-08-06)
+
+The three Phase 4 spikes (#47, #48, #49) ran as Plan D tasks. Full results:
+see `docs/superpowers/research/2026-08-06-freshness-enforced-coding-vision-report.md`.
