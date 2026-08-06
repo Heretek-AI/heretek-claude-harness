@@ -235,6 +235,42 @@ plugins:
           last_commit: 2026-08-04
           cve_scan: 2026-08-04
           review: reviews/skills-pack-superpowers.md
+      - id: heretek-catalog
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-05
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-05
+          cve_scan: not-applicable  # first-party
+          review: reviews/heretek-catalog.md
+      - id: heretek-refresh-pins
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-05
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-05
+          cve_scan: not-applicable  # first-party
+          review: reviews/heretek-refresh-pins.md
+      - id: heretek-merge-and-push
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-05
+          stars: 0  # first-party heretek code; not subject to D7 stars gate
+          last_commit: 2026-08-05
+          cve_scan: not-applicable  # first-party
+          review: reviews/heretek-merge-and-push.md
 
   - name: mcp-pack
     category: cross

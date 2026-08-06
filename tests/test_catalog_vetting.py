@@ -61,3 +61,20 @@ def test_hooks_plugin_has_at_least_one_item(catalog: dict) -> None:
     hooks_plugin = next(p for p in catalog["plugins"] if p["name"] == "hooks")
     items = hooks_plugin.get("items") or []
     assert len(items) >= 1, "hooks plugin must have ≥ 1 vetted item (the fast-gate itself)"
+
+
+def test_first_party_items_have_adr() -> None:
+    """Every first-party item has a vetting.review ADR file (D7 spirit for self-pins, #10)."""
+    import yaml
+    from pathlib import Path
+
+    data = yaml.safe_load((REPO_ROOT / "catalog" / "catalog.yaml").read_text())
+    for plugin in data["plugins"]:
+        for item in plugin.get("items", []):
+            sha = item.get("sha", "")
+            if not sha.startswith("first-party-"):
+                continue
+            review_rel = item.get("vetting", {}).get("review")
+            assert review_rel, f"{plugin['name']}/{item['id']} has no vetting.review"
+            full = REPO_ROOT / "catalog" / review_rel
+            assert full.exists(), f"{plugin['name']}/{item['id']} ADR missing: {full}"
