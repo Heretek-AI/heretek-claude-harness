@@ -1,23 +1,27 @@
-# Model profile for Gemini 2.5.
-# Similar to Claude profile; the two are interchangeable for most cases.
+# Model profile for Gemini 2.5 (frontier class).
+# Moderate enforcement: sits between Claude (lightest) and
+# DeepSeek/Qwen (strictest). Comparable to Claude on the eval,
+# but with stricter enforcement settings.
 version: 1
 model_id: gemini-2.5
 model_class: frontier
 notes: >
   Frontier-class model, comparable to Claude Opus on the Phase 1 eval.
+  Strictness sits between Claude (lightest) and DeepSeek/Qwen (strictest).
   Note: Google ships Gemini API Docs MCP (see research report); profiles
   can opt into MCP-driven lookup via mandatory_lookup.
 
 enforcement:
   promote_to_block: []
   demote_to_warn:
-    - py-yaml-load-without-loader
-    - py-os-popen
-    - js-var-declaration
+    - js-var-declaration  # modern JS uses const/let; var is acceptable in legacy code
 
 mandatory_lookup:
-  - pyyaml  # Google's docs MCP covers it natively
+  - pyyaml       # Google's docs MCP covers it natively
+  - requests     # security-relevant, fast-moving
 
-freshness_token_ttl_hours: 720
+# Freshness-token TTL — 2 weeks; between Claude (720h) and DeepSeek (168h)
+freshness_token_ttl_hours: 336
 
-drift_sensitivity: 0.7
+# Drift-detector sensitivity — between Claude (0.7) and DeepSeek (1.0)
+drift_sensitivity: 0.85
