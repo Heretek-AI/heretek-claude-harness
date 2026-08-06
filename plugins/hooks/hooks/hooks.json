@@ -11,6 +11,19 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ${CLAUDE_PROJECT_DIR}/scripts/stale_dep_intercept.py",
+            "async": true,
+            "timeout": 2000
+          }
+        ]
+      }
     ]
   }
 }
