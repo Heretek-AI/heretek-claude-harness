@@ -272,7 +272,7 @@ for n in 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53; do
   case $n in
     37) title="v1 freshness primitives: stale-dep intercept hook (D15)"; labels="enhancement security-scan tech-debt";;
     38) title="v1 freshness primitives: eval harness"; labels="enhancement testing";;
-    39) title="v1 freshness primitives: directive-docs system-prompt augmentation (spike)"; labels="enhancement research";;
+    39) title="v1 freshness primitives: directive-docs system-prompt augmentation (spike)"; labels="enhancement";;
     40) title="v2 detection: forbidden-pattern registry"; labels="enhancement security-scan tech-debt";;
     41) title="v2 detection: drift detector prototype (spike)"; labels="enhancement research";;
     42) title="v2 detection: RLM fast-gate research spike"; labels="enhancement research";;
