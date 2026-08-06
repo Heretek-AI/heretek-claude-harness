@@ -26,6 +26,8 @@ from typing import Any, Optional
 
 import yaml
 
+from _allowlist import require_ref_segment, require_upstream
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CATALOG = REPO_ROOT / "catalog" / "catalog.yaml"
 
@@ -145,8 +147,10 @@ def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[st
                 continue
             if str(sha).startswith("first-party-"):
                 continue
+            require_upstream(upstream)
             repo_meta = _github_get(f"/repos/{upstream}", gh_token)
             default_branch = repo_meta.get("default_branch") or "main"
+            require_ref_segment("default_branch", default_branch)
             ref = _github_get(f"/repos/{upstream}/git/ref/heads/{default_branch}", gh_token)
             new_sha = (ref.get("object") or {}).get("sha")
             if new_sha and new_sha != sha:
