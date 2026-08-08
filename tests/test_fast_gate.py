@@ -23,7 +23,7 @@ def _write(path: Path, content: str) -> None:
 def create_samples() -> None:
     """Create the sample files referenced by the fixtures."""
     _write(FIXTURES / "good_sample.py", "def hello():\n    print('hello')\n")
-    _write(FIXTURES / "bad_sample.py", "import os\ndef f( ):pass\n")
+    _write(FIXTURES / "bad_sample.py", "def f():pass\nundefined_var_xyz\n")
     # rustfmt 2021 requires the body on its own indented line.
     _write(FIXTURES / "good_sample.rs", "fn main() {\n    println!(\"hi\");\n}\n")
     _write(FIXTURES / "bad_sample.rs", "fn main(){println!(\"hi\");}\n")
@@ -106,7 +106,7 @@ def test_dispatch_js_bad_returns_two() -> None:
     assert code == 2
 
 
-def test_run_fails_open_on_time_budget() -> None:
+def test_run_fails_open_on_time_budget(monkeypatch: pytest.MonkeyPatch) -> None:
     """When the linter exceeds the time budget, exit 0 with a warning.
 
     Verifies the timeout is actually enforced by patching ``subprocess.run``
@@ -119,24 +119,53 @@ def test_run_fails_open_on_time_budget() -> None:
     contract is what we're verifying.
     """
     payload = (FIXTURES / "good_python.json").read_text()
-    original_run = fast_gate.subprocess.run
-    original_forced = dict(fast_gate._FORCE_BINARY)
     captured: dict = {}
-    try:
-        fast_gate._FORCE_BINARY["ruff"] = "/usr/bin/true"  # any resolvable path
 
-        def hang(*_args, **kwargs):
-            captured["timeout"] = kwargs.get("timeout")
-            raise subprocess.TimeoutExpired(
-                cmd=_args[0] if _args else [], timeout=kwargs.get("timeout", 0)
-            )
+    def hang(*_args, **kwargs):
+        captured["timeout"] = kwargs.get("timeout")
+        raise subprocess.TimeoutExpired(
+            cmd=_args[0] if _args else [], timeout=kwargs.get("timeout", 0)
+        )
 
-        fast_gate.subprocess.run = hang  # type: ignore
-        code = fast_gate.run(payload, time_budget_s=0.05)
-    finally:
-        fast_gate.subprocess.run = original_run  # type: ignore
-        fast_gate._FORCE_BINARY.clear()
-        fast_gate._FORCE_BINARY.update(original_forced)
+    monkeypatch.setitem(fast_gate._FORCE_BINARY, "ruff", "/usr/bin/true")
+    monkeypatch.setattr(fast_gate.subprocess, "run", hang)
+    code = fast_gate.run(payload, time_budget_s=0.05)
     assert code == 0  # fail-open
     # Verify the wrapper actually passed our budget into subprocess.run.
     assert captured["timeout"] == 0.05
+
+
+def test_dispatch_fails_open_on_linter_internal_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Linter exit code >= 2 (internal error) must fail-open (#97)."""
+    payload = (FIXTURES / "good_python.json").read_text()
+    fake = subprocess.CompletedProcess(
+        args=[], returncode=3, stderr="internal error: oops", stdout=""
+    )
+    monkeypatch.setitem(fast_gate._FORCE_BINARY, "ruff", "/usr/bin/true")
+    monkeypatch.setattr(fast_gate.subprocess, "run", lambda *a, **kw: fake)
+    code = fast_gate.run(payload, time_budget_s=0.05)
+    assert code == 0, "returncode>=2 should fail-open, not block"
+
+
+def test_dispatch_fails_open_on_stderr_internal_error_marker(monkeypatch: pytest.MonkeyPatch) -> None:
+    """returncode==1 with stderr containing 'internal error' marker must fail-open (#97)."""
+    payload = (FIXTURES / "good_python.json").read_text()
+    fake = subprocess.CompletedProcess(
+        args=[], returncode=1, stderr="internal error: parser crashed", stdout=""
+    )
+    monkeypatch.setitem(fast_gate._FORCE_BINARY, "ruff", "/usr/bin/true")
+    monkeypatch.setattr(fast_gate.subprocess, "run", lambda *a, **kw: fake)
+    code = fast_gate.run(payload, time_budget_s=0.05)
+    assert code == 0, "stderr internal-error marker should fail-open"
+
+
+def test_dispatch_still_blocks_on_normal_violation(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Regression: returncode==1 with normal violation stderr must still block."""
+    payload = (FIXTURES / "good_python.json").read_text()
+    fake = subprocess.CompletedProcess(
+        args=[], returncode=1, stderr="E501 line too long", stdout=""
+    )
+    monkeypatch.setitem(fast_gate._FORCE_BINARY, "ruff", "/usr/bin/true")
+    monkeypatch.setattr(fast_gate.subprocess, "run", lambda *a, **kw: fake)
+    code = fast_gate.run(payload, time_budget_s=0.05)
+    assert code == 2, "returncode==1 with normal violation must still block"

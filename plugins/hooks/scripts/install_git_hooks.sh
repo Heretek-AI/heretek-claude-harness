@@ -28,9 +28,11 @@ if ! python3 -m pre_commit --version >/dev/null 2>&1; then
     exit 1
 fi
 
-# 5. Idempotency check: are hooks already installed?
+# 5. Idempotency check: short-circuit if hooks are already installed (#97).
 if [ -f "$REPO_ROOT/.git/hooks/pre-commit" ] && grep -q "pre-commit" "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null; then
-    echo "install_git_hooks: pre-commit hooks already installed; re-installing with --overwrite" >&2
+    echo "install_git_hooks: pre-commit hooks already installed; skipping" >&2
+    echo "install_git_hooks: OK (pre-commit + pre-push hooks already installed in $REPO_ROOT)"
+    exit 0
 fi
 
 # 6. Run pre-commit install (sets up both pre-commit and pre-push because of
