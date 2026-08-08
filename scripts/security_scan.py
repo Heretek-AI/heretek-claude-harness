@@ -18,6 +18,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 from typing import Optional
@@ -289,7 +290,13 @@ def run(
 
             log.info("NEW RELEASE: %s → %s", composite_id, latest_sha[:12])
 
-            scratch = Path("/tmp") / "scan" / f"{plugin_name}-{item_id}-{latest_sha[:12]}"
+            # SonarCloud S5443: never use /tmp directly — symlink/TOCTOU risk.
+            # mkdtemp creates a 0o700 dir owned by us; cleanup is handled
+            # below by the clone-failure path and the shutil.rmtree in
+            # _shallow_clone on the next call.
+            scratch = Path(
+                tempfile.mkdtemp(prefix=f"heretek-scan-{plugin_name}-{item_id}-")
+            )
             # Spec §8.2: VT cap gates the tarball lookup. Above the cap we
             # pass vt_token=None so scan_mcp soft-fails via its existing
             # "no VT_TOKEN; skipped" branch; the report still records the
@@ -420,7 +427,7 @@ def _load_done_items(state_file: Path) -> set[str]:
 def _save_done_items(state_file: Path, done: set[str]) -> None:
     """Atomically write the checkpoint file."""
     tmp = state_file.with_suffix(state_file.suffix + ".tmp")
-    tmp.write_text(json.dumps({item: "done" for item in sorted(done)}, indent=2))
+    tmp.write_text(json.dumps(dict.fromkeys(sorted(done), "done"), indent=2))
     tmp.replace(state_file)
 
 
