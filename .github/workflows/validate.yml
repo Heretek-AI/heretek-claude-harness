@@ -106,6 +106,12 @@ jobs:
       - name: Run tests
         run: pytest
 
+      - name: Run fast_gate smoke
+        run: bash tests/smoke/fast_gate_smoke.sh
+
+      - name: Run catalog skill smoke
+        run: bash catalog/tests/smoke_test.sh
+
   freshness-eval:
     name: Freshness eval (#38)
     runs-on: ubuntu-latest
