@@ -2,6 +2,7 @@
 .omc/
 .omo/
 .serena/
+.superpowers/     # SDD plan workspaces (ledger, briefs, review packages)
 .codegraph
 .agents/*
 !.agents/skills/
