@@ -52,6 +52,47 @@ jobs:
           name: scan-reports
           path: reports/
 
+      - name: Open emergency issue on failure (spec §8.5)
+        if: failure()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1 # D20
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const title = `security-scan failed on ${new Date().toISOString().slice(0,10)}`;
+            const body = [
+              `The daily security-scan workflow failed.`,
+              ``,
+              `**Run:** ${runUrl}`,
+              `**Job:** ${context.job}`,
+              ``,
+              `Please check the run logs and triage. Duplicate issue detection:`,
+              `if an issue with this title is already open, the workflow will`,
+              `leave it in place instead of opening a new one.`,
+              ``,
+              `### Labels`,
+              ``,
+              `<!-- security-scan,emergency,spec-§8.5 -->`,
+            ].join('\n');
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security-scan,emergency',
+              per_page: 5,
+            });
+            const dup = existing.data.find(i => i.title === title);
+            if (dup) {
+              core.info(`emergency issue already open: #${dup.number}`);
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['security-scan', 'emergency'],
+              });
+            }
+
   freshness-index:
     name: Refresh freshness index
     runs-on: ubuntu-latest

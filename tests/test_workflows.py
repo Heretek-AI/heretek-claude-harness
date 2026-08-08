@@ -44,3 +44,19 @@ def test_all_workflows_pinned_to_commit_sha() -> None:
     refs = _iter_uses_lines()
     new_wf_refs = [r for r in refs if r[0].name in ("security-scan.yml", "security-scan-pr.yml")]
     assert len(new_wf_refs) >= 5, f"expected new workflows to add at least 5 uses refs, got {len(new_wf_refs)}"
+
+
+def test_security_scan_workflow_has_emergency_issue_step() -> None:
+    """Issue #33 / spec §8.5: workflow must have an `if: failure()` step that
+    opens an emergency issue so maintainers see silent cron failures."""
+    text = (WORKFLOW_DIR / "security-scan.yml").read_text()
+    assert "if: failure()" in text
+    assert "emergency" in text.lower()
+    assert "issues.create" in text or "issues.listForRepo" in text
+
+
+def test_security_scan_pr_workflow_has_emergency_issue_step() -> None:
+    """Issue #33 / spec §8.5: PR workflow also surfaces failures via emergency issue."""
+    text = (WORKFLOW_DIR / "security-scan-pr.yml").read_text()
+    assert "if: failure()" in text
+    assert "emergency" in text.lower()

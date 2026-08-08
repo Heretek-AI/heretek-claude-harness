@@ -2,7 +2,10 @@
 
 ## Reporting a vulnerability
 
-**Report via GitHub Security Advisories** on this repository.
+**Primary channel: GitHub Security Advisories** on this repository.
+
+For reporters without a GitHub account, or when the issue is sensitive:
+- Email: `security@heretek.ai` (PGP key pending — see v1.1 follow-up)
 
 Please include:
 - Item name (plugin / skill / MCP / LSP / etc.)
@@ -10,7 +13,15 @@ Please include:
 - Reproduction steps or proof-of-concept
 - Impact assessment
 
-We aim to acknowledge within 48 hours and provide a remediation timeline within 7 days.
+### Response SLA
+
+| Phase | Target |
+|---|---|
+| Acknowledgement | 48 hours |
+| Remediation timeline | 7 days |
+| Critical CVE escalation | 24 hours |
+
+The SLA is best-effort until a bug-bounty program is funded (see Known limitations).
 
 ## Supported versions
 

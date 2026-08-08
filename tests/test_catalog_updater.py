@@ -71,3 +71,105 @@ def test_bump_item_sha_raises_for_unknown_item(tmp_path: Path) -> None:
     p.write_text(SAMPLE)
     with pytest.raises(ItemNotFound):
         bump_item_sha(p, "rust", "nonexistent-item", "0" * 40, "2026-08-05")
+
+
+# ---------------------------------------------------------------------------
+# Issue #31 — coverage gap fills for scripts/catalog_updater.py (target ≥90%).
+# ---------------------------------------------------------------------------
+
+
+def test_bump_item_sha_rejects_short_sha(tmp_path: Path) -> None:
+    """Non-40-char SHA → ValueError before any file I/O."""
+    p = tmp_path / "catalog.yaml"
+    p.write_text(SAMPLE)
+    with pytest.raises(ValueError, match="40 chars"):
+        bump_item_sha(p, "rust", "rust-analyzer", "tooshort", "2026-08-05")
+
+
+def test_bump_item_sha_updates_cve_scan_when_provided(tmp_path: Path) -> None:
+    """Optional cve_scan arg sets vetting.cve_scan to the given date."""
+    p = tmp_path / "catalog.yaml"
+    p.write_text(SAMPLE)
+    bump_item_sha(
+        p, "rust", "rust-analyzer", "0" * 40, "2026-08-05", cve_scan="2026-08-06"
+    )
+    text = p.read_text()
+    assert "cve_scan: 2026-08-06" in text
+
+
+def test_bump_item_sha_skips_plugins_until_match(tmp_path: Path) -> None:
+    """The internal loop scans all plugins; first non-matching plugin is skipped."""
+    p = tmp_path / "catalog.yaml"
+    p.write_text(
+        """plugins:
+  - name: js-ts
+    items:
+      - id: biome
+        sha: "JS_TS_OLD_SHA_40_CHARS_LONG_xxxxxxxxxxxxx"
+  - name: rust
+    items:
+      - id: rust-analyzer
+        sha: "RUST_OLD_SHA_40_CHARS_LONG_xxxxxxxxxxxxxx"
+        vetting:
+          status: approved
+          date: 2026-08-04
+"""
+    )
+    bump_item_sha(p, "rust", "rust-analyzer", "0" * 40, "2026-08-05")
+    text = p.read_text()
+    # The js-ts item is untouched.
+    assert "JS_TS_OLD_SHA_40_CHARS_LONG_xxxxxxxxxxxxx" in text
+    # The rust item is updated.
+    assert "0" * 40 in text
+
+
+def test_main_returns_zero_on_success(tmp_path: Path) -> None:
+    """CLI: success path returns exit 0."""
+    from scripts.catalog_updater import main
+    p = tmp_path / "catalog.yaml"
+    p.write_text(SAMPLE)
+    rc = main(
+        [
+            "--catalog", str(p),
+            "--plugin", "rust",
+            "--item", "rust-analyzer",
+            "--sha", "0" * 40,
+            "--vetting-date", "2026-08-05",
+        ]
+    )
+    assert rc == 0
+
+
+def test_main_returns_one_on_item_not_found(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+    """CLI: unknown item → stderr message + exit 1."""
+    from scripts.catalog_updater import main
+    p = tmp_path / "catalog.yaml"
+    p.write_text(SAMPLE)
+    rc = main(
+        [
+            "--catalog", str(p),
+            "--plugin", "rust",
+            "--item", "missing-item",
+            "--sha", "0" * 40,
+            "--vetting-date", "2026-08-05",
+        ]
+    )
+    assert rc == 1
+    captured = capsys.readouterr()
+    assert "item not found" in captured.err
+
+
+def test_module_entry_point_invokes_main(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """`python -m scripts.catalog_updater` dispatches to main() with sys.argv."""
+    import runpy
+    p = tmp_path / "catalog.yaml"
+    p.write_text(SAMPLE)
+    monkeypatch.setattr(
+        "sys.argv",
+        ["catalog_updater", "--catalog", str(p), "--plugin", "rust",
+         "--item", "rust-analyzer", "--sha", "0" * 40, "--vetting-date", "2026-08-05"],
+    )
+    # runpy dispatches to __name__ == "__main__" branch.
+    with pytest.raises(SystemExit) as exc_info:
+        runpy.run_module("scripts.catalog_updater", run_name="__main__")
+    assert exc_info.value.code == 0

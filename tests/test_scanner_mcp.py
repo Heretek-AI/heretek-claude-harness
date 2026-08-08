@@ -5,7 +5,7 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -131,3 +131,133 @@ class TestRealMcpScan:
         assert report.severity in ("block", "warn"), (
             f"SkillSpector should have flagged the exfil pattern but got {report.severity}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Issue #31 — coverage gap fills for scripts/scanners/mcp.py (target ≥90%).
+# These exercise the _vt_lookup branches and the McpScanner class entry point.
+# ---------------------------------------------------------------------------
+
+
+from scripts.scanners.mcp import McpScanner, _vt_lookup, _worse
+
+
+def test_vt_lookup_no_token_returns_info_skipped() -> None:
+    """No VT_TOKEN → soft-fail `info` with vt-skipped rule_id."""
+    report = _vt_lookup("a" * 64, token=None)
+    assert report.severity == "info"
+    assert report.findings[0].rule_id == "vt-skipped"
+
+
+def test_vt_lookup_404_returns_info_no_record() -> None:
+    """VT 404 (no record, common case) → soft-fail `info`."""
+    with patch("scripts.scanners.mcp.requests.get") as mock_get:
+        mock_get.return_value = MagicMock(status_code=404)
+        report = _vt_lookup("a" * 64, token="fake")
+    assert report.severity == "info"
+    assert report.findings[0].rule_id == "vt-no-record"
+
+
+def test_vt_lookup_non_200_non_404_returns_info_http_error() -> None:
+    """VT 5xx or other non-2xx → soft-fail `info` with vt-http-error."""
+    with patch("scripts.scanners.mcp.requests.get") as mock_get:
+        mock_get.return_value = MagicMock(status_code=503)
+        report = _vt_lookup("a" * 64, token="fake")
+    assert report.severity == "info"
+    assert report.findings[0].rule_id == "vt-http-error"
+
+
+def test_vt_lookup_request_exception_returns_info_unreachable() -> None:
+    """Network error → soft-fail `info` with vt-unreachable."""
+    with patch("scripts.scanners.mcp.requests.get") as mock_get:
+        import requests as _req
+        mock_get.side_effect = _req.ConnectionError("dns failure")
+        report = _vt_lookup("a" * 64, token="fake")
+    assert report.severity == "info"
+    assert report.findings[0].rule_id == "vt-unreachable"
+
+
+def test_vt_lookup_invalid_json_returns_warn() -> None:
+    """Malformed JSON body → `warn` (not soft-fail)."""
+    with patch("scripts.scanners.mcp.requests.get") as mock_get:
+        mock_get.return_value = MagicMock(
+            status_code=200,
+            json=MagicMock(side_effect=json.JSONDecodeError("e", "doc", 0)),
+        )
+        report = _vt_lookup("a" * 64, token="fake")
+    assert report.severity == "warn"
+    assert report.findings[0].rule_id == "vt-invalid-json"
+
+
+def test_vt_lookup_malicious_count_block() -> None:
+    """≥5 malicious verdicts → `block`."""
+    payload = {"data": {"attributes": {"last_analysis_stats": {"malicious": 7, "suspicious": 0}}}}
+    with patch("scripts.scanners.mcp.requests.get") as mock_get:
+        mock_get.return_value = MagicMock(status_code=200, json=lambda: payload)
+        report = _vt_lookup("a" * 64, token="fake")
+    assert report.severity == "block"
+    assert report.findings[0].rule_id == "vt-verdict"
+
+
+def test_vt_lookup_one_malicious_returns_warn() -> None:
+    """1 malicious → `warn`."""
+    payload = {"data": {"attributes": {"last_analysis_stats": {"malicious": 1, "suspicious": 0}}}}
+    with patch("scripts.scanners.mcp.requests.get") as mock_get:
+        mock_get.return_value = MagicMock(status_code=200, json=lambda: payload)
+        report = _vt_lookup("a" * 64, token="fake")
+    assert report.severity == "warn"
+
+
+def test_vt_lookup_three_suspicious_returns_warn() -> None:
+    """≥3 suspicious (no malicious) → `warn`."""
+    payload = {"data": {"attributes": {"last_analysis_stats": {"malicious": 0, "suspicious": 3}}}}
+    with patch("scripts.scanners.mcp.requests.get") as mock_get:
+        mock_get.return_value = MagicMock(status_code=200, json=lambda: payload)
+        report = _vt_lookup("a" * 64, token="fake")
+    assert report.severity == "warn"
+
+
+def test_vt_lookup_clean_when_zero_malicious_and_suspicious() -> None:
+    """All vendors report clean → `clean`."""
+    payload = {"data": {"attributes": {"last_analysis_stats": {"malicious": 0, "suspicious": 0}}}}
+    with patch("scripts.scanners.mcp.requests.get") as mock_get:
+        mock_get.return_value = MagicMock(status_code=200, json=lambda: payload)
+        report = _vt_lookup("a" * 64, token="fake")
+    assert report.severity == "clean"
+
+
+def test_scan_mcp_no_tarball_candidate_returns_info(mcp_dir: Path) -> None:
+    """No server.{js,ts,py} / index.js / package.json → vt-no-candidate `info`."""
+    import shutil
+    empty_dir = mcp_dir.parent / "empty_mcp"
+    empty_dir.mkdir()
+    with patch("scripts.scanners.mcp.scan_skill") as mock_skill:
+        from scripts.scanners.base import ScannerReport
+        mock_skill.return_value = ScannerReport(
+            item_id="empty-mcp", scanner="skillspector", severity="clean"
+        )
+        report = scan_mcp(empty_dir, item_id="empty-mcp", vt_token="fake")
+    assert report.severity == "clean"  # info soft-fail does not escalate
+    assert any(f.rule_id == "vt-no-candidate" for f in report.findings)
+
+
+def test_mcp_scanner_class_delegates_to_scan_mcp(mcp_dir: Path) -> None:
+    """McpScanner.scan() wraps scan_mcp(); uses path.name when no item_id."""
+    with patch("scripts.scanners.mcp.scan_mcp") as mock_scan_mcp:
+        from scripts.scanners.base import ScannerReport
+        mock_scan_mcp.return_value = ScannerReport(
+            item_id="x", scanner="mcp-combined", severity="clean"
+        )
+        result = McpScanner().scan(mcp_dir)
+    assert result.severity == "clean"
+    # item_id defaults to path.name when not supplied
+    call = mock_scan_mcp.call_args
+    assert call.kwargs.get("item_id") == mcp_dir.name
+
+
+def test_worse_helper_picks_higher_severity() -> None:
+    """_worse picks the more severe of two severities (worst-of merge)."""
+    assert _worse("clean", "info") == "info"
+    assert _worse("info", "warn") == "warn"
+    assert _worse("warn", "block") == "block"
+    assert _worse("block", "block") == "block"

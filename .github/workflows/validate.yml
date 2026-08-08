@@ -38,6 +38,26 @@ jobs:
           # ruff install in .github/workflows/smoke-test.yml.
           pip install --only-binary=:all: ruff==0.16.1
 
+      - name: Install ast-grep (required for profile_aware e2e tests)
+        env:
+          # SHA-256 of app-x86_64-unknown-linux-gnu.zip from ast-grep 0.45.1.
+          # Pin to a known-good release; verify before extracting.
+          AST_GREP_VERSION: "0.45.1"
+          AST_GREP_SHA256: "76fb6555be6734fb5057dba8d2fb756430f374bb9e1af694cf1ce00e13238d63"
+        run: |
+          set -euo pipefail
+          curl -fsSL --proto "=https" --tlsv1.2 \
+            -o /tmp/ast-grep.zip \
+            "https://github.com/ast-grep/ast-grep/releases/download/${AST_GREP_VERSION}/app-x86_64-unknown-linux-gnu.zip"
+          echo "${AST_GREP_SHA256}  /tmp/ast-grep.zip" | sha256sum -c -
+          mkdir -p "$HOME/.cargo/bin"
+          unzip -o /tmp/ast-grep.zip -d "$HOME/.cargo/bin"
+          rm /tmp/ast-grep.zip
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Verify ast-grep reachable
+        run: command -v ast-grep
+
       - name: Run schema validation
         run: python scripts/validate.py
 
