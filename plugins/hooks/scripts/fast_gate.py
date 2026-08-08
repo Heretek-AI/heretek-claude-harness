@@ -131,7 +131,20 @@ def dispatch(file_path: Path, time_budget_s: float = 0.1) -> int:
         return 0
     if result.returncode == 0:
         return 0
-    # Print stderr to surface the lint output for the agent.
+    # Internal errors (returncode >= 2, or stderr markers like 'internal error')
+    # must fail-open so a broken linter never blocks the Edit/Write loop (#97).
+    stderr_lower = (result.stderr or "").lower()
+    is_internal_error = (
+        result.returncode >= 2 or "internal error" in stderr_lower
+    )
+    if is_internal_error:
+        print(
+            f"fast_gate: linter returned {result.returncode} "
+            f"(internal error) — failing open for {file_path}",
+            file=sys.stderr,
+        )
+        return 0
+    # Real lint violations: surface the output for the agent and block (exit 2).
     if result.stderr:
         print(result.stderr, file=sys.stderr, end="")
     if result.stdout:

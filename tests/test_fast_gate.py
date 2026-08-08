@@ -140,3 +140,60 @@ def test_run_fails_open_on_time_budget() -> None:
     assert code == 0  # fail-open
     # Verify the wrapper actually passed our budget into subprocess.run.
     assert captured["timeout"] == 0.05
+
+
+def test_dispatch_fails_open_on_linter_internal_error() -> None:
+    """Linter exit code >= 2 (internal error) must fail-open (#97)."""
+    payload = (FIXTURES / "good_python.json").read_text()
+    original_run = fast_gate.subprocess.run
+    original_forced = dict(fast_gate._FORCE_BINARY)
+    fake = subprocess.CompletedProcess(
+        args=[], returncode=3, stderr="internal error: oops", stdout=""
+    )
+    try:
+        fast_gate._FORCE_BINARY["ruff"] = "/usr/bin/true"
+        fast_gate.subprocess.run = lambda *a, **kw: fake  # type: ignore
+        code = fast_gate.run(payload, time_budget_s=0.05)
+    finally:
+        fast_gate.subprocess.run = original_run  # type: ignore
+        fast_gate._FORCE_BINARY.clear()
+        fast_gate._FORCE_BINARY.update(original_forced)
+    assert code == 0, "returncode>=2 should fail-open, not block"
+
+
+def test_dispatch_fails_open_on_stderr_internal_error_marker() -> None:
+    """returncode==1 with stderr containing 'internal error' marker must fail-open (#97)."""
+    payload = (FIXTURES / "good_python.json").read_text()
+    original_run = fast_gate.subprocess.run
+    original_forced = dict(fast_gate._FORCE_BINARY)
+    fake = subprocess.CompletedProcess(
+        args=[], returncode=1, stderr="internal error: parser crashed", stdout=""
+    )
+    try:
+        fast_gate._FORCE_BINARY["ruff"] = "/usr/bin/true"
+        fast_gate.subprocess.run = lambda *a, **kw: fake  # type: ignore
+        code = fast_gate.run(payload, time_budget_s=0.05)
+    finally:
+        fast_gate.subprocess.run = original_run  # type: ignore
+        fast_gate._FORCE_BINARY.clear()
+        fast_gate._FORCE_BINARY.update(original_forced)
+    assert code == 0, "stderr internal-error marker should fail-open"
+
+
+def test_dispatch_still_blocks_on_normal_violation() -> None:
+    """Regression: returncode==1 with normal violation stderr must still block."""
+    payload = (FIXTURES / "good_python.json").read_text()
+    original_run = fast_gate.subprocess.run
+    original_forced = dict(fast_gate._FORCE_BINARY)
+    fake = subprocess.CompletedProcess(
+        args=[], returncode=1, stderr="E501 line too long", stdout=""
+    )
+    try:
+        fast_gate._FORCE_BINARY["ruff"] = "/usr/bin/true"
+        fast_gate.subprocess.run = lambda *a, **kw: fake  # type: ignore
+        code = fast_gate.run(payload, time_budget_s=0.05)
+    finally:
+        fast_gate.subprocess.run = original_run  # type: ignore
+        fast_gate._FORCE_BINARY.clear()
+        fast_gate._FORCE_BINARY.update(original_forced)
+    assert code == 2, "returncode==1 with normal violation must still block"
