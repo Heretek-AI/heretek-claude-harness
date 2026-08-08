@@ -38,6 +38,14 @@ jobs:
           # ruff install in .github/workflows/smoke-test.yml.
           pip install --only-binary=:all: ruff==0.16.1
 
+      - name: Install ast-grep (required for profile_aware e2e tests)
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/ast-grep/install-guide/v0.39.0/install.sh | bash -s -- -y --tag v0.39.0
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Verify ast-grep reachable
+        run: command -v ast-grep
+
       - name: Run schema validation
         run: python scripts/validate.py
 

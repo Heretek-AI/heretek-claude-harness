@@ -66,6 +66,10 @@ jobs:
       - name: Install ruff (required for fast-gate trigger below)
         run: pip install ruff
 
+      - name: Install ast-grep (required for profile_aware tests)
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/ast-grep/install-guide/v0.39.0/install.sh | bash -s -- -y --tag v0.39.0
+
       - name: Add heretek marketplace locally
         run: claude plugin marketplace add ./
         env:
