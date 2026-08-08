@@ -1,14 +1,17 @@
 ---
 date: 2026-08-07
 topic: v1x-finish-line-sprint
-status: proposed
+status: shipped
 parent: docs/superpowers/specs/2026-08-05-security-monitoring-pipeline-design.md
 related_issues: [32, 34, 33, 31, 12]
+closing_commit: 5ee8884
 ---
 
 # v1.x Finish-Line Sprint — Design Spec
 
 > Date: 2026-08-07. One-week sprint closing out v1.x phase-1 hardening: #32 (GITHUB_REPOSITORY env) → #34 (shallow-clone portability). Triggers #33 (spec §8 features) by end. Triage-only spec; implementation lives behind per-issue branch → PR.
+>
+> **Status update 2026-08-08:** Both #32 and #34 closed by commit `5ee8884` (`fix(scripts): v1.x P1 batch — env var, shallow clone, coverage, §8 features`). #31, #33 also closed in the same batch. Spec fulfilled.
 
 ## 1. Summary
 
