@@ -188,9 +188,8 @@ def _commit_catalog_bump(
         # catalog_path is outside repo_root (e.g. absolute path passed by
         # an external caller). Compute a relative path so `git add` works.
         rel_catalog = os.path.relpath(catalog_path, repo_root)
-    _rel_catalog = rel_catalog  # nosonar — false positive: trusted maintainer invocation only (S8705)
     subprocess.run(
-        ["git", "add", _rel_catalog],
+        ["git", "add", rel_catalog],
         cwd=str(repo_root),
         check=True,
         capture_output=True,
@@ -234,6 +233,142 @@ def _commit_catalog_bump(
     return branch
 
 
+def _setup_state(state_dir: Optional[Path]) -> tuple[Optional[Path], set[str]]:
+    """Initialize the checkpoint state file for resumption.
+
+    Returns (state_file, done_items). state_file is None when checkpointing
+    is disabled; done_items is always a fresh set.
+    """
+    if state_dir is None:
+        return None, set()
+    state_dir.mkdir(parents=True, exist_ok=True)
+    state_file = state_dir / f"security-scan-{date.today().isoformat()}.json"
+    return state_file, _load_done_items(state_file)
+
+
+def _should_skip_item(item: dict, composite_id: str, done_items: set[str]) -> Optional[str]:
+    """Return a skip-reason string if this item should be skipped, else None.
+
+    Skips: first-party items, malformed upstream, items already in checkpoint.
+    """
+    sha = item.get("sha", "")
+    if sha.startswith("first-party-"):
+        return "first-party"
+    upstream = item.get("upstream")
+    if not upstream or "/" not in upstream:
+        return "malformed upstream"
+    if composite_id in done_items:
+        return "already done"
+    return None
+
+
+def _vt_cap_state(
+    vt_calls: int, vt_cap: int, vt_token: Optional[str]
+) -> tuple[Optional[str], bool]:
+    """Honour the per-run VT cap. Returns (effective_vt, cap_hit).
+
+    Above the cap we pass vt_token=None so scan_mcp soft-fails via its
+    "no VT_TOKEN; skipped" branch; the report still records the scan
+    (with vt-skipped finding), so maintainers see it.
+    """
+    if vt_token and vt_calls >= vt_cap:
+        return None, True
+    return vt_token, False
+
+
+def _scan_and_persist(
+    *,
+    item: dict,
+    plugin_name: str,
+    item_id: str,
+    composite_id: str,
+    upstream: str,
+    latest_sha: str,
+    scratch: Path,
+    output_dir: Path,
+    effective_vt: Optional[str],
+    suppressions: set[tuple[str, str]],
+    state_file: Optional[Path],
+    done_items: set[str],
+) -> tuple[Optional[ScannerReport], Optional[str]]:
+    """Clone, dispatch, apply suppressions, write report, checkpoint.
+
+    Returns (report, error_msg). report is None iff error_msg is set.
+    """
+    try:
+        _shallow_clone(upstream, latest_sha, scratch)
+        report = _dispatch_scanner(item, scratch, vt_token=effective_vt)
+    except Exception as e:
+        log.exception("clone/scan failed for %s: %s", composite_id, e)
+        return None, str(e)
+
+    report = _apply_suppressions(report, suppressions)
+
+    report_file = output_dir / f"{plugin_name}-{item_id}.json"
+    report_file.write_text(json.dumps(dataclasses.asdict(report), indent=2, default=str))
+
+    # Spec §8.4: checkpoint after each item.
+    if state_file is not None:
+        done_items.add(composite_id)
+        _save_done_items(state_file, done_items)
+
+    return report, None
+
+
+def _bump_and_draft_pr(
+    *,
+    report: ScannerReport,
+    plugin_name: str,
+    item_id: str,
+    composite_id: str,
+    latest_sha: str,
+    gh_token: Optional[str],
+    dry_run: bool,
+    repo_root: Path,
+    catalog_path: Path,
+) -> Optional[str]:
+    """Bump catalog.yaml on a branch + draft a tracking issue/PR.
+
+    Returns an error message string on failure, None on success.
+
+    Skipped (no-op) when dry_run or gh_token is missing.
+
+    The defensive zero-SHA check guards against draft_issue_and_pr's base-ref
+    lookup silently falling back to "0"*40 (Task 8, task-7-report.md).
+    """
+    if dry_run or not gh_token:
+        return None
+    if latest_sha == "0" * 40:
+        log.error(
+            "refusing to draft PR for %s: latest_sha is zero-SHA fallback",
+            composite_id,
+        )
+        return "zero-SHA fallback"
+    try:
+        _commit_catalog_bump(
+            catalog_path=catalog_path,
+            repo_root=repo_root,
+            plugin=plugin_name,
+            item_id=item_id,
+            new_sha=latest_sha,
+            vetting_date=date.today().isoformat(),
+        )
+    except subprocess.CalledProcessError as e:
+        log.exception("git commit/push failed for %s: %s", composite_id, e)
+        return "git commit/push failed"
+
+    issue_url, pr_url = draft_issue_and_pr(
+        report,
+        gh_token=gh_token,
+        repo=os.environ.get("GITHUB_REPOSITORY", DEFAULT_REPO),
+        plugin=plugin_name,
+        item=item_id,
+        new_sha=latest_sha,
+    )
+    log.info("issue: %s | pr: %s", issue_url, pr_url)
+    return None
+
+
 def run(
     catalog_path: Path,
     output_dir: Path,
@@ -263,19 +398,10 @@ def run(
     if vt_cap is None:
         vt_cap = int(os.environ.get("SECURITY_SCAN_VT_CAP", "100"))
 
-    _output_dir = output_dir  # nosonar — false positive: trusted maintainer invocation only (S8707)
-    _output_dir.mkdir(parents=True, exist_ok=True)
-    _catalog_text = catalog_path.read_text()  # nosonar — false positive: trusted maintainer invocation only (S8707)
-    catalog = yaml.safe_load(_catalog_text)
-
+    output_dir.mkdir(parents=True, exist_ok=True)
+    catalog = yaml.safe_load(catalog_path.read_text())
     suppressions = load_suppressions(reviews_dir) if reviews_dir else set()
-
-    state_file: Optional[Path] = None
-    done_items: set[str] = set()
-    if state_dir is not None:
-        state_dir.mkdir(parents=True, exist_ok=True)
-        state_file = state_dir / f"security-scan-{date.today().isoformat()}.json"
-        done_items = _load_done_items(state_file)
+    state_file, done_items = _setup_state(state_dir)
 
     report_count = 0
     error_count = 0
@@ -289,119 +415,65 @@ def run(
             composite_id = f"{plugin_name}/{item_id}"
             if item_filter and item_id != item_filter:
                 continue
+
+            skip_reason = _should_skip_item(item, composite_id, done_items)
+            if skip_reason:
+                log.info("skipping %s: %s", composite_id, skip_reason)
+                continue
+
             sha = item.get("sha", "")
-            if sha.startswith("first-party-"):
-                log.info("skipping first-party item: %s", composite_id)
-                continue
-            upstream = item.get("upstream")
-            if not upstream or "/" not in upstream:
-                log.warning("skipping malformed upstream: %s", composite_id)
-                continue
-
-            # Spec §8.4: skip items already marked done in today's run.
-            if composite_id in done_items:
-                log.info("resuming; already done: %s", composite_id)
-                continue
-
+            upstream = item["upstream"]
             latest_sha, _ = _get_latest_release_sha(upstream, gh_token=gh_token)
             if latest_sha is None:
                 log.warning("no release found for %s", composite_id)
                 error_count += 1
                 continue
-
             if latest_sha == sha:
                 log.info("up-to-date: %s", composite_id)
                 continue
-
             log.info("NEW RELEASE: %s → %s", composite_id, latest_sha[:12])
+
+            effective_vt, vt_hit = _vt_cap_state(vt_calls, vt_cap, vt_token)
+            if vt_hit:
+                vt_cap_hit = True
+                log.warning("VT cap (%d) reached; skipping further VT lookups", vt_cap)
 
             # SonarCloud S5443: never use /tmp directly — symlink/TOCTOU risk.
             # mkdtemp creates a 0o700 dir owned by us; cleanup is handled
-            # below by the clone-failure path and the shutil.rmtree in
-            # _shallow_clone on the next call.
+            # by the next _shallow_clone call.
             scratch = Path(
                 tempfile.mkdtemp(prefix=f"heretek-scan-{plugin_name}-{item_id}-")
             )
-            # Spec §8.2: VT cap gates the tarball lookup. Above the cap we
-            # pass vt_token=None so scan_mcp soft-fails via its existing
-            # "no VT_TOKEN; skipped" branch; the report still records the
-            # scan (with vt-skipped finding), so maintainers see it.
-            effective_vt = vt_token if vt_calls < vt_cap else None
-            if vt_token and vt_calls >= vt_cap:
-                vt_cap_hit = True
-                log.warning("VT cap (%d) reached; skipping further VT lookups", vt_cap)
-            try:
-                _shallow_clone(upstream, latest_sha, scratch)
-                report = _dispatch_scanner(item, scratch, vt_token=effective_vt)
-                if item.get("kind") == "mcp" and effective_vt:
-                    vt_calls += 1
-            except Exception as e:
-                log.exception("clone/scan failed for %s: %s", composite_id, e)
+            report, scan_err = _scan_and_persist(
+                item=item, plugin_name=plugin_name, item_id=item_id,
+                composite_id=composite_id, upstream=upstream,
+                latest_sha=latest_sha, scratch=scratch,
+                output_dir=output_dir, effective_vt=effective_vt,
+                suppressions=suppressions, state_file=state_file,
+                done_items=done_items,
+            )
+            if scan_err:
                 error_count += 1
                 continue
-
-            # Spec §8.7: downgrade suppressed findings to info, keep them
-            # in the report for audit.
-            report = _apply_suppressions(report, suppressions)
-
-            report_file = output_dir / f"{plugin_name}-{item_id}.json"
-            report_file.write_text(json.dumps(dataclasses.asdict(report), indent=2, default=str))
             report_count += 1
 
-            # Spec §8.4: checkpoint after each item.
-            if state_file is not None:
-                done_items.add(composite_id)
-                _save_done_items(state_file, done_items)
+            if item.get("kind") == "mcp" and effective_vt:
+                vt_calls += 1
 
-            # Defensive SHA check (Task 8): if draft_issue_and_pr's base-ref
-            # lookup silently fell back to the zero-SHA, refuse to draft a
-            # PR against the bogus ref. Concern flagged in task-7-report.md.
-            if latest_sha == "0" * 40:
-                log.error(
-                    "refusing to draft PR for %s: latest_sha is zero-SHA fallback",
-                    composite_id,
-                )
+            bump_err = _bump_and_draft_pr(
+                report=report, plugin_name=plugin_name, item_id=item_id,
+                composite_id=composite_id, latest_sha=latest_sha,
+                gh_token=gh_token, dry_run=dry_run, repo_root=repo_root,
+                catalog_path=catalog_path,
+            )
+            if bump_err:
                 error_count += 1
-                continue
-
-            if not dry_run and gh_token:
-                # C1 (final-review fix): bump catalog.yaml + push the new
-                # branch BEFORE drafting the PR. Otherwise the daily cron
-                # opens empty draft PRs with no catalog edit in the diff.
-                try:
-                    _commit_catalog_bump(
-                        catalog_path=catalog_path,
-                        repo_root=repo_root,
-                        plugin=plugin_name,
-                        item_id=item_id,
-                        new_sha=latest_sha,
-                        vetting_date=date.today().isoformat(),
-                    )
-                except subprocess.CalledProcessError as e:
-                    log.exception(
-                        "git commit/push failed for %s: %s",
-                        composite_id,
-                        e,
-                    )
-                    error_count += 1
-                    continue
-
-                issue_url, pr_url = draft_issue_and_pr(
-                    report,
-                    gh_token=gh_token,
-                    repo=os.environ.get("GITHUB_REPOSITORY", DEFAULT_REPO),
-                    plugin=plugin_name,
-                    item=item_id,
-                    new_sha=latest_sha,
-                )
-                log.info("issue: %s | pr: %s", issue_url, pr_url)
 
     if vt_cap_hit:
         log.warning(
             "VT cap of %d was reached; later MCP items scanned with vt_token=None",
             vt_cap,
         )
-
     return ScanSummary(report_count=report_count, error_count=error_count)
 
 

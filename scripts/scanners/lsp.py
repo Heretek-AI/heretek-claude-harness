@@ -77,68 +77,50 @@ def _block_invalid(item_id: str, rel_cfg: str, field: str, message: str) -> Scan
     )
 
 
-def scan_lsp(
-    path: Path, *, item_id: str, pinned_sha: Optional[str] = None
-) -> ScannerReport:
-    """Lint the LSP config in `path`. Returns a ScannerReport."""
-    findings: list[Finding] = []
+def _missing_config_report(item_id: str, path: Path) -> ScannerReport:
+    return ScannerReport(
+        item_id=item_id,
+        scanner="config-lint",
+        severity="warn",
+        findings=[
+            Finding(
+                path=str(path),
+                line=None,
+                message="LSP config (.lsp.json or lsp.json) missing",
+                rule_id="lsp-config-missing",
+            )
+        ],
+    )
 
-    cfg_path = _find_config(path)
-    if cfg_path is None:
-        return ScannerReport(
-            item_id=item_id,
-            scanner="config-lint",
-            severity="warn",
-            findings=[
-                Finding(
-                    path=str(path),
-                    line=None,
-                    message="LSP config (.lsp.json or lsp.json) missing",
-                    rule_id="lsp-config-missing",
-                )
-            ],
-        )
 
-    try:
-        cfg = json.loads(cfg_path.read_text())
-    except json.JSONDecodeError as e:
-        return ScannerReport(
-            item_id=item_id,
-            scanner="config-lint",
-            severity="block",
-            findings=[
-                Finding(
-                    path=str(cfg_path.relative_to(path)),
-                    line=None,
-                    message=f"LSP config invalid JSON: {e}",
-                    rule_id="lsp-config-invalid",
-                )
-            ],
-        )
+def _invalid_json_report(item_id: str, path: Path, cfg_path: Path, err: json.JSONDecodeError) -> ScannerReport:
+    return ScannerReport(
+        item_id=item_id,
+        scanner="config-lint",
+        severity="block",
+        findings=[
+            Finding(
+                path=str(cfg_path.relative_to(path)),
+                line=None,
+                message=f"LSP config invalid JSON: {err}",
+                rule_id="lsp-config-invalid",
+            )
+        ],
+    )
 
-    rel_cfg = str(cfg_path.relative_to(path))
 
-    # D11 shape check: top-level must be a JSON object.
-    if not isinstance(cfg, dict):
-        return _block_invalid(
-            item_id,
-            rel_cfg,
-            "<root>",
-            f"LSP config top-level must be a JSON object, got {type(cfg).__name__}",
-        )
-
-    # D11 shape check: 'command' must be a string (lists are unhashable vs allowlist).
-    command = cfg.get("command", "")
+def _check_command(
+    item_id: str, rel_cfg: str, command: object
+) -> tuple[Optional[ScannerReport], list[Finding]]:
+    """Validate cfg['command'] is a string on ALLOWLIST. Returns (block_report, findings)."""
     if not isinstance(command, str):
-        return _block_invalid(
-            item_id,
-            rel_cfg,
-            "command",
+        block = _block_invalid(
+            item_id, rel_cfg, "command",
             f"LSP 'command' must be a string, got {type(command).__name__}",
         )
-
+        return block, []
     if command not in ALLOWLIST:
-        findings.append(
+        return None, [
             Finding(
                 path=f"{rel_cfg}:command",
                 line=None,
@@ -148,23 +130,25 @@ def scan_lsp(
                 ),
                 rule_id="lsp-command-unknown",
             )
-        )
+        ]
+    return None, []
 
-    # D11 shape check: 'rootUri' / 'url' must be a string (or absent).
-    # If a rootUri is a github commit URL, check it matches the pinned sha.
-    # Non-github URLs are permitted (caller's choice) and do NOT block; only
-    # an SHA mismatch against pinned_sha triggers the lsp-url-drift finding.
+
+def _check_urls(
+    item_id: str, rel_cfg: str, cfg: dict, pinned_sha: Optional[str]
+) -> tuple[Optional[ScannerReport], list[Finding]]:
+    """Validate cfg['rootUri'] / cfg['url'] (or skip). Returns (block_report, findings)."""
+    findings: list[Finding] = []
     for url_field in ("rootUri", "url"):
         url = cfg.get(url_field)
         if url is None:
             continue
         if not isinstance(url, str):
-            return _block_invalid(
-                item_id,
-                rel_cfg,
-                url_field,
+            block = _block_invalid(
+                item_id, rel_cfg, url_field,
                 f"LSP '{url_field}' must be a string, got {type(url).__name__}",
             )
+            return block, findings
         m = GITHUB_COMMIT_RE.match(url)
         if m and pinned_sha and m.group(1) != pinned_sha:
             findings.append(
@@ -178,16 +162,55 @@ def scan_lsp(
                     rule_id="lsp-url-drift",
                 )
             )
+    return None, findings
 
-    severity: Severity = "clean" if not findings else (
-        "block" if any(f.rule_id in ("lsp-command-unknown", "lsp-url-drift") for f in findings)
-        else "warn"
-    )
+
+def _compute_severity(findings: list[Finding]) -> Severity:
+    if not findings:
+        return "clean"
+    if any(f.rule_id in ("lsp-command-unknown", "lsp-url-drift") for f in findings):
+        return "block"
+    return "warn"
+
+
+def scan_lsp(
+    path: Path, *, item_id: str, pinned_sha: Optional[str] = None
+) -> ScannerReport:
+    """Lint the LSP config in `path`. Returns a ScannerReport."""
+    findings: list[Finding] = []
+
+    cfg_path = _find_config(path)
+    if cfg_path is None:
+        return _missing_config_report(item_id, path)
+
+    try:
+        cfg = json.loads(cfg_path.read_text())
+    except json.JSONDecodeError as e:
+        return _invalid_json_report(item_id, path, cfg_path, e)
+
+    rel_cfg = str(cfg_path.relative_to(path))
+
+    # D11 shape check: top-level must be a JSON object.
+    if not isinstance(cfg, dict):
+        return _block_invalid(
+            item_id, rel_cfg, "<root>",
+            f"LSP config top-level must be a JSON object, got {type(cfg).__name__}",
+        )
+
+    block, command_findings = _check_command(item_id, rel_cfg, cfg.get("command", ""))
+    if block is not None:
+        return block
+    findings.extend(command_findings)
+
+    block, url_findings = _check_urls(item_id, rel_cfg, cfg, pinned_sha)
+    if block is not None:
+        return block
+    findings.extend(url_findings)
 
     return ScannerReport(
         item_id=item_id,
         scanner="config-lint",
-        severity=severity,
+        severity=_compute_severity(findings),
         findings=findings,
         raw=cfg,
     )
