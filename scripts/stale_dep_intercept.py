@@ -55,11 +55,11 @@ def _is_stale(pinned: str, latest: str) -> bool:
     return p[0] < l[0]
 
 
-def _check_content(file_path: str, new_content: str) -> list[str]:
+def _check_content(new_content: str) -> list[str]:
     """Return list of stale-pin warnings."""
     warnings = []
     for match in PIN_RE.finditer(new_content):
-        name, op, version = match.group(1), match.group(2), match.group(3)
+        name, _op, version = match.group(1), match.group(2), match.group(3)
         safe_name = name.lower().replace(".", "-")
         cache_file = CACHE_DIR / f"{safe_name}.yaml"
         if not cache_file.exists():
@@ -118,7 +118,7 @@ def main() -> int:
     warnings: list[str] = []
     for content in _extract_content_candidates(tool_name, tool_input):
         if content:
-            warnings.extend(_check_content(file_path, content))
+            warnings.extend(_check_content(content))
     if not warnings:
         return 0
 

@@ -42,7 +42,7 @@ def annotate_diff(diff: str) -> str:
             annotated_lines.append(line)
             continue
 
-        sign, name, op, version = match.groups()
+        sign, name, _op, version = match.groups()
         latest = _latest_for(name)
 
         if not latest or latest == version:

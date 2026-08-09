@@ -40,7 +40,9 @@ def test_claude_lax_profile_demotes_yaml_load_to_warn():
     output_str = json.dumps(output, ensure_ascii=False)
     assert "warn" in output_str.lower() or "⚠️" in output_str, \
         f"Claude profile should warn, got: {output}"
-    assert "🚫" not in output_str and "block" not in output_str.lower(), \
+    assert "🚫" not in output_str, \
+        "Claude profile should not emit block emoji at demoted severity"
+    assert "block" not in output_str.lower(), \
         "Claude profile should not block at demoted severity"
 
 

@@ -42,6 +42,7 @@ def test_parse_payload_extracts_file_path() -> None:
 
 def test_parse_payload_rejects_missing_file_path() -> None:
     with pytest.raises(ValueError, match="file_path"):
+        # Single invocation under test — no need to wrap in a helper.
         fast_gate.parse_payload(json.dumps({"tool_name": "Edit", "tool_input": {}}))
 
 
