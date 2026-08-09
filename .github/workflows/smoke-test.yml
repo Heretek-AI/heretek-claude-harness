@@ -40,7 +40,7 @@ jobs:
           cache: pip
 
       - name: Install Python deps
-        run: pip install -r requirements-dev.txt
+        run: pip install --only-binary=:all: -r requirements-dev.txt
 
       - name: Run schema validation
         run: python scripts/validate.py
@@ -61,10 +61,10 @@ jobs:
           node-version: "20"
 
       - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
+        run: npm install -g --ignore-scripts @anthropic-ai/claude-code
 
       - name: Install ruff (required for fast-gate trigger below)
-        run: pip install ruff
+        run: pip install --only-binary=:all: ruff==0.16.1
 
       - name: Add heretek marketplace locally
         run: claude plugin marketplace add ./
@@ -147,7 +147,7 @@ jobs:
           cache: pip
 
       - name: Install runtime + dev deps
-        run: pip install -r requirements-dev.txt ast-grep-cli
+        run: pip install --only-binary=:all: -r requirements-dev.txt ast-grep-cli
 
       - name: Populate freshness cache
         run: python -m scripts.freshness_index --all
