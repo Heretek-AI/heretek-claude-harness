@@ -20,16 +20,14 @@ import time
 
 
 def main() -> int:
-    # SonarCloud S3516 (BLOCKER) — false positive: hook-script entrypoint always
-    # returns 0 (success). The hook infrastructure reads warnings from stdout
-    # JSON, not the exit code. See #141.
+    # nosonar — false positive: hook-script entrypoint always returns 0
     if os.environ.get("ENABLE_RLM_SPIKE") != "1":
-        return 0  # nosonar
+        return 0
 
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
-        return 0  # nosonar
+        return 0
 
     tool_input = payload.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
@@ -47,7 +45,7 @@ def main() -> int:
             "additionalContext": f"rlm-spike: verdict={verdict} latency={latency_ms:.0f}ms (stub)",
         }
     }))
-    return 0  # nosonar
+    return 0
 
 
 if __name__ == "__main__":

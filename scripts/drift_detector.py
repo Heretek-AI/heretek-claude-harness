@@ -54,10 +54,8 @@ def _load_state(session_id: str) -> dict:
 
 
 def _save_state(session_id: str, state: dict) -> None:
-    # SonarCloud S2083 (BLOCKER) — false positive: session_id is validated
-    # against ^[A-Za-z0-9_-]{1,128}$ in _session_state_path() via
-    # require_session_id() before any path construction. See #141.
-    _session_state_path(session_id).write_text(json.dumps(state))  # nosonar
+    # nosonar — false positive: session_id validated against SESSION_ID_RE
+    _session_state_path(session_id).write_text(json.dumps(state))
 
 
 def _extract_imports(text: str) -> set[str]:
@@ -177,13 +175,11 @@ def _detect_warnings(
 
 
 def main() -> int:
-    # SonarCloud S3516 (BLOCKER) — false positive: hook-script entrypoint always
-    # returns 0 (success). The hook infrastructure reads warnings from stdout
-    # JSON, not the exit code. See #141.
+    # nosonar — false positive: hook-script entrypoint always returns 0
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
-        return 0  # nosonar
+        return 0
 
     sid = payload.get("session_id", "")
     tool_input = payload.get("tool_input", {})
@@ -192,11 +188,11 @@ def main() -> int:
     old_string = tool_input.get("old_string", "")
 
     if not sid or not file_path:
-        return 0  # nosonar
+        return 0
 
     warnings = _detect_warnings(sid, file_path, new_string, old_string)
     if not warnings:
-        return 0  # nosonar
+        return 0
 
     print(json.dumps({
         "hookSpecificOutput": {
@@ -204,7 +200,7 @@ def main() -> int:
             "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
         }
     }))
-    return 0  # nosonar
+    return 0
 
 
 if __name__ == "__main__":

@@ -102,27 +102,25 @@ def _extract_content_candidates(tool_name: str, tool_input: dict) -> list[str]:
 
 
 def main() -> int:
-    # SonarCloud S3516 (BLOCKER) — false positive: hook-script entrypoint always
-    # returns 0 (success). The hook infrastructure reads warnings from stdout
-    # JSON, not the exit code. See #141.
+    # nosonar — false positive: hook-script entrypoint always returns 0
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
-        return 0  # Bad input — don't block the agent — # nosonar
+        return 0  # Bad input — don't block the agent
 
     tool_input = payload.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
     tool_name = payload.get("tool_name", "")
 
     if not _is_dep_file(file_path):
-        return 0  # nosonar
+        return 0
 
     warnings: list[str] = []
     for content in _extract_content_candidates(tool_name, tool_input):
         if content:
             warnings.extend(_check_content(file_path, content))
     if not warnings:
-        return 0  # nosonar
+        return 0
 
     # Async-with-warning per spec §2 (non-blocking, hooks adds context to next turn)
     print(json.dumps({
@@ -131,7 +129,7 @@ def main() -> int:
             "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
         }
     }))
-    return 0  # nosonar
+    return 0
 
 
 if __name__ == "__main__":

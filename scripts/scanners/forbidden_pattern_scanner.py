@@ -87,23 +87,21 @@ def _scan(file_path: str, content: str) -> list[str]:
 
 
 def main() -> int:
-    # SonarCloud S3516 (BLOCKER) — false positive: hook-script entrypoint always
-    # returns 0 (success). The hook infrastructure reads warnings from stdout
-    # JSON, not the exit code. See #141.
+    # nosonar — false positive: hook-script entrypoint always returns 0
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
-        return 0  # nosonar
+        return 0
 
     tool_input = payload.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
     new_content = tool_input.get("new_string", "")
     if not file_path or not new_content:
-        return 0  # nosonar
+        return 0
 
     warnings = _scan(file_path, new_content)
     if not warnings:
-        return 0  # nosonar
+        return 0
 
     print(json.dumps({
         "hookSpecificOutput": {
@@ -111,7 +109,7 @@ def main() -> int:
             "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
         }
     }))
-    return 0  # nosonar
+    return 0
 
 
 if __name__ == "__main__":
