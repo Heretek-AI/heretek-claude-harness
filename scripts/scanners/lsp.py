@@ -179,10 +179,7 @@ def scan_lsp(
                 )
             )
 
-    severity: Severity = "clean" if not findings else (
-        "block" if any(f.rule_id in ("lsp-command-unknown", "lsp-url-drift") for f in findings)
-        else "warn"
-    )
+    severity: Severity = "clean" if not findings else _severity_from_findings(findings)
 
     return ScannerReport(
         item_id=item_id,
@@ -191,6 +188,13 @@ def scan_lsp(
         findings=findings,
         raw=cfg,
     )
+
+
+def _severity_from_findings(findings: list[Finding]) -> Severity:
+    """Return 'block' if any blocking rule fired, else 'warn'."""
+    if any(f.rule_id in ("lsp-command-unknown", "lsp-url-drift") for f in findings):
+        return "block"
+    return "warn"
 
 
 class LspScanner:

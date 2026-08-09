@@ -24,7 +24,7 @@ DEP_FILE_PATTERNS = (
 # Tolerates optional single or double quotes around the package name so PEP 621 quoted
 # strings (e.g. `"requests==2.20.0"` inside `dependencies = [...]`) parse correctly.
 PIN_RE = re.compile(
-    r"^\s*[\"']?([a-zA-Z0-9_.+-]+)[\"']?\s*([=<>~!]=)\s*([0-9][^,;\s]*)",
+    r"^\s*[\"']?([a-zA-Z0-9_.+-]+)[\"']?\s*([=<>~!]=)\s*(\d[^,;\s]*)",
     re.MULTILINE,
 )
 
