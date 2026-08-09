@@ -15,6 +15,7 @@ import dataclasses
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -29,13 +30,13 @@ from scripts._allowlist import require_id_segment, require_sha, require_upstream
 import requests
 import yaml
 
-from .catalog_updater import bump_item_sha
-from .issue_drafter import draft_issue_and_pr
-from .scanners.base import Finding, ScannerReport
-from .scanners.lsp import scan_lsp
-from .scanners.mcp import scan_mcp
-from .scanners.skills import scan_skill
-from .suppression import load_suppressions  # noqa: F401
+from scripts.catalog_updater import bump_item_sha
+from scripts.issue_drafter import draft_issue_and_pr
+from scripts.scanners.base import Finding, ScannerReport
+from scripts.scanners.lsp import scan_lsp
+from scripts.scanners.mcp import scan_mcp
+from scripts.scanners.skills import scan_skill
+from scripts.suppression import load_suppressions  # noqa: F401
 
 log = logging.getLogger(__name__)
 
@@ -53,10 +54,18 @@ class ScanSummary:
     error_count: int
 
 
+_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
 def _get_latest_release_sha(
     upstream: str, *, gh_token: Optional[str]
 ) -> tuple[Optional[str], Optional[str]]:
-    """Return (sha, tag) of the latest upstream release, or (None, None)."""
+    """Return (sha, tag) of the latest upstream release, or (None, None).
+
+    Resolves branch-name `target_commitish` to a commit SHA via the
+    branches/<name> endpoint when the release's target is not already a
+    40-hex SHA (common for repos that release from main).
+    """
     headers = {"Accept": "application/vnd.github+json"}
     if gh_token:
         headers["Authorization"] = f"Bearer {gh_token}"
@@ -68,7 +77,20 @@ def _get_latest_release_sha(
     if r.status_code != 200:
         return None, None
     data = r.json()
-    return data.get("target_commitish"), data.get("tag_name")
+    target = data.get("target_commitish")
+    tag = data.get("tag_name")
+    if target and not _SHA_RE.match(target):
+        # target_commitish is a branch name; resolve to SHA via branches API
+        r2 = requests.get(
+            f"{GITHUB_API}/repos/{upstream}/branches/{target}",
+            headers=headers,
+            timeout=10,
+        )
+        if r2.status_code == 200:
+            target = r2.json().get("commit", {}).get("sha") or None
+        else:
+            target = None
+    return target, tag
 
 
 def _shallow_clone(upstream: str, sha: str, target: Path) -> None:
