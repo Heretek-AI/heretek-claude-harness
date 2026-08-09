@@ -119,6 +119,16 @@ def emit_event(
     return True
 
 
+def _derive_decision(payload: dict[str, Any]) -> str:
+    exit_code = int(payload.get("hook_exit_code", 0))
+    if exit_code == 2:
+        return "block"
+    stderr = (payload.get("hook_stderr") or "").lower()
+    if "warn" in stderr:
+        return "warn"
+    return "allow"
+
+
 def _build_event(payload: dict[str, Any], home: str | None = None) -> dict[str, Any]:
     tool_input = payload.get("tool_input") or {}
     if not isinstance(tool_input, dict):
@@ -141,16 +151,6 @@ def _build_event(payload: dict[str, Any], home: str | None = None) -> dict[str, 
         ),
         "schema_version": 1,
     }
-
-
-def _derive_decision(payload: dict[str, Any]) -> str:
-    exit_code = int(payload.get("hook_exit_code", 0))
-    if exit_code == 2:
-        return "block"
-    stderr = (payload.get("hook_stderr") or "").lower()
-    if "warn" in stderr:
-        return "warn"
-    return "allow"
 
 
 def run_retention_sweep(

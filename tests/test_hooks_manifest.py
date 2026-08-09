@@ -29,14 +29,19 @@ def test_hooks_manifest_validates_against_schema(
 def test_hooks_manifest_has_fast_gate_pre_tool_use() -> None:
     instance = json.loads(HOOKS_JSON.read_text())
     pre_tool = instance["hooks"]["PreToolUse"]
-    # PreToolUse has the original entry + the telemetry_collector entry (Task 3)
-    assert len(pre_tool) == 2
-    matcher_entry = pre_tool[0]
-    assert matcher_entry["matcher"] == "Edit|Write|MultiEdit"
-    hook = matcher_entry["hooks"][0]
+    # PreToolUse must contain a fast_gate entry on Edit|Write|MultiEdit
+    # plus a telemetry_collector entry (v3.5 collector sprint invariant)
+    fast_gate_entries = [e for e in pre_tool if e["matcher"] == "Edit|Write|MultiEdit"]
+    assert (
+        len(fast_gate_entries) == 1
+    ), "expected exactly one fast_gate PreToolUse entry"
+    hook = fast_gate_entries[0]["hooks"][0]
     assert hook["type"] == "command"
     assert "fast_gate.py" in hook["command"]
     assert hook["timeout"] == 1
+    # Telemetry collector entry must also be wired in
+    telemetry_entries = [e for e in pre_tool if "telemetry_collector" in str(e)]
+    assert telemetry_entries, "expected telemetry_collector wired into PreToolUse"
 
 
 def test_hooks_manifest_validates_full_tree(repo_root: Path, schemas_dir: Path) -> None:

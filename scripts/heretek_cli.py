@@ -129,18 +129,17 @@ def cmd_telemetry_config(args: argparse.Namespace) -> int:
     """
     config_path = TELEMETRY_ROOT / "config.properties"
     TELEMETRY_ROOT.mkdir(parents=True, exist_ok=True)
-    if args.subcommand == "set":
-        existing: dict[str, str] = {}
-        if config_path.exists():
-            for line in config_path.read_text().splitlines():
-                if ":" in line and not line.strip().startswith("#"):
-                    k, v = line.split(":", 1)
-                    existing[k.strip()] = v.strip()
-        existing[args.key] = args.value
-        config_path.write_text(
-            "\n".join(f"{k}: {v}" for k, v in sorted(existing.items())) + "\n"
-        )
-        print(f"set {args.key}={args.value} in {config_path}")
+    existing: dict[str, str] = {}
+    if config_path.exists():
+        for line in config_path.read_text().splitlines():
+            if ":" in line and not line.strip().startswith("#"):
+                k, v = line.split(":", 1)
+                existing[k.strip()] = v.strip()
+    existing[args.key] = args.value
+    config_path.write_text(
+        "\n".join(f"{k}: {v}" for k, v in sorted(existing.items())) + "\n"
+    )
+    print(f"set {args.key}={args.value} in {config_path}")
     return 0
 
 
