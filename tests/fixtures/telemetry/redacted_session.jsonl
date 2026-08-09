@@ -1,0 +1,1 @@
+{"ts":"2026-08-08T12:34:56.789Z","session_id":"00000000-0000-4000-8000-000000000010","event_type":"PostToolUse","tool_name":"Edit","tool_input_path":"~/plugins/hooks/README.md","hook_decision":"allow","hook_latency_ms":47,"hook_exit_code":0,"hook_stderr_summary":"","matcher_matched":true,"plugin_root":"/home/john/.claude/plugins/hooks","schema_version":1}
