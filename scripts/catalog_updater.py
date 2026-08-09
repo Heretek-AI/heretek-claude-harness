@@ -64,11 +64,7 @@ def bump_item_sha(
         raise ValueError(f"new_sha must be 40 chars, got {len(new_sha)}")
 
     yaml = _make_yaml()
-    # nosonar — false positive: script is invoked by trusted maintainers / CI,
-    # not by LLMs. The --catalog CLI arg comes from the catalog commit/PR diff
-    # (already allowlist-validated upstream). See #141.
-    data = yaml.load(catalog_path.read_text())
-    item = _find_item(data, plugin_name, item_id)
+    data = yaml.load(catalog_path.read_text())  # nosonar — false positive: trusted maintainer invocation only
     if item is None:
         raise ItemNotFound(f"{plugin_name}/{item_id}")
     _apply_item_updates(item, new_sha, vetting_date, cve_scan)
