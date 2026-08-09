@@ -82,6 +82,32 @@ def test_cli_exits_zero_on_valid(
     assert validate.main() == 0
 
 
+def test_cli_accepts_json_input(
+    schemas_dir: Path,
+    fixtures_dir: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    validate.SCHEMA_PATH = schemas_dir / "audit_finding.schema.json"
+    # Write a valid finding as JSON (not YAML).
+    import json as json_mod
+
+    valid = _load_yaml(fixtures_dir / "audit" / "valid_finding.yaml")
+    single = tmp_path / "single.json"
+    single.write_text(json_mod.dumps(valid))
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "validate.py",
+            "--schema",
+            str(schemas_dir / "audit_finding.schema.json"),
+            str(single),
+        ],
+    )
+    assert validate.main() == 0
+
+
 def test_cli_exits_one_on_invalid(
     schemas_dir: Path,
     fixtures_dir: Path,

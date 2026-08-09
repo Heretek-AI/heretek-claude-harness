@@ -61,23 +61,27 @@ def main(argv: Iterable[str] | None = None) -> int:
 
     any_errors = False
     for path in args.files:
+        file_has_errors = False
         try:
             instance = _load_instance(path)
         except (json.JSONDecodeError, ValueError) as exc:
             print(f"{path}: parse error: {exc}", file=sys.stderr)
             any_errors = True
+            file_has_errors = True
             continue
 
         # A file may contain a single finding OR a list of findings.
         findings = instance if isinstance(instance, list) else [instance]
         for idx, errors in validate_findings(findings):
-            any_errors = True
+            file_has_errors = True
             print(f"{path}#{idx}:", file=sys.stderr)
             for e in errors:
                 print(f"  - {e}", file=sys.stderr)
 
-        if not any_errors:
+        if not file_has_errors:
             print(f"{path}: OK ({len(findings)} finding(s))")
+        else:
+            any_errors = True
 
     return 1 if any_errors else 0
 
