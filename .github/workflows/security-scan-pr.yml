@@ -32,13 +32,33 @@ jobs:
       - name: Determine bumped item
         id: detect
         run: |
-          # Find the item id whose sha changed in the PR diff
-          ITEM_ID=$(git diff origin/main..HEAD -- catalog/catalog.yaml | \
-            grep -E '^\- *sha: ' | head -1 | sed -E 's/.*id: ([a-z0-9-]+).*/\1/' || true)
+          # Find the item id whose sha changed (bumped existing item) or was
+          # added (new candidate). Returns the first matching id, since the
+          # downstream scanner runs one item per PR.
+          #
+          # Pass 1: added items. '+ - id: <name>' lines are unambiguous; the
+          # first one is the new candidate.
+          ITEM_ID=$(git diff origin/main..HEAD -U10 -- catalog/catalog.yaml | \
+            grep -E '^\+ *- *id: ' | head -1 | sed -E 's/.*- *id: ([a-z0-9-]+).*/\1/' || true)
+
+          # Pass 2: bumped items. For a sha bump, the id line is in diff
+          # context (no prefix). -U10 keeps it visible regardless of block
+          # size. awk tracks the most recent 'id:' before the '- sha:'.
           if [ -z "$ITEM_ID" ]; then
-            ITEM_ID=$(git diff origin/main..HEAD -- catalog/catalog.yaml | \
-              grep -E '^[+-] *sha: ' | tail -1 | awk '{print $3}' | tr -d '"')
+            ITEM_ID=$(git diff origin/main..HEAD -U10 -- catalog/catalog.yaml | \
+              awk '
+                /^ *- *id: / {
+                  id = $0
+                  sub(/.*- *id: /, "", id)
+                  sub(/[^a-z0-9-].*/, "", id)
+                  have_id = 1
+                }
+                /^- *sha: / {
+                  if (have_id) { print id; exit }
+                }
+              ' || true)
           fi
+
           echo "item_id=$ITEM_ID" >> "$GITHUB_OUTPUT"
 
       - name: Run scanner against bumped item
