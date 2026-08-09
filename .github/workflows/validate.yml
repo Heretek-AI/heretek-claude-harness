@@ -126,7 +126,7 @@ jobs:
           cache: pip
 
       - name: Install deps
-        run: pip install -r requirements-dev.txt
+        run: pip install --only-binary=:all: -r requirements-dev.txt
 
       - name: Populate freshness cache
         run: python -m scripts.freshness_index --all
@@ -151,7 +151,7 @@ jobs:
           cache: pip
 
       - name: Install deps
-        run: pip install -r requirements-dev.txt
+        run: pip install --only-binary=:all: -r requirements-dev.txt
 
       - name: Run refresh-pins check
         env:
