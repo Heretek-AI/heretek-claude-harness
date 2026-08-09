@@ -1,7 +1,7 @@
 ---
 slug: observability-sub-spec-1
 date: 2026-08-09
-status: proposed
+status: pending
 ---
 
 # Harness Observability — Sub-spec 1 (Collector)

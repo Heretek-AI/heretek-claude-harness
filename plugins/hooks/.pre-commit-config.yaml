@@ -28,6 +28,5 @@ repos:
       - id: shellcheck
         # Issue #150: local feedback for shell-script issues before push.
         # Mirrors the CI workflow (.github/workflows/shellcheck.yml);
-        # locally we treat info/style as warnings (severity=style matches
-        # the scanner's default) so dev loop stays fast.
+        # Severity matches CI: blocks on warning+error; info/style are filtered (don't fail the dev loop).
         args: ["--severity=warning"]
