@@ -1,0 +1,17 @@
+- finding_id: B-001
+  cluster: Design & architecture
+  principle: Single Responsibility
+  severity: critical
+  adversarial_posture: violated
+  evidence:
+    code_refs: ["scripts/scanners/scanner_base.py:1-200"]
+    file: scripts/scanners/scanner_base.py
+    line_range: [1, 200]
+    metric: file_loc=200+ classes_in_module=5
+  failure_scenario: >-
+    Adding a sixth scanner kind requires editing this module in 4 places;
+    signals multiple responsibilities.
+  recommended_action: refactor
+  rationale: SRP violation; scanner_base.py mixes base class, dispatcher, and report shape.
+  principle_reference: Design & architecture > SOLID > SRP
+  drift_signals: []

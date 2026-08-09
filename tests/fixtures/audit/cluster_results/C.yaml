@@ -1,0 +1,17 @@
+- finding_id: C-001
+  cluster: Correctness & safety
+  principle: Explicit error handling
+  severity: medium
+  adversarial_posture: violated
+  evidence:
+    code_refs: ["scripts/refresh_pins.py:55-67"]
+    file: scripts/refresh_pins.py
+    line_range: [55, 67]
+    metric: bare-except-count=2
+  failure_scenario: >-
+    A transient network failure is silently swallowed; the run appears to
+    succeed but no pins were refreshed.
+  recommended_action: refactor
+  rationale: Silent failure violates explicit-error-handling principle.
+  principle_reference: Correctness & safety > error handling
+  drift_signals: []

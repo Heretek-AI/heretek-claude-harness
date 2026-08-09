@@ -1,0 +1,19 @@
+- finding_id: A-001
+  cluster: Readability & quality bar
+  principle: Small, focused functions
+  severity: high
+  adversarial_posture: violated
+  evidence:
+    code_refs: ["scripts/validate.py:124-187"]
+    file: scripts/validate.py
+    line_range: [124, 187]
+    metric: cognitive_complexity=42 (threshold=15, repo p95=12)
+  failure_scenario: >-
+    When a plugin manifest has 5 nested conditional branches, this function
+    returns the wrong D7 status because the early-exit path is missed.
+  recommended_action: refactor
+  rationale: >-
+    Function violates the small-focused-functions principle; shows up in the
+    SonarCloud p99 complexity report.
+  principle_reference: Code quality > Maintainability > small, focused functions
+  drift_signals: []

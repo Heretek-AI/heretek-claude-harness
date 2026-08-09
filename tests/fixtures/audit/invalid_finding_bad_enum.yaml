@@ -1,0 +1,16 @@
+finding_id: A-003
+cluster: Readability & quality bar
+principle: Small, focused functions
+severity: catastrophic        # not in enum
+adversarial_posture: violated
+evidence:
+  code_refs:
+    - scripts/foo.py:1-10
+  file: scripts/foo.py
+  line_range: [1, 10]
+  metric: ""
+failure_scenario: "x"
+recommended_action: refactor
+rationale: "x"
+principle_reference: "x"
+drift_signals: []
