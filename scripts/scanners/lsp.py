@@ -165,12 +165,15 @@ def _check_urls(
     return None, findings
 
 
-def _compute_severity(findings: list[Finding]) -> Severity:
-    if not findings:
-        return "clean"
+def _severity_from_findings(findings: list[Finding]) -> Severity:
+    """Return 'block' if any blocking rule fired, else 'warn'."""
     if any(f.rule_id in ("lsp-command-unknown", "lsp-url-drift") for f in findings):
         return "block"
     return "warn"
+
+
+def _compute_severity(findings: list[Finding]) -> Severity:
+    return "clean" if not findings else _severity_from_findings(findings)
 
 
 def scan_lsp(

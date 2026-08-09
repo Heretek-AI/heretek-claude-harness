@@ -30,8 +30,8 @@ def main() -> int:
         return 0
 
     tool_input = payload.get("tool_input", {})
-    file_path = tool_input.get("file_path", "")
-    new_string = tool_input.get("new_string", "")
+    _file_path = tool_input.get("file_path", "")
+    _new_string = tool_input.get("new_string", "")
 
     start = time.time()
     # Minimal REPL: just print the edit content + a stub verdict for the spike.

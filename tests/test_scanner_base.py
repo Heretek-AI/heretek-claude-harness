@@ -1,6 +1,8 @@
 """Tests for the ScannerReport contract — frozen, fields, defaults."""
 from __future__ import annotations
 
+import dataclasses
+
 import pytest
 
 from scripts.scanners.base import Finding, ScannerReport, Severity
@@ -15,7 +17,7 @@ def test_scanner_report_default_severity_is_clean() -> None:
 
 def test_scanner_report_is_frozen() -> None:
     r = ScannerReport(item_id="x", scanner="test")
-    with pytest.raises(Exception):
+    with pytest.raises((AttributeError, dataclasses.FrozenInstanceError)):
         r.severity = "block"  # type: ignore[misc]
 
 

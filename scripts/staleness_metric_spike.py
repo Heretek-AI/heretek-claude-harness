@@ -15,7 +15,7 @@ from pathlib import Path
 import yaml
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / "catalog" / "freshness"
-PIN_RE = re.compile(r"^\s*([a-zA-Z0-9_.+-]+)\s*([=<>~!]=)\s*([0-9][^,;\s]*)", re.MULTILINE)
+PIN_RE = re.compile(r"^\s*([a-zA-Z0-9_.+-]+)\s*([=<>~!]=)\s*(\d[^,;\s]*)", re.MULTILINE)
 
 
 def _latest_for(lib: str) -> str | None:

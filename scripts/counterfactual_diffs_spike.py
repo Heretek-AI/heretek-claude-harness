@@ -16,7 +16,7 @@ import yaml
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / "catalog" / "freshness"
 # Match `name==X.Y.Z` etc.
-PIN_RE = re.compile(r"^([+-])([a-zA-Z0-9_.+-]+)\s*([=<>~!]=)\s*([0-9][^,;\s]*)", re.MULTILINE)
+PIN_RE = re.compile(r"^([+-])([a-zA-Z0-9_.+-]+)\s*([=<>~!]=)\s*(\d[^,;\s]*)", re.MULTILINE)
 
 
 def _latest_for(lib: str) -> str | None:
@@ -42,7 +42,7 @@ def annotate_diff(diff: str) -> str:
             annotated_lines.append(line)
             continue
 
-        sign, name, op, version = match.groups()
+        sign, name, _op, version = match.groups()
         latest = _latest_for(name)
 
         if not latest or latest == version:
