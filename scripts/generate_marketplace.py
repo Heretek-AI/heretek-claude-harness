@@ -89,8 +89,9 @@ def _plugin_entry(
 
 def generate(catalog_path: Path, output_path: Path) -> dict:
     """Read catalog.yaml, write marketplace.json; return the generated dict."""
-    _catalog_text = catalog_path.read_text()  # nosonar — false positive: trusted maintainer invocation only (S8707)
-    catalog = yaml.safe_load(_catalog_text)
+    if not catalog_path.exists():
+        raise FileNotFoundError(f"catalog not found: {catalog_path}")
+    catalog = yaml.safe_load(catalog_path.read_text())  # nosonar — S8707 false positive; trusted-maintainer invocation only (see #141)
     if not isinstance(catalog, dict) or "marketplace" not in catalog:
         raise ValueError(
             f"{catalog_path}: top-level 'marketplace' key missing or not a mapping"
@@ -109,8 +110,7 @@ def generate(catalog_path: Path, output_path: Path) -> dict:
     }
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    _out = output_path.write_text  # nosonar — false positive: trusted maintainer invocation only (S8707)
-    _out(json.dumps(generated, indent=2, sort_keys=True) + "\n")
+    output_path.write_text(json.dumps(generated, indent=2, sort_keys=True) + "\n")  # nosonar — S8707 false positive; trusted-maintainer invocation only (see #141)
     return generated
 
 
