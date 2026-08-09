@@ -66,20 +66,24 @@ def _scan(file_path: str, content: str) -> list[dict]:
 
 
 def main() -> int:
+    # SonarCloud S3516 (BLOCKER) — false positive: this is a hook-script entrypoint
+    # that always returns 0 (success). The hook infrastructure (PreToolUse) reads
+    # the permissionDecision from stdout JSON, not the exit code. Suppressed after
+    # review (issue #141, PR #142).
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
-        return 0
+        return 0  # nosonar S3516
 
     tool_input = payload.get("tool_input", {})
     file_path = tool_input.get("file_path", "")
     new_content = tool_input.get("new_string", "")
     if not file_path or not new_content:
-        return 0
+        return 0  # nosonar S3516
 
     matches = _scan(file_path, new_content)
     if not matches:
-        return 0
+        return 0  # nosonar S3516
 
     summary = "; ".join(f"{m['id']}: {m['reason']}" for m in matches)
     print(json.dumps({
@@ -89,7 +93,7 @@ def main() -> int:
             "permissionDecisionReason": f"AST-grep blocked pattern(s): {summary}",
         }
     }))
-    return 0
+    return 0  # nosonar S3516
 
 
 if __name__ == "__main__":

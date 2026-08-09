@@ -58,22 +58,26 @@ def _last_lookup_age_hours() -> float:
 
 
 def main() -> int:
+    # SonarCloud S3516 (BLOCKER) — false positive: this is a hook-script entrypoint
+    # that always returns 0 (success). The hook infrastructure (PostToolUse) reads
+    # warnings from stdout JSON, not the exit code. Suppressed after review
+    # (issue #141, PR #142).
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
-        return 0
+        return 0  # nosonar S3516
 
     tool_input = payload.get("tool_input", {})
     new_content = tool_input.get("new_string", "")
     if not new_content:
-        return 0
+        return 0  # nosonar S3516
 
     tracked = _tracked_libs_for_active_model()
     edited_libs = _libs_in_content(new_content)
     relevant = tracked & edited_libs
 
     if not relevant:
-        return 0
+        return 0  # nosonar S3516
 
     try:
         profile = load_profile(resolve_active_model_id())
@@ -83,7 +87,7 @@ def main() -> int:
 
     age_hours = _last_lookup_age_hours()
     if age_hours <= ttl:
-        return 0  # recent enough
+        return 0  # recent enough — # nosonar S3516
 
     libs_str = ", ".join(sorted(relevant))
     print(json.dumps({
@@ -96,7 +100,7 @@ def main() -> int:
             ),
         }
     }))
-    return 0
+    return 0  # nosonar S3516
 
 
 if __name__ == "__main__":
