@@ -91,5 +91,6 @@ def test_e2e_emit_prompts_then_synthesize(
         ],
     )
     assert harness_self.main() == 0
-    assert (prompts_dir / "A.txt").is_file()
+    for letter in ("A", "B", "C", "D", "E"):
+        assert (prompts_dir / f"{letter}.txt").is_file()
     assert "Readability" in (prompts_dir / "A.txt").read_text()

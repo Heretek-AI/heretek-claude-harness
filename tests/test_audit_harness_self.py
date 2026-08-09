@@ -168,3 +168,15 @@ def test_build_issues_writes_payload_file(tmp_path: Path) -> None:
     assert "title" in payload[0]
     assert "body" in payload[0]
     assert "labels" in payload[0]
+
+
+# -- argparse rejection ----------------------------------------------------
+
+
+def test_unknown_subcommand_exits_nonzero(monkeypatch: pytest.MonkeyPatch) -> None:
+    """An unknown subcommand should exit with a non-zero status (argparse rejects)."""
+    monkeypatch.setattr(sys, "argv", ["harness_self.py", "bogus-cmd"])
+    with pytest.raises(SystemExit) as exc_info:
+        harness_self.main()
+    # argparse with required=True subparsers calls sys.exit(2) for unknown subcommand
+    assert exc_info.value.code != 0

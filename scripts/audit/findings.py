@@ -97,7 +97,10 @@ class Finding:
 def _load_instance(path: Path) -> Any:
     text = path.read_text()
     if path.suffix.lower() in {".yaml", ".yml"}:
-        return YAML(typ="safe").load(text)
+        result = YAML(typ="safe").load(text)
+        if result is None:
+            raise ValueError(f"empty or whitespace-only YAML in {path}")
+        return result
     return json.loads(text)
 
 

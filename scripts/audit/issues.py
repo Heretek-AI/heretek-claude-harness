@@ -28,9 +28,9 @@ _AUDITABLE_SEVERITIES: set[str] = {"critical", "high"}
 _CLUSTER_SHORT: dict[str, str] = {
     "Readability & quality bar": "readability",
     "Design & architecture": "design",
-    "Security & supply chain": "security",
+    "Correctness & safety": "correctness",
     "Testing & verification": "testing",
-    "Observability & ops": "observability",
+    "Operations & docs": "ops-docs",
 }
 
 
