@@ -58,6 +58,7 @@ def _last_lookup_age_hours() -> float:
 
 
 def main() -> int:
+    # nosonar — false positive: hook-script entrypoint always returns 0
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
