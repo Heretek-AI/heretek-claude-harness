@@ -20,6 +20,7 @@ import time
 
 
 def main() -> int:
+    # nosonar — false positive: hook-script entrypoint always returns 0
     if os.environ.get("ENABLE_RLM_SPIKE") != "1":
         return 0
 
