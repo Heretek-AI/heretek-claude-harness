@@ -15,6 +15,17 @@
             "timeout": 1000
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/telemetry_collector.py",
+            "async": true,
+            "timeout": 200
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -59,6 +70,17 @@
             "command": "python ${CLAUDE_PROJECT_DIR}/scripts/lookup_gate.py",
             "async": true,
             "timeout": 500
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/telemetry_collector.py",
+            "async": true,
+            "timeout": 200
           }
         ]
       }
