@@ -4,7 +4,7 @@
 
 **Goal:** Migrate the heretek-claude-harness repo from the current v1.x→v4-vision roadmap structure to the new v2→v6 phased structure defined in `docs/superpowers/specs/2026-08-08-roadmap-restructure-design.md`.
 
-**Architecture:** Documentation + GitHub issue actions only. No code changes. The migration produces: (1) a new `docs/superpowers/roadmap.md` as the canonical structure, (2) a migration spec documenting the close/mutate/open sequence, (3) 9 spike ADRs and 3 rejection notes for tri-stated items, (4) 6 phase tracking issues (3 new + 3 mutated), (5) 3 closed issues, (6) a slimmed `PLAN.md`.
+**Architecture:** Documentation + GitHub issue actions only. No code changes. The migration produces: (1) a new `docs/superpowers/roadmap.md` as the canonical structure, (2) a migration spec documenting the close/mutate/open sequence, (3) 8 spike ADRs and 1 rejection notes file (3 rejected items), (4) 6 phase tracking issues (3 new + 3 mutated), (5) 3 closed issues, (6) a slimmed `PLAN.md`.
 
 **Tech Stack:** Markdown docs, ruamel.yaml-free editing, GitHub MCP for issue actions.
 

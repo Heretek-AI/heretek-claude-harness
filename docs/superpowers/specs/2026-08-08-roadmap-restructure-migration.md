@@ -6,7 +6,7 @@
 ## Pre-conditions
 
 - New `docs/superpowers/roadmap.md` exists (Task 1).
-- All 9 spike ADRs exist (Task 3).
+- All 8 spike ADRs and the rejection notes file exist (Task 3).
 - All rejection notes exist (Task 3).
 - `PLAN.md` slimmed (Task 4).
 
