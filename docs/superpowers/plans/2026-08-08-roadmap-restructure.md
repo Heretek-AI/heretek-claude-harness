@@ -843,16 +843,18 @@ Expected: ≤ 40 lines.
 
 - [ ] **Step 5: Verify GitHub issues**
 
-List open `tracking` issues:
-```
-gh issue list --repo Heretek-AI/heretek-claude-harness --label tracking --state open
-```
+List open `tracking` issues via `mcp__github__github-list_issues`:
+- `owner`: `Heretek-AI`
+- `repo`: `heretek-claude-harness`
+- `state`: `OPEN`
+- `labels`: `["tracking"]`
+
 Expected: at least 6 (3 mutated + 3 new).
 
-List closed issues since today:
-```
-gh issue list --repo Heretek-AI/heretek-claude-harness --state closed --search "closed:2026-08-08..2026-08-08"
-```
+List closed issues today via `mcp__github__github-list_issues`:
+- `state`: `CLOSED`
+- (filter results to today's `updated_at`)
+
 Expected: at least #87, #88.
 
 - [ ] **Step 6: Verify #92 still open with reassignment**
