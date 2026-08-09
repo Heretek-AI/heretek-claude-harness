@@ -257,7 +257,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     for status, path, item_id, details in results:
         detail_str = details.get("reason", "")
         if status == "ok":
-            rc = rc  # no change
+            pass
         elif status == "skipped":
             pass
         else:
