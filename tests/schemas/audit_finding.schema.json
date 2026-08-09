@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heretek.ai/schemas/audit_finding.schema.json",
+  "title": "Heretek harness self-audit finding card",
+  "description": "One finding from one cluster lane (per spec 2026-08-09 §Per-finding schema).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "finding_id",
+    "cluster",
+    "principle",
+    "severity",
+    "adversarial_posture",
+    "evidence",
+    "failure_scenario",
+    "recommended_action",
+    "rationale",
+    "principle_reference",
+    "drift_signals"
+  ],
+  "properties": {
+    "finding_id": {
+      "type": "string",
+      "pattern": "^[A-E]-[0-9]{3,}$",
+      "description": "<cluster_letter>-<NNN>, deterministic per spec."
+    },
+    "cluster": {
+      "type": "string",
+      "enum": [
+        "Readability & quality bar",
+        "Design & architecture",
+        "Correctness & safety",
+        "Testing & verification",
+        "Operations & docs"
+      ]
+    },
+    "principle": { "type": "string", "minLength": 1 },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low", "info"]
+    },
+    "adversarial_posture": {
+      "type": "string",
+      "enum": ["violated", "partial", "justified"]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code_refs", "file", "line_range", "metric"],
+      "properties": {
+        "code_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[^\\s].+:[0-9]+(-[0-9]+)?$" },
+          "description": "<file>:<start_line>[-<end_line>] per spec."
+        },
+        "file": { "type": "string", "minLength": 1 },
+        "line_range": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 1 },
+          "description": "[start_line, end_line] inclusive."
+        },
+        "metric": { "type": "string" }
+      }
+    },
+    "failure_scenario": { "type": "string", "minLength": 1 },
+    "recommended_action": {
+      "type": "string",
+      "enum": ["refactor", "document", "suppress", "accept", "escalate"]
+    },
+    "rationale": { "type": "string", "minLength": 1 },
+    "principle_reference": { "type": "string", "minLength": 1 },
+    "drift_signals": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
