@@ -11,6 +11,7 @@ The script is observability, never enforcement. It never blocks tool calls.
 Async-friendly: hook manifest declares `async: true` so this never gates the
 agent loop.
 """
+
 from __future__ import annotations
 
 import json
@@ -23,8 +24,15 @@ from typing import Any
 
 import jsonschema
 
-TELEMETRY_ROOT = Path(os.environ.get("HERETEK_TELEMETRY_ROOT", Path.home() / ".heretek" / "telemetry"))
-SCHEMA_PATH = Path(__file__).parent.parent.parent.parent / "tests" / "fixtures" / "telemetry_schema.json"
+TELEMETRY_ROOT = Path(
+    os.environ.get("HERETEK_TELEMETRY_ROOT", Path.home() / ".heretek" / "telemetry")
+)
+SCHEMA_PATH = (
+    Path(__file__).parent.parent.parent.parent
+    / "tests"
+    / "fixtures"
+    / "telemetry_schema.json"
+)
 
 
 def _load_schema() -> dict:
@@ -64,14 +72,19 @@ def parse_payload(payload_text: str) -> dict[str, Any]:
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.") + f"{datetime.now(timezone.utc).microsecond // 1000:03d}Z"
+    now = datetime.now(timezone.utc)
+    return now.strftime("%Y-%m-%dT%H:%M:%S.") + f"{now.microsecond // 1000:03d}Z"
 
 
 def _session_id(payload: dict[str, Any]) -> str:
-    return str(payload.get("session_id") or os.environ.get("CLAUDE_SESSION_ID") or uuid.uuid4())
+    return str(
+        payload.get("session_id") or os.environ.get("CLAUDE_SESSION_ID") or uuid.uuid4()
+    )
 
 
-def emit_event(session_dir: Path, event: dict[str, Any], schema: dict[str, Any] | None = None) -> bool:
+def emit_event(
+    session_dir: Path, event: dict[str, Any], schema: dict[str, Any] | None = None
+) -> bool:
     """Append one JSONL line to session_dir/session-<id>.jsonl.
 
     Validates against schema. Returns True on success, False on any failure
@@ -85,7 +98,10 @@ def emit_event(session_dir: Path, event: dict[str, Any], schema: dict[str, Any] 
     try:
         jsonschema.validate(event, schema)
     except jsonschema.ValidationError as exc:
-        print(f"telemetry_collector: schema validation failed: {exc.message}", file=sys.stderr)
+        print(
+            f"telemetry_collector: schema validation failed: {exc.message}",
+            file=sys.stderr,
+        )
         return False
     session_file = session_dir / f"session-{event['session_id']}.jsonl"
     try:
@@ -93,7 +109,10 @@ def emit_event(session_dir: Path, event: dict[str, Any], schema: dict[str, Any] 
         with session_file.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(event, separators=(",", ":")) + "\n")
     except OSError as exc:
-        print(f"telemetry_collector: write failed ({exc}); dropping event", file=sys.stderr)
+        print(
+            f"telemetry_collector: write failed ({exc}); dropping event",
+            file=sys.stderr,
+        )
         return False
     return True
 
@@ -105,7 +124,9 @@ def _build_event(payload: dict[str, Any], home: str | None = None) -> dict[str, 
     raw_path = tool_input.get("file_path")
     return {
         "session_id": _session_id(payload),
-        "event_type": payload.get("event_type") or payload.get("hook_event_name") or "PostToolUse",
+        "event_type": payload.get("event_type")
+        or payload.get("hook_event_name")
+        or "PostToolUse",
         "tool_name": payload.get("tool_name") or "?",
         "tool_input_path": redact_path(raw_path, home=home),
         "hook_decision": payload.get("hook_decision") or _derive_decision(payload),
@@ -113,7 +134,9 @@ def _build_event(payload: dict[str, Any], home: str | None = None) -> dict[str, 
         "hook_exit_code": int(payload.get("hook_exit_code", 0)),
         "hook_stderr_summary": (payload.get("hook_stderr") or "")[:256] or None,
         "matcher_matched": bool(payload.get("matcher_matched", True)),
-        "plugin_root": str(payload.get("plugin_root") or os.environ.get("CLAUDE_PLUGIN_ROOT", "")),
+        "plugin_root": str(
+            payload.get("plugin_root") or os.environ.get("CLAUDE_PLUGIN_ROOT", "")
+        ),
         "schema_version": 1,
     }
 

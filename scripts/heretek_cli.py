@@ -116,7 +116,7 @@ def cmd_telemetry_export(args: argparse.Namespace) -> int:
 
 
 def cmd_telemetry_config(args: argparse.Namespace) -> int:
-    config_path = TELEMETRY_ROOT / "config.yaml"
+    config_path = TELEMETRY_ROOT / "config.properties"
     TELEMETRY_ROOT.mkdir(parents=True, exist_ok=True)
     if args.subcommand == "set":
         existing: dict[str, str] = {}
@@ -178,7 +178,7 @@ def build_parser() -> argparse.ArgumentParser:
     exp.set_defaults(func=cmd_telemetry_export)
 
     cfg = tel_sub.add_parser(
-        "config", help="read/write ~/.heretek/telemetry/config.yaml"
+        "config", help="read/write ~/.heretek/telemetry/config.properties"
     )
     cfg_sub = cfg.add_subparsers(dest="subcommand", required=True)
     cfg_set = cfg_sub.add_parser("set", help="set a config key")

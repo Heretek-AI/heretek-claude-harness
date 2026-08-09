@@ -21,8 +21,8 @@
     },
     "session_id": {
       "type": "string",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
-      "description": "UUID v4 session identifier"
+      "pattern": "^[A-Za-z0-9_-]{1,128}$",
+      "description": "Session identifier; default is UUID v4 but any reasonable id shape is accepted (Claude Code may emit non-UUID ids)"
     },
     "event_type": {
       "type": "string",

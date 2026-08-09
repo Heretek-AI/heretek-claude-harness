@@ -110,11 +110,11 @@ def test_export_writes_with_pii_flag(
     assert out.read_text().strip().startswith("{")
 
 
-def test_config_set_writes_yaml(
+def test_config_set_writes_properties(
     telemetry_root: Path, capsys: pytest.CaptureFixture
 ) -> None:
     assert cli.main(["telemetry", "config", "set", "retention_days", "60"]) == 0
-    config = (telemetry_root / "config.yaml").read_text()
+    config = (telemetry_root / "config.properties").read_text()
     assert "retention_days: 60" in config
 
 
