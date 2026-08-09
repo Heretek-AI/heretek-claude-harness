@@ -65,8 +65,7 @@ def _scan(file_path: str, content: str) -> list[dict]:
     return matches
 
 
-def main() -> int:
-    # nosonar — false positive: hook-script entrypoint always returns 0
+def main() -> int:  # nosonar — false positive: hook-script entrypoint always returns 0
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:

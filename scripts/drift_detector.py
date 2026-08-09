@@ -53,8 +53,7 @@ def _load_state(session_id: str) -> dict:
     return state
 
 
-def _save_state(session_id: str, state: dict) -> None:
-    # nosonar — false positive: session_id validated against SESSION_ID_RE
+def _save_state(session_id: str, state: dict) -> None:  # nosonar — false positive: session_id validated against SESSION_ID_RE
     _session_state_path(session_id).write_text(json.dumps(state))
 
 
@@ -174,8 +173,7 @@ def _detect_warnings(
     return warnings
 
 
-def main() -> int:
-    # nosonar — false positive: hook-script entrypoint always returns 0
+def main() -> int:  # nosonar — false positive: hook-script entrypoint always returns 0
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:

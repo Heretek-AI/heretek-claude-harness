@@ -101,8 +101,7 @@ def _extract_content_candidates(tool_name: str, tool_input: dict) -> list[str]:
     ]
 
 
-def main() -> int:
-    # nosonar — false positive: hook-script entrypoint always returns 0
+def main() -> int:  # nosonar — false positive: hook-script entrypoint always returns 0
     try:
         payload = json.loads(sys.stdin.read())
     except json.JSONDecodeError:
