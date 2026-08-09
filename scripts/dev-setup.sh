@@ -31,7 +31,7 @@ if ! "$PYTHON" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)
 fi
 
 # Create venv if missing
-if [ ! -d "$VENV" ]; then
+if [[ ! -d "$VENV" ]]; then
   echo "==> creating venv at $VENV (Python $PY_VERSION)"
   "$PYTHON" -m venv "$VENV"
 else

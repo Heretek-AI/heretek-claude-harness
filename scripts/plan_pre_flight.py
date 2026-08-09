@@ -124,13 +124,38 @@ def check_count_drift(text: str) -> list[str]:
     return findings
 
 
+def _resolve_plan_path(raw: str) -> Path | None:
+    """Resolve and validate a CLI-provided plan path.
+
+    Rejects paths that escape the current working directory. The script
+    is meant to scan in-repo plan files; an LLM-controlled caller passing
+    a path like `../../etc/passwd` or an absolute system path would
+    otherwise read arbitrary files.
+    """
+    try:
+        resolved = Path(raw).resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+    cwd = Path.cwd().resolve()
+    try:
+        resolved.relative_to(cwd)
+    except ValueError:
+        return None
+    if not resolved.is_file():
+        return None
+    return resolved
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         print("usage: plan_pre_flight.py PLAN_FILE", file=sys.stderr)
         return 2
-    plan_path = Path(sys.argv[1])
-    if not plan_path.is_file():
-        print(f"error: {plan_path} not found", file=sys.stderr)
+    plan_path = _resolve_plan_path(sys.argv[1])
+    if plan_path is None:
+        print(
+            f"error: {sys.argv[1]!r} is not a readable file within the current directory",
+            file=sys.stderr,
+        )
         return 2
     text = plan_path.read_text(encoding="utf-8")
 
