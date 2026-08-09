@@ -76,42 +76,77 @@ def _get_latest_release_sha(upstream: str, *, gh_token: Optional[str]) -> tuple[
     return data.get("target_commitish"), data.get("tag_name")
 
 
-def check_item(item: dict, *, gh_token: Optional[str]) -> tuple[str, dict]:
-    """Return (status, details). status in {ok, skipped, stale_stars, stale_commit, license_drift, cve_alert}."""
-    details: dict[str, Any] = {"id": item.get("id"), "upstream": item.get("upstream")}
+def _check_vetting_date(item: dict, details: dict) -> Optional[str]:
+    """Return 'stale_commit' if vetting.date is older than the window."""
     vetting = item.get("vetting") or {}
     vetting_date = vetting.get("date")
     if vetting_date and _days_since(vetting_date) > STALENESS_WINDOW_DAYS:
         details["reason"] = f"vetting.date {vetting_date} is older than {STALENESS_WINDOW_DAYS} days"
-        return "stale_commit", details
-    if not gh_token:
-        details["reason"] = "no GITHUB_TOKEN; offline check skipped"
-        return "skipped", details
-    upstream = item.get("upstream")
-    if not upstream or "/" not in upstream:
-        details["reason"] = "upstream missing or malformed"
-        return "skipped", details
-    data = _github_get(f"/repos/{upstream}", gh_token)
-    if not data:
-        details["reason"] = "upstream not found or API error"
-        return "stale_stars", details  # conservative
-    stars = data.get("stargazers_count", 0)
+        return "stale_commit"
+    return None
+
+
+def _check_stars(repo_data: dict, details: dict) -> Optional[str]:
+    """Return 'stale_stars' if stars < 500."""
+    stars = repo_data.get("stargazers_count", 0)
     if stars < 500:
         details["reason"] = f"stars={stars} < 500"
-        return "stale_stars", details
-    spdx = (data.get("license") or {}).get("spdx_id") or "NOASSERTION"
+        return "stale_stars"
+    return None
+
+
+def _check_license(item: dict, repo_data: dict, details: dict) -> Optional[str]:
+    """Return 'license_drift' if upstream SPDX doesn't match catalog license."""
+    spdx = (repo_data.get("license") or {}).get("spdx_id") or "NOASSERTION"
     catalog_license = (item.get("license") or "").upper()
     # Missing catalog license OR upstream NOASSERTION/UNKNOWN — treat as
     # "unknown, not drift" (closes #96 item 2).
-    if catalog_license and spdx not in ("NOASSERTION", "UNKNOWN"):
-        if spdx != catalog_license:
-            details["reason"] = f"license drifted: upstream={spdx} vs catalog={catalog_license}"
-            return "license_drift", details
+    if catalog_license and spdx not in ("NOASSERTION", "UNKNOWN") and spdx != catalog_license:
+        details["reason"] = f"license drifted: upstream={spdx} vs catalog={catalog_license}"
+        return "license_drift"
+    return None
+
+
+def _check_cves(upstream: str, gh_token: Optional[str], details: dict) -> Optional[str]:
+    """Return 'cve_alert' if any CRITICAL-severity advisory exists upstream."""
     advisories = _github_get(f"/repos/{upstream}/security-advisories", gh_token)
     critical = [a for a in advisories if (a.get("severity") or "").upper() == "CRITICAL"]
     if critical:
         details["reason"] = f"{len(critical)} critical CVE(s)"
-        return "cve_alert", details
+        return "cve_alert"
+    return None
+
+
+def check_item(item: dict, *, gh_token: Optional[str]) -> tuple[str, dict]:
+    """Return (status, details). status in {ok, skipped, stale_stars, stale_commit, license_drift, cve_alert}."""
+    details: dict[str, Any] = {"id": item.get("id"), "upstream": item.get("upstream")}
+
+    stale = _check_vetting_date(item, details)
+    if stale:
+        return stale, details
+    if not gh_token:
+        details["reason"] = "no GITHUB_TOKEN; offline check skipped"
+        return "skipped", details
+
+    upstream = item.get("upstream")
+    if not upstream or "/" not in upstream:
+        details["reason"] = "upstream missing or malformed"
+        return "skipped", details
+
+    repo_data = _github_get(f"/repos/{upstream}", gh_token)
+    if not repo_data:
+        details["reason"] = "upstream not found or API error"
+        return "stale_stars", details  # conservative
+
+    for check in (
+        lambda r, d: _check_stars(r, d),
+        lambda r, d: _check_license(item, r, d),
+        lambda r, d: _check_cves(upstream, gh_token, d),
+    ):
+        result = check(repo_data, details)
+        if result:
+            return result, details
+
     return "ok", details
 
 
@@ -136,6 +171,30 @@ def bump_sha(item: dict, new_sha: str) -> dict:
     return out
 
 
+def _resolve_new_sha(
+    item: dict, gh_token: Optional[str]
+) -> Optional[str]:
+    """Return the latest upstream release SHA, or None if this item should be skipped.
+
+    Skips items with missing upstream, missing sha, or first-party sha.
+    Validates upstream + default_branch against the allowlist.
+    Pins to the latest release tag (not HEAD) — release tags are the
+    security-reviewed commit set.
+    """
+    upstream = item.get("upstream")
+    sha = item.get("sha")
+    if not upstream or "/" not in upstream or not sha:
+        return None
+    if str(sha).startswith("first-party-"):
+        return None
+    require_upstream(upstream)
+    repo_meta = _github_get(f"/repos/{upstream}", gh_token)
+    default_branch = repo_meta.get("default_branch") or "main"
+    require_ref_segment("default_branch", default_branch)
+    new_sha, _tag = _get_latest_release_sha(upstream, gh_token=gh_token)
+    return new_sha
+
+
 def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[str, str, str]]:
     """Re-fetch upstream HEAD SHA per item and write it back to catalog_path.
 
@@ -155,22 +214,11 @@ def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[st
     updates: list[tuple[str, str, str]] = []
     for plugin in data.get("plugins", []):
         for item in plugin.get("items", []):
-            upstream = item.get("upstream")
-            sha = item.get("sha")
-            if not upstream or "/" not in upstream or not sha:
-                continue
-            if str(sha).startswith("first-party-"):
-                continue
-            require_upstream(upstream)
-            repo_meta = _github_get(f"/repos/{upstream}", gh_token)
-            default_branch = repo_meta.get("default_branch") or "main"
-            require_ref_segment("default_branch", default_branch)
-            # Pin to the latest release tag, not HEAD (HEAD may be unreleased
-            # or malicious; release tags are the security-reviewed commit set).
-            new_sha, _tag = _get_latest_release_sha(upstream, gh_token=gh_token)
-            if new_sha and new_sha != sha:
+            old_sha = item.get("sha")
+            new_sha = _resolve_new_sha(item, gh_token)
+            if new_sha and new_sha != old_sha:
                 item["sha"] = new_sha
-                updates.append((item.get("id", "?"), sha, new_sha))
+                updates.append((item.get("id", "?"), old_sha, new_sha))
 
     if updates:
         with catalog_path.open("w") as f:
