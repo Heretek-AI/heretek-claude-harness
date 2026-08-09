@@ -271,6 +271,66 @@ plugins:
           last_commit: 2026-08-05
           cve_scan: not-applicable  # first-party
           review: reviews/heretek-merge-and-push.md
+      - id: agent-skills
+        kind: skill
+        upstream: addyosmani/agent-skills
+        sha: "7676817c12a1317454ae3898a0c5c1eacf5dd3d5"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-09
+          stars: 84591
+          last_commit: 2026-08-09
+          cve_scan: 2026-08-09
+          review: reviews/skills-pack-agent-skills.md
+      - id: wondelai
+        kind: skill
+        upstream: wondelai/skills
+        sha: "73de8a53f618ce9361673a2a9eb80532459658fb"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-09
+          stars: 1868
+          last_commit: 2026-08-08
+          cve_scan: 2026-08-09
+          review: reviews/skills-pack-wondelai.md
+      - id: headroom
+        kind: skill
+        upstream: headroomlabs-ai/headroom
+        sha: "91d6bf33cde777b541375fb182d4479fdd78f81b"
+        license: Apache-2.0
+        vetting:
+          status: approved
+          date: 2026-08-09
+          stars: 65540
+          last_commit: 2026-08-09
+          cve_scan: 2026-08-09
+          review: reviews/skills-pack-headroom.md
+      - id: taste-skill
+        kind: skill
+        upstream: Leonxlnx/taste-skill
+        sha: "e988add20dab0fa97d7a76781c48961c8184288e"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-09
+          stars: 74284
+          last_commit: 2026-08-09
+          cve_scan: 2026-08-09
+          review: reviews/skills-pack-taste-skill.md
+      - id: cli-anything
+        kind: skill
+        upstream: HKUDS/CLI-Anything
+        sha: "39634a640cf20bc603b4faae4d31069c44821a9a"
+        license: Apache-2.0
+        vetting:
+          status: approved
+          date: 2026-08-09
+          stars: 46790
+          last_commit: 2026-08-09
+          cve_scan: 2026-08-09
+          review: reviews/skills-pack-cli-anything.md
 
   - name: mcp-pack
     category: cross
@@ -326,6 +386,18 @@ plugins:
           last_commit: 2026-08-04
           cve_scan: 2026-08-04
           review: reviews/mcp-pack-serena.md
+      - id: claude-mem
+        kind: mcp
+        upstream: thedotmack/claude-mem
+        sha: "4702c337d85aa12e8ab7f845264a78885676261f"
+        license: Apache-2.0
+        vetting:
+          status: approved
+          date: 2026-08-09
+          stars: 90113
+          last_commit: 2026-08-09
+          cve_scan: 2026-08-09
+          review: reviews/mcp-pack-claude-mem.md
 
   - name: lsp-pack
     category: cross
