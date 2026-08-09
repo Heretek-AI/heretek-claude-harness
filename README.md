@@ -28,6 +28,15 @@ for p in rust python js-ts web-frontend hooks security skills-pack mcp-pack lsp-
 done
 ```
 
+## Common commands
+
+```bash
+# Inspect local hook event telemetry
+python scripts/heretek_cli.py telemetry show
+python scripts/heretek_cli.py telemetry grep "Edit"
+python scripts/heretek_cli.py telemetry schema
+```
+
 ## What ships?
 
 See [`docs/superpowers/specs/2026-08-03-heretek-marketplace-design.md`](docs/superpowers/specs/2026-08-03-heretek-marketplace-design.md) for the canonical plugin catalog. Quick summary:
