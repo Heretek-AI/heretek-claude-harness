@@ -14,11 +14,13 @@ agent loop.
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import sys
+import tarfile
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -149,6 +151,76 @@ def _derive_decision(payload: dict[str, Any]) -> str:
     if "warn" in stderr:
         return "warn"
     return "allow"
+
+
+def run_retention_sweep(
+    root: Path | None = None,
+    cutoff_days: int = 30,
+    now: datetime | None = None,
+) -> int:
+    """Archive session directories older than ``cutoff_days`` into tar.zst.
+
+    For each ``<root>/sessions/<YYYY-MM-DD>/`` whose date is older than the
+    cutoff, all JSONL files in that directory are packed into
+    ``<root>/archive/<YYYY-MM-DD>.tar.zst`` and the source files are
+    removed on successful compression.
+
+    Returns the number of session days archived. Raises ``ImportError`` if
+    zstandard is not installed; callers (and tests) should ``pytest.skip``
+    when the optional dep is unavailable.
+    """
+    import zstandard
+
+    if root is None:
+        root = TELEMETRY_ROOT
+    root = Path(root)
+    now = now if now is not None else datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=cutoff_days)
+    sessions_dir = root / "sessions"
+    archive_dir = root / "archive"
+    if not sessions_dir.is_dir():
+        return 0
+    archived = 0
+    for day_dir in sorted(sessions_dir.iterdir()):
+        if not day_dir.is_dir():
+            continue
+        try:
+            day = datetime.strptime(day_dir.name, "%Y-%m-%d").replace(
+                tzinfo=timezone.utc
+            )
+        except ValueError:
+            continue
+        if day >= cutoff:
+            continue
+        jsonl_files = sorted(day_dir.glob("*.jsonl"))
+        if not jsonl_files:
+            continue
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        tar_path = archive_dir / f"{day_dir.name}.tar.zst"
+        cctx = zstandard.ZstdCompressor()
+        tar_buf = io.BytesIO()
+        with tarfile.open(fileobj=tar_buf, mode="w", format=tarfile.GNU_FORMAT) as tar:
+            for jsonl in jsonl_files:
+                tar.add(str(jsonl), arcname=jsonl.name, recursive=False)
+        tmp_path = tar_path.with_suffix(tar_path.suffix + ".tmp")
+        try:
+            tmp_path.write_bytes(cctx.compress(tar_buf.getvalue()))
+            os.replace(tmp_path, tar_path)
+        except OSError:
+            if tmp_path.exists():
+                try:
+                    tmp_path.unlink()
+                except OSError:
+                    pass
+            raise
+        for jsonl in jsonl_files:
+            jsonl.unlink()
+        try:
+            day_dir.rmdir()
+        except OSError:
+            pass
+        archived += 1
+    return archived
 
 
 def main() -> int:
