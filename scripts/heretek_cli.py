@@ -34,6 +34,7 @@ def _iter_session_files(root: Path) -> list[Path]:
 
 def _read_events(files: list[Path]) -> list[dict]:
     events = []
+    dropped = 0
     for f in files:
         for line in f.read_text().splitlines():
             line = line.strip()
@@ -42,7 +43,10 @@ def _read_events(files: list[Path]) -> list[dict]:
             try:
                 events.append(json.loads(line))
             except json.JSONDecodeError:
+                dropped += 1
                 continue
+    if dropped:
+        print(f"warning: {dropped} malformed JSONL line(s) skipped", file=sys.stderr)
     return events
 
 

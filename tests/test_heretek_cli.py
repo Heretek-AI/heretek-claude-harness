@@ -167,3 +167,30 @@ def test_show_session_help_mentions_substring_match() -> None:
             assert "2026-08-08" in action.help
             return
     pytest.fail("--session argument not found on show subcommand")
+
+
+def test_read_events_warns_on_malformed_jsonl(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    """_read_events emits a stderr warning when a JSONL line is malformed."""
+    monkeypatch.setattr(cli, "TELEMETRY_ROOT", tmp_path)
+    (tmp_path / "sessions" / "2026-08-09").mkdir(parents=True)
+    good = {
+        "ts": "2026-08-09T10:00:00.000Z",
+        "session_id": "00000000-0000-4000-8000-000000000ccc",
+        "event_type": "PostToolUse",
+        "tool_name": "Edit",
+        "tool_input_path": "~/good.py",
+        "hook_decision": "allow",
+        "hook_exit_code": 0,
+        "matcher_matched": True,
+        "plugin_root": "/x",
+        "schema_version": 1,
+    }
+    bad_line = "this is not valid json {{{"
+    (tmp_path / "sessions" / "2026-08-09" / "session-ddd.jsonl").write_text(
+        json.dumps(good) + "\n" + bad_line + "\n"
+    )
+    assert cli.main(["telemetry", "show"]) == 0
+    captured = capsys.readouterr()
+    assert "warning: 1 malformed JSONL line(s) skipped" in captured.err
