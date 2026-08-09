@@ -118,6 +118,20 @@ git diff --exit-code .claude-plugin/marketplace.json
 
 The CI workflow (`.github/workflows/validate.yml`) runs the same checks automatically.
 
+## ShellCheck
+
+CI enforces [ShellCheck](https://www.shellcheck.net/) on every `*.sh` file. To run locally:
+
+```bash
+# Install (pick one):
+#   Ubuntu/Debian: sudo apt-get install shellcheck
+#   macOS:         brew install shellcheck
+
+shellcheck -x --severity=warning $(find . -name '*.sh' -not -path '*/.claude/worktrees/*' -not -path '*/node_modules/*')
+```
+
+The pre-commit hook (installed via `plugins/hooks/install.sh`) also runs ShellCheck on changed scripts before each commit.
+
 ## Quarterly refresh
 
 Once per quarter, a maintainer runs:

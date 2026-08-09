@@ -1,0 +1,64 @@
+name: shellcheck
+
+# Issue #150: long-term defense against shell-script regressions.
+# SonarCloud S7688/S7677 baseline fixed in PR #147; this layer catches the
+# broader class of issues (quoting, exit codes, `set -e` discipline, etc.)
+# that no single SonarCloud rule covers.
+# Pins actions per D20 (40-char SHA + version comment).
+# Tool pinning: shellcheck is installed via apt at the runner's default
+# version. Verify the binary after install so an unexpected drift fails loudly.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'  # Mondays at 06:00 UTC
+
+# Read-only: shellcheck only reads repo files and runs the linter.
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck — every *.sh in the repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Verify shellcheck binary
+        run: shellcheck --version
+
+      - name: Run shellcheck
+        run: |
+          set -euo pipefail
+          # Scope matches the issue (#150): all `*.sh` files in the repo.
+          # Exclude nested agent worktrees so we don't scan runtime files.
+          # Use a single root + `-prune` (multi-root `-not -path` patterns don't
+          # prune correctly when worktree paths share the `.claude/` prefix).
+          mapfile -t FILES < <(
+            find . \
+              -path './.claude/worktrees' -prune -o \
+              -path './.claude/worktrees/*' -prune -o \
+              -path '*/node_modules/*' -prune -o \
+              -path './.git/*' -prune -o \
+              -type f -name '*.sh' -print \
+              | sort
+          )
+          echo "Scanning ${#FILES[@]} shell script(s):"
+          printf '  %s\n' "${FILES[@]}"
+          if [ "${#FILES[@]}" -eq 0 ]; then
+            echo "No shell scripts found — nothing to lint."
+            exit 0
+          fi
+          # -x follows sourced files; --severity=warning blocks on warning+error
+          # (info/style are still emitted but don't fail the gate).
+          shellcheck -x --severity=warning "${FILES[@]}"

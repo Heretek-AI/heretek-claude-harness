@@ -3,9 +3,8 @@
 # Creates a file with a known lint error and asserts the dispatcher exits non-zero.
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TMPDIR="$(mktemp -d)"
-trap "rm -rf $TMPDIR" EXIT
+trap 'rm -rf "$TMPDIR"' EXIT
 
 BAD_FILE="$TMPDIR/bad.py"
 cat > "$BAD_FILE" <<'EOF'

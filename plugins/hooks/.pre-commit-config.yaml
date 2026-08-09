@@ -21,3 +21,13 @@ repos:
         types: [python]
         # Fast gate is also enforced by Claude Code's PreToolUse hook;
         # this catches git commits that bypass the agent loop.
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        # Issue #150: local feedback for shell-script issues before push.
+        # Mirrors the CI workflow (.github/workflows/shellcheck.yml);
+        # locally we treat info/style as warnings (severity=style matches
+        # the scanner's default) so dev loop stays fast.
+        args: ["--severity=warning"]

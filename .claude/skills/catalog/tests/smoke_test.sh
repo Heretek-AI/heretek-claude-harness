@@ -7,7 +7,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 TEMP_DIR="$(mktemp -d)"
-trap "rm -rf $TEMP_DIR" EXIT
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
 # Copy the real catalog.yaml + ADR template into the temp dir
 cp "$REPO_ROOT/catalog/catalog.yaml" "$TEMP_DIR/catalog.yaml"
