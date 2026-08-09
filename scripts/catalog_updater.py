@@ -64,7 +64,7 @@ def bump_item_sha(
         raise ValueError(f"new_sha must be 40 chars, got {len(new_sha)}")
 
     yaml = _make_yaml()
-    _catalog_text = catalog_path.read_text()  # nosonar — false positive: trusted maintainer invocation only (S8707)
+    _catalog_text = catalog_path.read_text()  # nosonar
     data = yaml.load(_catalog_text)
     item = _find_item(data, plugin_name, item_id)
     if item is None:
