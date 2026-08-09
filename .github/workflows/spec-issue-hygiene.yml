@@ -1,0 +1,80 @@
+name: spec-issue-hygiene
+
+# Reminds PR authors when a spec/review file references an issue that the PR
+# body doesn't include in a `Closes #N` (or `Fixes #N` / `Resolves #N`)
+# keyword. Closes the drift pattern surfaced by the 2026-08-08 issue↔codebase
+# audit (catalog/reviews/audit-2026-08-08.md) where 14 issues were shipped_but_open.
+#
+# Warning-only — does not block the PR. Authors can dismiss if the reference
+# is intentional context rather than a related issue.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check-hygiene:
+    name: Spec files reference issues not closed by this PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Extract issue refs from changed spec/review files
+        id: extract
+        run: |
+          changed=$(git diff --name-only "origin/${BASE_REF}...HEAD" | \
+            grep -E '(docs/superpowers/specs/.*-design\.md|catalog/reviews/.*\.md)$' || true)
+          if [ -z "$changed" ]; then
+            echo "issues=" >> "$GITHUB_OUTPUT"
+            echo "No spec/review files changed; nothing to check."
+            exit 0
+          fi
+          echo "Changed spec/review files:"
+          echo "$changed"
+          echo ""
+          refs=$(grep -ohE '#[0-9]+\b' $changed | sort -u | tr '\n' ' ' || true)
+          echo "issues=$refs" >> "$GITHUB_OUTPUT"
+          echo "Found refs: $refs"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+
+      - name: Verify each ref appears in PR body as Closes/Fixes/Resolves
+        if: steps.extract.outputs.issues != ''
+        env:
+          ISSUES: ${{ steps.extract.outputs.issues }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          missing=""
+          for issue in $ISSUES; do
+            num="${issue#\#}"
+            # Match `Closes #N`, `Fixes #N`, `Resolves #N` with optional leading whitespace and optional `#`
+            if printf '%s\n' "$BODY" | grep -qE "(Closes|Fixes|Resolves)[[:space:]]+#?${num}([^0-9]|$)"; then
+              continue
+            fi
+            missing="${missing} ${issue}"
+          done
+          if [ -n "$missing" ]; then
+            {
+              echo "## ⚠️ Spec/review files reference issues not closed by this PR"
+              echo ""
+              echo "The following issues appear in the changed spec/review files but the PR body does not include a closing keyword (Closes/Fixes/Resolves) for them:"
+              echo ""
+              for issue in $missing; do
+                echo "- \`${issue}\`"
+              done
+              echo ""
+              echo "If the reference is intentional context, ignore this warning. Otherwise, add \`Closes #N\` (or \`Fixes #N\` / \`Resolves #N\`) to the PR body."
+              echo ""
+              echo "_This check exists because the 2026-08-08 audit found 14 issues that had shipped but were never closed (catalog/reviews/audit-2026-08-08.md)._"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::Spec/review files reference issues not closed by this PR: ${missing}"
+          else
+            echo "All referenced issues have closing keywords. ✅"
+          fi
