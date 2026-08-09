@@ -1400,7 +1400,6 @@ operator action via `needs_reverify=True` on the result.
 from __future__ import annotations
 
 import json
-import subprocess
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
