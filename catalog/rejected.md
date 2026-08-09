@@ -4,6 +4,12 @@ Items that did not pass the D7 vetting bar, with the reason for rejection. Each 
 
 <!-- Newest entries at the top. -->
 
+- `revenantworks/citadel` — D7 stars fail: 0★ verified 2026-08-06 via `gh api repos/revenantworks/citadel`; repo created 2026-08-01, well below the ≥500★ bar. (Note: a separate `SethGammon/Citadel` repo at 812★ was an earlier candidate but is unrelated — the 2026-08-06 deep-research confirmed `revenantworks/citadel` as the canonical Tier-2 reference.) Revisit at next quarterly `refresh-pins` once traction accumulates. Closes #8 (Tier-2 split).
+
+- `alonbaron/claude-skills` (ponytail bundle) — D7 stars fail: ponytail ships bundled inside `alonbaron/claude-skills` (6★) as one of 6 skills; no standalone ponytail repo with material traction exists. Defer; no canonical repo to pin. Re-evaluate at next quarterly `refresh-pins`. Closes #8 (Tier-2 split).
+
+- `mcpland/storybook-mcp` — D7 stars fail: 46★ verified 2026-08-06 via `gh api repos/mcpland/storybook-mcp`; well below ≥500★ bar. (Distinct from the prior `storybookjs/mcp` 265★ rejection — see `catalog/reviews/web-frontend-storybook-mcp.md`.) Defer until community matures. Closes #8 (Tier-2 split).
+
 - `mksglu/context-mode` — D7 license fail: Elastic License 2.0 (ELv2) is not OSI-approved; ELv2 restricts hosted/managed service provision. 19,650★ verified 2026-08-06 (LICENSE file at SHA `de53368caf1c88159bcc4f665fe87dfa1ec2b000`). Re-evaluate only if upstream re-licenses to MIT / Apache-2.0 / BSD or similar OSI-approved license. Closes #55.
 
 - `find-skills` (no canonical upstream) — D7 source provenance fail: no public repo with ≥ 500★ + OSI-approved license ships a canonical `find-skills/SKILL.md`. WebSearch returned no credible match; `gh api`, `gh search repos`, and `gh search code` confirmed the skill does not exist in `anthropics/skills`, `obra/superpowers`, `JuliusBrussee/caveman`, `davila7/claude-code-templates`, or `anthropics/claude-code`. The closest matches (`davepoon/buildwithclaude` 3,252★ MIT, `futantan/agent-skills.md` 238★ no license) are tutorial repos or unrelated. ADR: `catalog/reviews/skills-pack-find-skills.md`. Re-evaluate if Anthropic ships an official `find-skills` under Apache 2.0.
