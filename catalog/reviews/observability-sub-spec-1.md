@@ -102,6 +102,6 @@ fast-gate scanner in `plugins/hooks/scripts/`. No new plugin needed.
 ## Verdict
 
 - [ ] Approved
-- [x] Proposed
+- [ ] Rejected
 
 Reason: ships with sub-spec 1 close-out PR; ratification pending review.
