@@ -134,8 +134,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         ValueError,
         KeyError,
         TypeError,
-        OSError,
-        FileNotFoundError,
+        OSError,  # includes FileNotFoundError (subclass of OSError)
         yaml.YAMLError,
     ) as exc:
         print(f"generate: error: {exc}", file=sys.stderr)
