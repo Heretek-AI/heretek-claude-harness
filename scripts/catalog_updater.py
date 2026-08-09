@@ -65,6 +65,7 @@ def bump_item_sha(
 
     yaml = _make_yaml()
     data = yaml.load(catalog_path.read_text())  # nosonar — false positive: trusted maintainer invocation only
+    item = _find_item(data, plugin_name, item_id)
     if item is None:
         raise ItemNotFound(f"{plugin_name}/{item_id}")
     _apply_item_updates(item, new_sha, vetting_date, cve_scan)
