@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TelemetryEvent",
+  "type": "object",
+  "required": [
+    "ts",
+    "session_id",
+    "event_type",
+    "tool_name",
+    "hook_decision",
+    "hook_exit_code",
+    "matcher_matched",
+    "plugin_root",
+    "schema_version"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp at event capture"
+    },
+    "session_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "description": "UUID v4 session identifier"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": ["PreToolUse", "PostToolUse"]
+    },
+    "tool_name": {
+      "type": "string",
+      "enum": ["Edit", "Write", "MultiEdit", "Read", "Bash", "Glob", "Grep", "Agent", "WebFetch", "WebSearch", "TodoWrite", "?"]
+    },
+    "tool_input_path": {
+      "type": ["string", "null"],
+      "description": "Path from tool_input, redacted by default"
+    },
+    "hook_decision": {
+      "type": "string",
+      "enum": ["allow", "block", "warn"]
+    },
+    "hook_latency_ms": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Hook execution latency in milliseconds"
+    },
+    "hook_exit_code": {
+      "type": "integer"
+    },
+    "hook_stderr_summary": {
+      "type": ["string", "null"],
+      "maxLength": 256
+    },
+    "matcher_matched": {
+      "type": "boolean"
+    },
+    "plugin_root": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "const": 1
+    }
+  },
+  "additionalProperties": false
+}
