@@ -69,13 +69,14 @@ change with `act` or by reading carefully.
 
 | PR | Branch | Status | Merged at | Notes |
 |----|--------|--------|-----------|-------|
-| 1 | `fix/sonar-blocker` | pending | — | |
-| 2 | `refactor/cognitive-complexity` | pending | — | |
-| 3 | `ci/github-actions-hardening` | pending | — | |
-| 4 | `fix/python-security-rules` | pending | — | |
-| 5 | `chore/python-code-smells` | pending | — | |
-| 6 | `fix/shell-script-issues` | pending | — | |
-| 7 | `chore/sonar-remaining` | pending | — | |
+| 1 | `fix/sonar-blocker` | ✅ merged (#142) | 2026-08-09 | |
+| 2 | `refactor/cognitive-complexity` | ✅ merged (#143) | 2026-08-09 | |
+| 3 | `ci/github-actions-hardening` | ✅ merged (#144) | 2026-08-09 | |
+| 4 | `fix/python-security-rules` | ✅ merged (#145) | 2026-08-09 | |
+| 5 | `chore/python-code-smells` | ✅ merged (#146) | 2026-08-09 | |
+| 6 | `fix/shell-script-issues` | ✅ merged (#147) | 2026-08-09 | |
+| 7 | `chore/sonar-remaining` | ✅ merged (#148) | 2026-08-09 | |
+| — | `fix/nosonar-same-line` | ✅ merged (#149) | 2026-08-09 | Marker-relocation follow-up |
 
 ## 7. Non-goals
 
