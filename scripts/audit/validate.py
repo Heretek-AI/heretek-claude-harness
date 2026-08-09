@@ -60,14 +60,15 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser.add_argument("files", nargs="+", type=Path)
     args = parser.parse_args(argv)
 
-    SCHEMA_PATH = args.schema
+    SCHEMA_PATH = args.schema.resolve()
 
     any_errors = False
     for path in args.files:
         file_has_errors = False
+        resolved = path.resolve()
         try:
-            instance = _load_instance(path)
-        except (json.JSONDecodeError, ValueError) as exc:
+            instance = _load_instance(resolved)
+        except ValueError as exc:
             print(f"{path}: parse error: {exc}", file=sys.stderr)
             any_errors = True
             file_has_errors = True

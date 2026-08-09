@@ -77,24 +77,34 @@ def _ranked_table(items: list[findings.Finding]) -> str:
     return "\n".join(lines)
 
 
+def _present_cluster_files(cluster_results_dir: Path) -> set[str]:
+    """Detect which cluster letters have a result file present."""
+    present: set[str] = set()
+    for letter in CLUSTER_LETTERS:
+        for ext in (".yaml", ".yml", ".json"):
+            if (cluster_results_dir / f"{letter}{ext}").exists():
+                present.add(letter)
+                break
+    return present
+
+
+def _present_cluster_findings(items: list[findings.Finding]) -> set[str]:
+    """Detect which cluster letters have at least one finding (by finding_id prefix)."""
+    present: set[str] = set()
+    for f in items:
+        for letter in CLUSTER_LETTERS:
+            if f.finding_id.startswith(letter):
+                present.add(letter)
+                break
+    return present
+
+
 def _coverage_gaps_section(
     cluster_results_dir: Path, items: list[findings.Finding]
 ) -> list[str]:
     """Detect missing clusters and zero-finding clusters."""
-    present_files: set[str] = set()
-    for letter in CLUSTER_LETTERS:
-        for ext in (".yaml", ".yml", ".json"):
-            if (cluster_results_dir / f"{letter}{ext}").exists():
-                present_files.add(letter)
-                break
-
-    present_findings: set[str] = set()
-    for f in items:
-        for letter in CLUSTER_LETTERS:
-            if f.finding_id.startswith(letter):
-                present_findings.add(letter)
-                break
-
+    present_files = _present_cluster_files(cluster_results_dir)
+    present_findings = _present_cluster_findings(items)
     gaps: list[str] = []
     for letter in CLUSTER_LETTERS:
         if letter not in present_files:

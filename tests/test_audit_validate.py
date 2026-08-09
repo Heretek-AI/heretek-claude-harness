@@ -1,5 +1,6 @@
 """Tests for scripts/audit/validate.py."""
 
+import json as json_mod
 import sys
 from pathlib import Path
 
@@ -15,19 +16,25 @@ def _load_yaml(p: Path) -> dict:
     return YAML(typ="safe").load(p.read_text())
 
 
+def _set_schema(monkeypatch: pytest.MonkeyPatch, schemas_dir: Path) -> None:
+    monkeypatch.setattr(
+        validate, "SCHEMA_PATH", schemas_dir / "audit_finding.schema.json"
+    )
+
+
 def test_validate_finding_accepts_valid_card(
-    schemas_dir: Path, fixtures_dir: Path
+    monkeypatch: pytest.MonkeyPatch, schemas_dir: Path, fixtures_dir: Path
 ) -> None:
-    validate.SCHEMA_PATH = schemas_dir / "audit_finding.schema.json"
+    _set_schema(monkeypatch, schemas_dir)
     valid = _load_yaml(fixtures_dir / "audit" / "valid_finding.yaml")
     errors = validate.validate_finding(valid)
     assert errors == [], f"expected no errors, got: {errors}"
 
 
 def test_validate_finding_rejects_missing_severity(
-    schemas_dir: Path, fixtures_dir: Path
+    monkeypatch: pytest.MonkeyPatch, schemas_dir: Path, fixtures_dir: Path
 ) -> None:
-    validate.SCHEMA_PATH = schemas_dir / "audit_finding.schema.json"
+    _set_schema(monkeypatch, schemas_dir)
     bad = _load_yaml(fixtures_dir / "audit" / "invalid_finding_missing_severity.yaml")
     errors = validate.validate_finding(bad)
     assert len(errors) >= 1
@@ -35,18 +42,18 @@ def test_validate_finding_rejects_missing_severity(
 
 
 def test_validate_finding_rejects_bad_enum(
-    schemas_dir: Path, fixtures_dir: Path
+    monkeypatch: pytest.MonkeyPatch, schemas_dir: Path, fixtures_dir: Path
 ) -> None:
-    validate.SCHEMA_PATH = schemas_dir / "audit_finding.schema.json"
+    _set_schema(monkeypatch, schemas_dir)
     bad = _load_yaml(fixtures_dir / "audit" / "invalid_finding_bad_enum.yaml")
     errors = validate.validate_finding(bad)
     assert len(errors) >= 1
 
 
 def test_validate_findings_indexes_errors(
-    schemas_dir: Path, fixtures_dir: Path
+    monkeypatch: pytest.MonkeyPatch, schemas_dir: Path, fixtures_dir: Path
 ) -> None:
-    validate.SCHEMA_PATH = schemas_dir / "audit_finding.schema.json"
+    _set_schema(monkeypatch, schemas_dir)
     findings = [
         _load_yaml(fixtures_dir / "audit" / "valid_finding.yaml"),
         _load_yaml(fixtures_dir / "audit" / "invalid_finding_bad_enum.yaml"),
@@ -60,12 +67,12 @@ def test_validate_findings_indexes_errors(
 
 
 def test_cli_exits_zero_on_valid(
+    monkeypatch: pytest.MonkeyPatch,
     schemas_dir: Path,
     fixtures_dir: Path,
-    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    validate.SCHEMA_PATH = schemas_dir / "audit_finding.schema.json"
+    _set_schema(monkeypatch, schemas_dir)
     # Write a single-finding YAML file the CLI can read.
     single = tmp_path / "single.yaml"
     single.write_text((fixtures_dir / "audit" / "valid_finding.yaml").read_text())
@@ -83,15 +90,13 @@ def test_cli_exits_zero_on_valid(
 
 
 def test_cli_accepts_json_input(
+    monkeypatch: pytest.MonkeyPatch,
     schemas_dir: Path,
     fixtures_dir: Path,
-    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    validate.SCHEMA_PATH = schemas_dir / "audit_finding.schema.json"
+    _set_schema(monkeypatch, schemas_dir)
     # Write a valid finding as JSON (not YAML).
-    import json as json_mod
-
     valid = _load_yaml(fixtures_dir / "audit" / "valid_finding.yaml")
     single = tmp_path / "single.json"
     single.write_text(json_mod.dumps(valid))
@@ -109,12 +114,12 @@ def test_cli_accepts_json_input(
 
 
 def test_cli_exits_one_on_invalid(
+    monkeypatch: pytest.MonkeyPatch,
     schemas_dir: Path,
     fixtures_dir: Path,
-    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    validate.SCHEMA_PATH = schemas_dir / "audit_finding.schema.json"
+    _set_schema(monkeypatch, schemas_dir)
     single = tmp_path / "bad.yaml"
     single.write_text(
         (fixtures_dir / "audit" / "invalid_finding_bad_enum.yaml").read_text()
