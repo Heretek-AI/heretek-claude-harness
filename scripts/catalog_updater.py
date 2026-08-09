@@ -64,6 +64,9 @@ def bump_item_sha(
         raise ValueError(f"new_sha must be 40 chars, got {len(new_sha)}")
 
     yaml = _make_yaml()
+    # nosonar — false positive: script is invoked by trusted maintainers / CI,
+    # not by LLMs. The --catalog CLI arg comes from the catalog commit/PR diff
+    # (already allowlist-validated upstream). See #141.
     data = yaml.load(catalog_path.read_text())
     item = _find_item(data, plugin_name, item_id)
     if item is None:
