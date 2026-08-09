@@ -73,6 +73,9 @@ def bump_item_sha(
     tmp = catalog_path.with_suffix(catalog_path.suffix + ".tmp")
     with tmp.open("w") as f:
         yaml.dump(data, f)
+    # nosonar — false positive: script is invoked by trusted maintainers / CI,
+    # not by LLMs. The --catalog CLI arg comes from the catalog commit/PR diff
+    # (already allowlist-validated upstream). See #141.
     tmp.replace(catalog_path)
 
 
