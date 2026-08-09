@@ -527,7 +527,7 @@ Run:
 ```bash
 ls -1 docs/superpowers/roadmap-rejected-candidates.md docs/superpowers/spikes/2026-08-08-*.md
 ```
-Expected: 10 files (1 rejection + 9 spikes).
+Expected: 9 files (1 rejection + 8 spike ADRs; v6-c consolidates session forking + AgentPool into one file per spec §5).
 
 - [ ] **Step 8: Commit**
 
@@ -834,7 +834,7 @@ Run:
 ```bash
 ls docs/superpowers/roadmap-rejected-candidates.md docs/superpowers/spikes/2026-08-08-*.md | wc -l
 ```
-Expected: 10.
+Expected: 9.
 
 - [ ] **Step 4: Verify PLAN.md slimmed**
 

@@ -52,3 +52,7 @@ After all 9 actions:
 - 6 phase tracking issues exist with `tracking` label
 - 3 closed issues (#87, #88 done; #92 open with reassignment comment)
 - 0 untracked v1.x→v4-vision references in new artifacts
+
+## Cross-references
+
+- Design spec: `docs/superpowers/specs/2026-08-08-roadmap-restructure-design.md`
