@@ -137,3 +137,33 @@ def test_schema_returns_1_when_missing(
     assert cli.main(["telemetry", "schema"]) == 1
     captured = capsys.readouterr()
     assert "schema file not found" in captured.err
+
+
+def test_diff_reports_each_missing_session_individually(
+    telemetry_root: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """cmd_telemetry_diff reports each missing session name, not 'or'."""
+    assert cli.main(["telemetry", "diff", "session-aaa", "no-such-b"]) == 1
+    captured = capsys.readouterr()
+    assert "session not found: no-such-b" in captured.err
+    assert "or" not in captured.err
+
+    assert cli.main(["telemetry", "diff", "no-such-a", "no-such-b"]) == 1
+    captured = capsys.readouterr()
+    assert "session not found: no-such-a" in captured.err
+    assert "session not found: no-such-b" in captured.err
+    assert "or" not in captured.err
+
+
+def test_show_session_help_mentions_substring_match() -> None:
+    """--session help text documents substring match behavior."""
+    parser = cli.build_parser()
+    # Find the --session argument on the 'show' subcommand
+    show_parser = parser._subparsers._group_actions[0].choices["telemetry"]
+    show_sub = show_parser._subparsers._group_actions[0].choices["show"]
+    for action in show_sub._actions:
+        if action.dest == "session":
+            assert "substring match" in action.help
+            assert "2026-08-08" in action.help
+            return
+    pytest.fail("--session argument not found on show subcommand")

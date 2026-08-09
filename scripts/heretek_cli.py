@@ -79,10 +79,10 @@ def cmd_telemetry_grep(args: argparse.Namespace) -> int:
 
 def cmd_telemetry_diff(args: argparse.Namespace) -> int:
     files = {f.stem: f for f in _iter_session_files(TELEMETRY_ROOT)}
-    if args.session_a not in files or args.session_b not in files:
-        print(
-            f"session not found: {args.session_a} or {args.session_b}", file=sys.stderr
-        )
+    missing = [s for s in (args.session_a, args.session_b) if s not in files]
+    if missing:
+        for name in missing:
+            print(f"session not found: {name}", file=sys.stderr)
         return 1
     events_a = _read_events([files[args.session_a]])
     events_b = _read_events([files[args.session_b]])
@@ -158,7 +158,10 @@ def build_parser() -> argparse.ArgumentParser:
     tel_sub = tel.add_subparsers(dest="command", required=True)
 
     show = tel_sub.add_parser("show", help="show events")
-    show.add_argument("--session", help="filter by session id (substring)")
+    show.add_argument(
+        "--session",
+        help="filter by session id (substring match; e.g., '2026-08-08' matches all sessions in that date folder)",
+    )
     show.add_argument("--tool", help="filter by tool name")
     show.add_argument("--since", help="filter by timestamp prefix")
     show.set_defaults(func=cmd_telemetry_show)
