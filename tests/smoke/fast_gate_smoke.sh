@@ -21,21 +21,21 @@ python3 -m plugins.hooks.scripts.fast_gate <<<"$PAYLOAD" >/dev/null 2>&1
 EXIT_CODE=$?
 set -e
 
-if [ "$EXIT_CODE" -eq 0 ]; then
+if [[ "$EXIT_CODE" -eq 0 ]]; then
     # If ruff isn't installed, the dispatcher fails open with exit 0.
     # That's acceptable but skip reporting.
     if ! command -v ruff >/dev/null 2>&1; then
         echo "fast_gate_smoke: SKIPPED (ruff not installed)"
         exit 0
     fi
-    echo "fast_gate_smoke: FAIL (expected non-zero exit on lint error)"
+    echo "fast_gate_smoke: FAIL (expected non-zero exit on lint error)" >&2
     exit 1
 fi
 
-if [ "$EXIT_CODE" -eq 2 ]; then
+if [[ "$EXIT_CODE" -eq 2 ]]; then
     echo "fast_gate_smoke: OK (dispatcher blocked bad file with exit 2)"
     exit 0
 fi
 
-echo "fast_gate_smoke: FAIL (unexpected exit code: $EXIT_CODE)"
+echo "fast_gate_smoke: FAIL (unexpected exit code: $EXIT_CODE)" >&2
 exit 1

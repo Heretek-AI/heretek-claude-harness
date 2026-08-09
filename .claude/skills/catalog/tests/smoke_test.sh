@@ -101,7 +101,7 @@ for p in cat['plugins']:
 "
 echo "---"
 echo "ADR exists at $TEMP_DIR/reviews/${ITEM_ID}.md"
-test -f "$TEMP_DIR/reviews/${ITEM_ID}.md" && echo "OK: ADR present"
+[[ -f "$TEMP_DIR/reviews/${ITEM_ID}.md" ]] && echo "OK: ADR present"
 
 echo ""
 echo "smoke test passed"
