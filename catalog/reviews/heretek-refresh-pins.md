@@ -38,9 +38,7 @@ the bar can change at any time.
 - [x] Approved (first-party)
 - [ ] Rejected
 
-## Target plugin
-
-`skills-pack`
+Runtime: .claude/skills/ + .agents/skills/ (Claude Code / opencode top-level — see `docs/superpowers/specs/2026-08-05-heretek-maintenance-skills-design.md` §3; skills ship outside `plugins/skills-pack/` so both runtimes can invoke them).
 
 ## Vetting checklist (D7 spirit)
 
