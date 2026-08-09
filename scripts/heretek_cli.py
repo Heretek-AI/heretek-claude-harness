@@ -116,6 +116,13 @@ def cmd_telemetry_export(args: argparse.Namespace) -> int:
 
 
 def cmd_telemetry_config(args: argparse.Namespace) -> int:
+    """Read/write telemetry config.properties.
+
+    Format: flat ``key: value`` lines (one per line).  Values are always
+    strings — no nested keys, no quoting, no type coercion.  Lines
+    starting with ``#`` are ignored.  Keys are sorted alphabetically
+    on write.
+    """
     config_path = TELEMETRY_ROOT / "config.properties"
     TELEMETRY_ROOT.mkdir(parents=True, exist_ok=True)
     if args.subcommand == "set":
