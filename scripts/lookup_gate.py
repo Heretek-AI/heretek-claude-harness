@@ -28,7 +28,7 @@ SENTINEL_FILE = Path.cwd() / ".heretek" / "last_lookup.json"
 # Default freshness TTL if not in profile
 DEFAULT_TTL_HOURS = 24
 # Pattern for `name==X.Y.Z` or similar pins
-PIN_RE = re.compile(r"^\s*([a-zA-Z0-9_.+-]+)\s*([=<>~!]=)\s*([0-9][^,;\s]*)", re.MULTILINE)
+PIN_RE = re.compile(r"^\s*([a-zA-Z0-9_.+-]+)\s*([=<>~!]=)\s*(\d[^,;\s]*)", re.MULTILINE)
 
 
 def _tracked_libs_for_active_model() -> set[str]:

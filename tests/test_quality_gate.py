@@ -1,6 +1,7 @@
 """Tests for Layer-2 quality_gate.py."""
 import sys
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -34,9 +35,5 @@ def test_resolve_tools_returns_subset_of_known() -> None:
 def test_run_repo_with_no_tools_exits_zero() -> None:
     """If no Layer-2 tools are installed, runner exits 0 (nothing to fail)."""
     # Force empty tool list by mocking.
-    original = quality_gate.resolve_tools
-    try:
-        quality_gate.resolve_tools = lambda: []  # type: ignore
+    with mock.patch.object(quality_gate, "resolve_tools", return_value=[]):
         assert quality_gate.run({"scope": "repo"}) == 0
-    finally:
-        quality_gate.resolve_tools = original  # type: ignore
