@@ -25,7 +25,12 @@ from pathlib import Path
 from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scripts._allowlist import require_id_segment, require_sha, require_upstream  # noqa: E402
+from scripts._allowlist import (  # noqa: E402,I001
+    require_id_segment,
+    require_ref_segment,
+    require_sha,
+    require_upstream,
+)
 
 import requests
 import yaml
@@ -214,6 +219,16 @@ def _commit_catalog_bump(
     # (falls back to "main" if detection fails; HERETEK_DEFAULT_BRANCH
     # overrides for CI / scripted environments).
     default_branch = os.environ.get("HERETEK_DEFAULT_BRANCH")
+    if default_branch:
+        try:
+            require_ref_segment("HERETEK_DEFAULT_BRANCH", default_branch)
+        except ValueError as exc:
+            log.warning(
+                "ignoring invalid HERETEK_DEFAULT_BRANCH=%r: %s",
+                default_branch,
+                exc,
+            )
+            default_branch = None
     if not default_branch:
         probe = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
@@ -222,7 +237,16 @@ def _commit_catalog_bump(
             text=True,
             timeout=10,
         )
-        default_branch = probe.stdout.strip() if probe.returncode == 0 else "main"
+        probed = probe.stdout.strip() if probe.returncode == 0 else "main"
+        if probed != "main":
+            try:
+                require_ref_segment("default_branch_probe", probed)
+            except ValueError as exc:
+                log.warning(
+                    "ignoring invalid default_branch_probe=%r: %s", probed, exc
+                )
+                probed = "main"
+        default_branch = probed
     subprocess.run(
         ["git", "checkout", default_branch],
         cwd=str(repo_root),
