@@ -99,3 +99,21 @@ def test_install_sh_skips_reinstall_when_already_present() -> None:
     assert (
         mtime_before == mtime_after
     ), "second run should not modify the hook file (must short-circuit)"
+
+
+def test_install_sh_uses_existing_precommit_config() -> None:
+    """Regression guard (A0 D30): install_git_hooks.sh must NOT silently
+    install when the config file is absent. The script reads
+    $PLUGIN_ROOT/.pre-commit-config.yaml; if the file goes missing again,
+    this test fails loudly instead of letting install_git_hooks.sh silently
+    install without a config.
+    """
+    config_path = (
+        Path(__file__).resolve().parents[1]
+        / "plugins"
+        / "hooks"
+        / ".pre-commit-config.yaml"
+    )
+    assert config_path.is_file(), (
+        "A0 spec D30 requires plugins/hooks/.pre-commit-config.yaml to exist"
+    )
