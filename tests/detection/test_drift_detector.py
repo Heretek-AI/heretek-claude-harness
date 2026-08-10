@@ -9,6 +9,7 @@ and stdout is captured via `capsys`. No test ever touches the real
 import io
 import json
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -330,3 +331,34 @@ def test_drift_detector_warns_once_per_unreferenced_import(
     assert "added import(s) not referenced" not in ctx3, (
         f"third edit must not re-warn about dropped import, got: {out3}"
     )
+
+
+def test_drift_detector_rejects_session_state_env_var_traversal(monkeypatch):
+    """#160: HERETEK_SESSION_STATE_DIR pointing outside safe root must raise."""
+    monkeypatch.setenv("HERETEK_SESSION_STATE_DIR", "/tmp/evil")
+    import importlib
+    import scripts.drift_detector as hook
+    with pytest.raises(ValueError, match="escapes safe root"):
+        importlib.reload(hook)
+
+
+def test_drift_detector_accepts_session_state_env_var_inside_safe_root(
+    monkeypatch
+):
+    """#160: env var pointing inside Path.cwd() / '.heretek' must be accepted."""
+    import importlib
+    import scripts.drift_detector as hook
+    safe_child = (Path.cwd() / ".heretek" / "sub").resolve()
+    monkeypatch.setenv("HERETEK_SESSION_STATE_DIR", str(safe_child))
+    importlib.reload(hook)  # must NOT raise
+    assert hook.SESSION_STATE_DIR == safe_child
+
+
+def test_drift_detector_default_session_state_dir_when_env_unset(monkeypatch):
+    """#160 (happy path): unset env var falls back to Path.cwd() / '.heretek' / 'session_state'."""
+    import importlib
+    import scripts.drift_detector as hook
+    monkeypatch.delenv("HERETEK_SESSION_STATE_DIR", raising=False)
+    importlib.reload(hook)  # must NOT raise
+    expected = (Path.cwd() / ".heretek" / "session_state").resolve()
+    assert hook.SESSION_STATE_DIR == expected
