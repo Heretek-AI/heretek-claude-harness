@@ -94,3 +94,20 @@ def test_mark_investigated_is_terminal(tmp_path: Path) -> None:
     ledger = Ledger(tmp_path / "ledger.json")
     ledger.mark_investigated(456, "x")
     assert ledger._entries["456"]["status"] in TERMINAL
+
+
+def test_validate_path_rejects_dotdot_traversal(tmp_ledger: Path) -> None:
+    """Path-traversal escape: '..' component must be rejected."""
+    with pytest.raises(ValueError, match="contains '..' component"):
+        Ledger(Path(".omc/state/issue-loop/../../../etc/passwd"))
+    with pytest.raises(ValueError, match="contains '..' component"):
+        Ledger(Path("foo/../bar/ledger.json"))
+    with pytest.raises(ValueError, match="contains '..' component"):
+        Ledger(Path("../ledger.json"))
+
+
+def test_validate_path_allows_normal_paths(tmp_ledger: Path) -> None:
+    """Non-traversal paths work normally (existing behavior preserved)."""
+    Ledger(tmp_ledger)
+    Ledger(Path(".omc/state/issue-loop/ledger.json"))
+    Ledger(Path("/tmp/some/ledger.json"))

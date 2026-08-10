@@ -13,7 +13,7 @@ from .ledger import IssueRef
 
 Path = Literal["fix", "investigate", "spec", "break-down", "skip"]
 
-_FILE_LINE_RE = re.compile(r"`?[\w./\-]+\.[A-Za-z]+:\d+`?")
+_FILE_LINE_RE = re.compile(r"`?[\w./\-]{1,256}\.[A-Za-z]{1,10}:\d{1,7}`?")
 _FIX_KEYWORDS = re.compile(
     r"\b(fix|patch|replace|use\s+\w+\s+instead)\b", re.IGNORECASE
 )

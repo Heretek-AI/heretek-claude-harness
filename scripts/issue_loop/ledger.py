@@ -24,7 +24,7 @@ class IssueRef:
 
 class Ledger:
     def __init__(self, path: Path) -> None:
-        self.path = path
+        self.path = self._validate_path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.path.exists():
             # TODO(follow-up): I5 — no error handling for corrupt/truncated JSON.
@@ -32,6 +32,18 @@ class Ledger:
         else:
             self._entries = {}
             self._save()
+
+    @staticmethod
+    def _validate_path(path: Path) -> Path:
+        """Reject paths with '..' components (path-traversal escape attempt).
+
+        Prevents LLM-driven CLI callers from directing ledger writes outside
+        the intended directory via path traversal.
+        """
+        for part in path.parts:
+            if part == "..":
+                raise ValueError(f"ledger path {path!r} contains '..' component")
+        return path
 
     def _save(self) -> None:
         self.path.write_text(json.dumps(self._entries, indent=2, sort_keys=True))
