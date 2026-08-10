@@ -19,10 +19,24 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts._allowlist import require_session_id  # noqa: E402
 
-SESSION_STATE_DIR = Path(os.environ.get(
-    "HERETEK_SESSION_STATE_DIR",
-    Path.cwd() / ".heretek" / "session_state",
-))
+def _resolve_session_state_dir() -> Path:
+    """Resolve HERETEK_SESSION_STATE_DIR against the safe root (Path.cwd() / ".heretek").
+
+    Rejects values that resolve outside the safe root with ValueError. Stdlib only.
+    """
+    safe_root = (Path.cwd() / ".heretek").resolve()
+    raw = os.environ.get("HERETEK_SESSION_STATE_DIR")
+    if raw is None:
+        return (safe_root / "session_state").resolve()
+    candidate = Path(raw).resolve()
+    if not candidate.is_relative_to(safe_root):
+        raise ValueError(
+            f"HERETEK_SESSION_STATE_DIR {raw!r} escapes safe root {safe_root}"
+        )
+    return candidate
+
+
+SESSION_STATE_DIR = _resolve_session_state_dir()
 REPEATED_EDIT_THRESHOLD = 3
 MONOTONIC_DIFF_THRESHOLD = 3
 
