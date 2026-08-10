@@ -45,12 +45,7 @@ def validate_finding(finding: dict) -> list[str]:
 
 def validate_findings(findings: list[dict]) -> list[tuple[int, list[str]]]:
     """Validate a list; return [(index, errors)] for every invalid entry."""
-    return [
-        (i, errs)
-        for i, f in enumerate(findings)
-        for errs in [validate_finding(f)]
-        if errs
-    ]
+    return [(i, errs) for i, f in enumerate(findings) for errs in [validate_finding(f)] if errs]
 
 
 def main(argv: Iterable[str] | None = None) -> int:

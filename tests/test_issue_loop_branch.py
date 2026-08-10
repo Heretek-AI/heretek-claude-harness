@@ -7,7 +7,9 @@ from scripts.issue_loop.branch import BranchManager, slug_from_title
 
 
 def test_slug_from_title_basic() -> None:
-    assert slug_from_title("Security: yaml.load without Loader") == "security-yaml-load-without-loader"
+    assert (
+        slug_from_title("Security: yaml.load without Loader") == "security-yaml-load-without-loader"
+    )
 
 
 def test_slug_from_title_truncates_at_max_len() -> None:
@@ -18,7 +20,10 @@ def test_slug_from_title_truncates_at_max_len() -> None:
 
 
 def test_slug_from_title_drops_punctuation() -> None:
-    assert slug_from_title("Fix: TOCTOU race in `_save_done_items`") == "fix-toctou-race-in-save-done-items"
+    assert (
+        slug_from_title("Fix: TOCTOU race in `_save_done_items`")
+        == "fix-toctou-race-in-save-done-items"
+    )
 
 
 def test_slug_from_title_collapses_dashes() -> None:
@@ -42,9 +47,7 @@ def test_branch_manager_create(git_repo: Path) -> None:
     bm = BranchManager(git_repo)
     name = bm.create(158, "yaml.load without Loader")
     assert name == "auto/158-yaml-load-without-loader"
-    out = subprocess.check_output(
-        ["git", "branch"], cwd=git_repo
-    ).decode()
+    out = subprocess.check_output(["git", "branch"], cwd=git_repo).decode()
     assert "auto/158-yaml-load-without-loader" in out
 
 

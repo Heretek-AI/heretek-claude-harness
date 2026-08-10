@@ -1,12 +1,12 @@
 {
-  "lspServers": {
-    "python": {
-      "command": "ruff",
-      "args": ["server"],
-      "extensionToLanguage": {
-        ".py": "python",
-        ".pyi": "python"
-      }
-    }
-  }
+	"lspServers": {
+		"python": {
+			"command": "ruff",
+			"args": ["server"],
+			"extensionToLanguage": {
+				".py": "python",
+				".pyi": "python"
+			}
+		}
+	}
 }

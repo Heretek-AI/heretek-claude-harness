@@ -6,6 +6,7 @@ entry by a future PR. Validates shape (top-level mapping with
 `latest_version: str`) so the cache files remain parseable by
 `scripts/stale_dep_intercept.py` and `scripts/staleness_metric_spike.py`.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -29,6 +30,6 @@ def test_freshness_cache_entries_have_latest_version_field():
         data = yaml.safe_load(path.read_text())
         assert isinstance(data, dict), f"{path}: top-level must be a mapping"
         assert "latest_version" in data, f"{path}: missing 'latest_version'"
-        assert isinstance(data["latest_version"], str), (
-            f"{path}: latest_version must be a string, got {type(data['latest_version'])}"
-        )
+        assert isinstance(
+            data["latest_version"], str
+        ), f"{path}: latest_version must be a string, got {type(data['latest_version'])}"

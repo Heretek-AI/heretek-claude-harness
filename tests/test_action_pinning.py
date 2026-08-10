@@ -1,4 +1,5 @@
 """D20: every `uses:` reference in every workflow must be pinned to a 40-char SHA."""
+
 from __future__ import annotations
 
 import re

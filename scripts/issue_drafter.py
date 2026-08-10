@@ -3,6 +3,7 @@ bumps catalog.yaml's sha for one item.
 
 CLI: not directly invokable — called by scripts/security_scan.py.
 """
+
 from __future__ import annotations
 
 import json
@@ -45,7 +46,9 @@ def _search_existing_issue(*, token: str, repo: str, title: str) -> Optional[str
     return items[0]["html_url"] if items else None
 
 
-def _create_issue(*, token: str, repo: str, title: str, body: str, labels: list[str]) -> tuple[str, int]:
+def _create_issue(
+    *, token: str, repo: str, title: str, body: str, labels: list[str]
+) -> tuple[str, int]:
     r = requests.post(
         f"{GITHUB_API}/repos/{repo}/issues",
         headers=_gh_headers(token),
@@ -70,7 +73,9 @@ def _create_branch(*, token: str, repo: str, branch: str, base_sha: str) -> str:
     return r.json()["ref"]
 
 
-def _create_pr(*, token: str, repo: str, title: str, body: str, head: str, base: str) -> tuple[str, int]:
+def _create_pr(
+    *, token: str, repo: str, title: str, body: str, head: str, base: str
+) -> tuple[str, int]:
     r = requests.post(
         f"{GITHUB_API}/repos/{repo}/pulls",
         headers=_gh_headers(token),
@@ -84,12 +89,15 @@ def _create_pr(*, token: str, repo: str, title: str, body: str, head: str, base:
 
 
 def _build_issue_body(report: ScannerReport, *, plugin: str, item: str, new_sha: str) -> str:
-    findings_md = "\n".join(
-        f"- `{f.path}:{f.line}` — {f.message}"
-        + (f" (rule `{f.rule_id}`)" if f.rule_id else "")
-        + (f" (CVE `{f.cve_id}`)" if f.cve_id else "")
-        for f in report.findings
-    ) or "_(no findings)_"
+    findings_md = (
+        "\n".join(
+            f"- `{f.path}:{f.line}` — {f.message}"
+            + (f" (rule `{f.rule_id}`)" if f.rule_id else "")
+            + (f" (CVE `{f.cve_id}`)" if f.cve_id else "")
+            for f in report.findings
+        )
+        or "_(no findings)_"
+    )
     return (
         f"New upstream release detected for `{plugin}/{item}`.\n\n"
         f"- New SHA: `{new_sha}`\n"
@@ -141,9 +149,7 @@ def draft_issue_and_pr(
         check_content_length(r)
         r.raise_for_status()
     except requests.HTTPError as e:
-        raise RuntimeError(
-            f"base ref lookup failed for {base_branch}: {e}"
-        ) from e
+        raise RuntimeError(f"base ref lookup failed for {base_branch}: {e}") from e
     # JSON-shape fallback: response was 2xx but missing {"object": {"sha": ...}}.
     base_ref = r.json().get("object", {}).get("sha") or ("0" * 40)
 

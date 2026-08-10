@@ -1,6 +1,7 @@
 """Sanity checks that the new workflows are present, valid YAML, and have
 the required jobs. Full end-to-end execution requires `act` and a GH
 token; that lives in CI smoke and is not part of pytest."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -41,9 +42,12 @@ def test_all_workflows_pinned_to_commit_sha() -> None:
     """Re-uses test_action_pinning.py; this is a smoke check that the new
     workflows are included in that test."""
     from tests.test_action_pinning import _iter_uses_lines
+
     refs = _iter_uses_lines()
     new_wf_refs = [r for r in refs if r[0].name in ("security-scan.yml", "security-scan-pr.yml")]
-    assert len(new_wf_refs) >= 5, f"expected new workflows to add at least 5 uses refs, got {len(new_wf_refs)}"
+    assert (
+        len(new_wf_refs) >= 5
+    ), f"expected new workflows to add at least 5 uses refs, got {len(new_wf_refs)}"
 
 
 def test_security_scan_workflow_has_emergency_issue_step() -> None:

@@ -3,6 +3,7 @@
 All commands are shell-out via subprocess.run with check=False so callers
 can inspect exit codes (e.g. rebase conflict returns False, not raise).
 """
+
 from __future__ import annotations
 
 import re

@@ -67,9 +67,7 @@ def test_emits_one_payload_per_critical_high() -> None:
 
 def test_caps_at_five_per_cluster() -> None:
     """8 critical findings in cluster A yields 5 individual + 1 umbrella with overflow=3."""
-    fs = [
-        _f("critical", f"A-{i:03d}", "Readability & quality bar") for i in range(1, 9)
-    ]
+    fs = [_f("critical", f"A-{i:03d}", "Readability & quality bar") for i in range(1, 9)]
     payloads = build_issue_payloads(fs)
     # 5 individual + 1 umbrella = 6
     assert len(payloads) == 6
@@ -80,9 +78,7 @@ def test_caps_at_five_per_cluster() -> None:
 
 def test_umbrella_title_shows_overflow_count() -> None:
     """Umbrella issue title includes the correct overflow count."""
-    fs = [
-        _f("critical", f"A-{i:03d}", "Readability & quality bar") for i in range(1, 11)
-    ]
+    fs = [_f("critical", f"A-{i:03d}", "Readability & quality bar") for i in range(1, 11)]
     payloads = build_issue_payloads(fs)
     umbrella = payloads[-1]
     assert "5 additional findings" in umbrella.title
@@ -90,9 +86,7 @@ def test_umbrella_title_shows_overflow_count() -> None:
 
 def test_per_cluster_cap_not_global() -> None:
     """Cap is per-cluster: 5 in A + 5 in B each produce 5 issues, no umbrella."""
-    fs_a = [
-        _f("critical", f"A-{i:03d}", "Readability & quality bar") for i in range(1, 6)
-    ]
+    fs_a = [_f("critical", f"A-{i:03d}", "Readability & quality bar") for i in range(1, 6)]
     fs_b = [_f("critical", f"B-{i:03d}", "Design & architecture") for i in range(1, 6)]
     payloads = build_issue_payloads(fs_a + fs_b)
     # Exactly 10 — no umbrella because neither cluster exceeds cap

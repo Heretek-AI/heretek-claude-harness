@@ -32,9 +32,7 @@ def test_hooks_manifest_has_fast_gate_pre_tool_use() -> None:
     # PreToolUse must contain a fast_gate entry on Edit|Write|MultiEdit
     # plus a telemetry_collector entry (v3.5 collector sprint invariant)
     fast_gate_entries = [e for e in pre_tool if e["matcher"] == "Edit|Write|MultiEdit"]
-    assert (
-        len(fast_gate_entries) == 1
-    ), "expected exactly one fast_gate PreToolUse entry"
+    assert len(fast_gate_entries) == 1, "expected exactly one fast_gate PreToolUse entry"
     hook = fast_gate_entries[0]["hooks"][0]
     assert hook["type"] == "command"
     assert "fast_gate.py" in hook["command"]

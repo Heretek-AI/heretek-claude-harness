@@ -16,12 +16,20 @@ def fake_loop(tmp_path: Path) -> IssueLoop:
     # to `git branch`, so initialize one. Brief fixture uses BranchManager(tmp_path)
     # verbatim but does not init git — this is the minimal deviation required to
     # let the verbatim implementation run.
-    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=tmp_path, check=True, capture_output=True)
-    subprocess.run(["git", "config", "user.email", "t@t"], cwd=tmp_path, check=True, capture_output=True)
-    subprocess.run(["git", "config", "user.name", "t"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "init", "-q", "-b", "main"], cwd=tmp_path, check=True, capture_output=True
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "t@t"], cwd=tmp_path, check=True, capture_output=True
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "t"], cwd=tmp_path, check=True, capture_output=True
+    )
     (tmp_path / "init.txt").write_text("init")
     subprocess.run(["git", "add", "init.txt"], cwd=tmp_path, check=True, capture_output=True)
-    subprocess.run(["git", "commit", "-q", "-m", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(
+        ["git", "commit", "-q", "-m", "init"], cwd=tmp_path, check=True, capture_output=True
+    )
     prompts = tmp_path / "prompts"
     prompts.mkdir()
     for name in ("explore", "planner", "executor", "test_engineer", "verifier"):
@@ -34,8 +42,12 @@ def fake_loop(tmp_path: Path) -> IssueLoop:
         dispatch=lambda n, p, w, issue: '{"approved": true, "severity_max": "LOW", "findings": []}',
     )
     gp = GatePoller(
-        "tok", "o/r", pr_number=1,
-        fetcher=lambda: GateVerdict(ci="green", copilot="approved", sonar="passed", code_reviewer="approved"),
+        "tok",
+        "o/r",
+        pr_number=1,
+        fetcher=lambda: GateVerdict(
+            ci="green", copilot="approved", sonar="passed", code_reviewer="approved"
+        ),
         sleep=lambda s: None,
     )
     m = Merger("tok", "o/r", local_repo=tmp_path)

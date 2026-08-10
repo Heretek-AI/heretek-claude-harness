@@ -1,4 +1,5 @@
 """Pytest config for freshness_eval (#38)."""
+
 import pytest
 from pathlib import Path
 

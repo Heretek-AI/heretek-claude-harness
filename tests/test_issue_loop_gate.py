@@ -3,6 +3,7 @@
 Covers GateVerdict.ok semantics and GatePoller.wait() timeout + happy path
 with injectable fetcher / sleep / clock.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

@@ -8,6 +8,7 @@ from scripts/templates/plugin/{plugin.json,README.md}. Fails if the plugin
 directory already exists. Plugin name must match the catalog convention:
 lowercase, digits, hyphens; first character alphanumeric.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -29,9 +30,7 @@ def _display_name(slug: str) -> str:
 def scaffold(repo_root: Path, name: str, description: str = "") -> Path:
     """Create plugins/<name>/ from templates. Returns the created dir."""
     if not PLUGIN_NAME_RE.match(name):
-        raise ValueError(
-            f"invalid plugin name {name!r}: must match {PLUGIN_NAME_RE.pattern}"
-        )
+        raise ValueError(f"invalid plugin name {name!r}: must match {PLUGIN_NAME_RE.pattern}")
     plugin_dir = repo_root / "plugins" / name
     if plugin_dir.exists():
         raise FileExistsError(f"plugin directory already exists: {plugin_dir}")
@@ -42,14 +41,12 @@ def scaffold(repo_root: Path, name: str, description: str = "") -> Path:
 
     display = _display_name(name)
     plugin_json = (
-        plugin_json_tmpl
-        .replace("<name>", name)
+        plugin_json_tmpl.replace("<name>", name)
         .replace("<displayName>", display)
         .replace("<description>", description)
     )
     readme = (
-        readme_tmpl
-        .replace("<name>", name)
+        readme_tmpl.replace("<name>", name)
         .replace("<displayName>", display)
         .replace("<description>", description)
     )

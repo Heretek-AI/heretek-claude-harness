@@ -12,6 +12,7 @@ Token format:
 
 The TTL is read from the active model's profile; default 24h.
 """
+
 from __future__ import annotations
 
 from datetime import datetime, timezone

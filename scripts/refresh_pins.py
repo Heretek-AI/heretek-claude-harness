@@ -15,6 +15,7 @@ Usage:
   python scripts/refresh_pins.py --github-token $TOK  # live API checks
   python scripts/refresh_pins.py --update-shas        # write new SHAs
 """
+
 from __future__ import annotations
 
 import argparse
@@ -26,7 +27,6 @@ from typing import Any, Optional
 
 import yaml
 
-import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts._allowlist import require_ref_segment, require_upstream
 from scripts._http import check_content_length
@@ -70,7 +70,9 @@ def _github_get(path: str, gh_token: Optional[str]) -> dict:
         return {}
 
 
-def _get_latest_release_sha(upstream: str, *, gh_token: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+def _get_latest_release_sha(
+    upstream: str, *, gh_token: Optional[str]
+) -> tuple[Optional[str], Optional[str]]:
     """Return (sha, tag) of upstream's latest release, or (None, None)."""
     data = _github_get(f"/repos/{upstream}/releases/latest", gh_token)
     if not data:
@@ -83,7 +85,9 @@ def _check_vetting_date(item: dict, details: dict) -> Optional[str]:
     vetting = item.get("vetting") or {}
     vetting_date = vetting.get("date")
     if vetting_date and _days_since(vetting_date) > STALENESS_WINDOW_DAYS:
-        details["reason"] = f"vetting.date {vetting_date} is older than {STALENESS_WINDOW_DAYS} days"
+        details["reason"] = (
+            f"vetting.date {vetting_date} is older than {STALENESS_WINDOW_DAYS} days"
+        )
         return "stale_commit"
     return None
 
@@ -163,7 +167,9 @@ def _safe_load_catalog(catalog_path: Path) -> dict:
     return yaml.safe_load(catalog_path.resolve().read_text())
 
 
-def check_catalog(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[str, Path, str, dict]]:
+def check_catalog(
+    catalog_path: Path, *, gh_token: Optional[str]
+) -> list[tuple[str, Path, str, dict]]:
     catalog = _safe_load_catalog(catalog_path)
     results: list[tuple[str, Path, str, dict]] = []
     for plugin in catalog.get("plugins", []):
@@ -184,9 +190,7 @@ def bump_sha(item: dict, new_sha: str) -> dict:
     return out
 
 
-def _resolve_new_sha(
-    item: dict, gh_token: Optional[str]
-) -> Optional[str]:
+def _resolve_new_sha(item: dict, gh_token: Optional[str]) -> Optional[str]:
     """Return the latest upstream release SHA, or None if this item should be skipped.
 
     Skips items with missing upstream, missing sha, or first-party sha.
@@ -245,8 +249,11 @@ def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[st
 def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
-    parser.add_argument("--update-shas", action="store_true",
-                        help="Write updated SHAs back to the catalog (requires --github-token).")
+    parser.add_argument(
+        "--update-shas",
+        action="store_true",
+        help="Write updated SHAs back to the catalog (requires --github-token).",
+    )
     parser.add_argument("--github-token", default=os.environ.get("GITHUB_TOKEN"))
     args = parser.parse_args(argv)
     if args.update_shas:
@@ -268,7 +275,9 @@ def main(argv: Optional[list[str]] = None) -> int:
             rc = 1
         print(f"{status:<14} {path.name:<24} {item_id:<28} {detail_str}")
     print()
-    print(f"Summary: {len(results)} item(s); {sum(1 for s, *_ in results if s != 'ok' and s != 'skipped')} stale")
+    print(
+        f"Summary: {len(results)} item(s); {sum(1 for s, *_ in results if s != 'ok' and s != 'skipped')} stale"
+    )
     return rc
 
 

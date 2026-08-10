@@ -1,4 +1,5 @@
 """Shared HTTP response guards for GitHub API calls."""
+
 MAX_RESPONSE_BYTES = 50_000_000  # 50 MB hard cap; legitimate GitHub API responses are < 10 MB
 
 
@@ -17,6 +18,4 @@ def check_content_length(response) -> None:
     except ValueError:
         return  # malformed header is not our problem to police
     if n > MAX_RESPONSE_BYTES:
-        raise ValueError(
-            f"GitHub API response Content-Length={n} exceeds cap {MAX_RESPONSE_BYTES}"
-        )
+        raise ValueError(f"GitHub API response Content-Length={n} exceeds cap {MAX_RESPONSE_BYTES}")

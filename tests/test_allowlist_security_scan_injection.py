@@ -5,6 +5,7 @@ Sites covered:
 - security_scan.py:130 — `_commit_catalog_bump` interpolates `item_id` +
   `new_sha[:12]` into a git branch name.
 """
+
 import sys
 from pathlib import Path
 
@@ -24,7 +25,9 @@ def test_shallow_clone_rejects_evil_upstream(tmp_path: Path) -> None:
     assert not target.exists()
 
 
-def test_shallow_clone_accepts_well_formed_upstream(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_shallow_clone_accepts_well_formed_upstream(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Well-formed upstream proceeds (we mock `git clone` so no network)."""
     called: list[list[str]] = []
 
@@ -42,7 +45,9 @@ def test_shallow_clone_accepts_well_formed_upstream(tmp_path: Path, monkeypatch:
     assert any("rust-lang/rust-analyzer" in str(arg) for arg in clone_argv)
 
 
-def test_commit_branch_rejects_evil_item_id(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_commit_branch_rejects_evil_item_id(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """`item_id` containing `/` is rejected before any git call."""
     catalog = tmp_path / "catalog.yaml"
     catalog.write_text("plugins: []\n")
@@ -79,7 +84,9 @@ def test_commit_branch_rejects_non_hex_sha(tmp_path: Path, monkeypatch: pytest.M
         )
 
 
-def test_commit_branch_constructs_safe_branch_name(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_commit_branch_constructs_safe_branch_name(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Well-formed item_id + sha produce a well-formed branch name; git calls
     use the validated branch (no extra sanitization needed)."""
     catalog = tmp_path / "catalog.yaml"

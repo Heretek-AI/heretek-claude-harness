@@ -1,154 +1,171 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://heretek.ai/schemas/marketplace.schema.json",
-  "title": "Claude Code marketplace.json",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["name", "owner", "plugins"],
-  "properties": {
-    "$schema": { "type": "string" },
-    "name": {
-      "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9-]*$",
-      "minLength": 1,
-      "description": "Marketplace identifier; lowercase, hyphenated."
-    },
-    "description": { "type": "string" },
-    "version": { "type": "string" },
-    "owner": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["name"],
-      "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "email": { "type": "string", "format": "email" },
-        "url": { "type": "string", "format": "uri" }
-      }
-    },
-    "metadata": {
-      "type": "object",
-      "additionalProperties": true,
-      "properties": {
-        "pluginRoot": {
-          "type": "string",
-          "description": "Base directory for relative plugin sources (e.g. './plugins')."
-        }
-      }
-    },
-    "allowCrossMarketplaceDependenciesOn": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
-    "renames": {
-      "type": "object",
-      "description": "Plugin rename/removal map for graceful migration (Claude Code v2.1.193+).",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["from"],
-        "properties": {
-          "from": { "type": "string" },
-          "to": { "type": "string" }
-        }
-      }
-    },
-    "plugins": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/pluginEntry" }
-    }
-  },
-  "$defs": {
-    "pluginEntry": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["name", "source"],
-      "properties": {
-        "name": {
-          "type": "string",
-          "pattern": "^[a-z0-9][a-z0-9-]*$",
-          "minLength": 1
-        },
-        "source": {
-          "oneOf": [
-            { "type": "string", "minLength": 1, "description": "Relative source name; resolved against metadata.pluginRoot." },
-            { "$ref": "#/$defs/sourceObject" }
-          ]
-        },
-        "description": { "type": "string" },
-        "version": { "type": "string", "description": "Omitted for first-party (SHA-ride, D11)." },
-        "author": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "name": { "type": "string" },
-            "email": { "type": "string", "format": "email" },
-            "url": { "type": "string", "format": "uri" }
-          }
-        },
-        "homepage": { "type": "string", "format": "uri" },
-        "repository": { "type": "string", "format": "uri" },
-        "license": { "type": "string" },
-        "keywords": { "type": "array", "items": { "type": "string" } },
-        "category": { "type": "string" },
-        "tags": { "type": "array", "items": { "type": "string" } },
-        "commands": { "type": "array", "items": { "type": "string" } },
-        "agents": { "type": "array", "items": { "type": "string" } },
-        "hooks": {
-          "oneOf": [
-            { "type": "string" },
-            { "type": "object" }
-          ]
-        },
-        "mcpServers": {
-          "oneOf": [
-            { "type": "string" },
-            { "type": "object" }
-          ]
-        },
-        "strict": { "type": "boolean" }
-      }
-    },
-    "sourceObject": {
-      "type": "object",
-      "required": ["source"],
-      "properties": {
-        "source": {
-          "type": "string",
-          "enum": ["github", "git-subdir", "url", "npm"]
-        },
-        "repo": { "type": "string", "description": "owner/repo for source=github." },
-        "url": { "type": "string", "format": "uri", "description": "Git URL for source=git-subdir or source=url." },
-        "path": { "type": "string", "description": "Subdirectory within the upstream repo (git-subdir) or plugin manifest path." },
-        "ref": { "type": "string", "description": "Git ref (branch or tag). For git-subdir." },
-        "sha": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{40}$",
-          "description": "Full 40-char commit SHA. Required for vetted 3rd-party per D7."
-        },
-        "package": { "type": "string", "description": "NPM package name for source=npm." },
-        "headers": {
-          "type": "object",
-          "additionalProperties": { "type": "string" },
-          "description": "HTTP headers for source=url."
-        }
-      },
-      "allOf": [
-        {
-          "if": { "properties": { "source": { "const": "github" } } },
-          "then": { "required": ["source", "repo"] }
-        },
-        {
-          "if": { "properties": { "source": { "const": "git-subdir" } } },
-          "then": { "required": ["source", "url", "path"] }
-        },
-        {
-          "if": { "properties": { "source": { "const": "url" } } },
-          "then": { "required": ["source", "url"] }
-        },
-        {
-          "if": { "properties": { "source": { "const": "npm" } } },
-          "then": { "required": ["source", "package"] }
-        }
-      ]
-    }
-  }
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://heretek.ai/schemas/marketplace.schema.json",
+	"title": "Claude Code marketplace.json",
+	"type": "object",
+	"additionalProperties": false,
+	"required": ["name", "owner", "plugins"],
+	"properties": {
+		"$schema": { "type": "string" },
+		"name": {
+			"type": "string",
+			"pattern": "^[a-z0-9][a-z0-9-]*$",
+			"minLength": 1,
+			"description": "Marketplace identifier; lowercase, hyphenated."
+		},
+		"description": { "type": "string" },
+		"version": { "type": "string" },
+		"owner": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["name"],
+			"properties": {
+				"name": { "type": "string", "minLength": 1 },
+				"email": { "type": "string", "format": "email" },
+				"url": { "type": "string", "format": "uri" }
+			}
+		},
+		"metadata": {
+			"type": "object",
+			"additionalProperties": true,
+			"properties": {
+				"pluginRoot": {
+					"type": "string",
+					"description": "Base directory for relative plugin sources (e.g. './plugins')."
+				}
+			}
+		},
+		"allowCrossMarketplaceDependenciesOn": {
+			"type": "array",
+			"items": { "type": "string" }
+		},
+		"renames": {
+			"type": "object",
+			"description": "Plugin rename/removal map for graceful migration (Claude Code v2.1.193+).",
+			"additionalProperties": {
+				"type": "object",
+				"required": ["from"],
+				"properties": {
+					"from": { "type": "string" },
+					"to": { "type": "string" }
+				}
+			}
+		},
+		"plugins": {
+			"type": "array",
+			"items": { "$ref": "#/$defs/pluginEntry" }
+		}
+	},
+	"$defs": {
+		"pluginEntry": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": ["name", "source"],
+			"properties": {
+				"name": {
+					"type": "string",
+					"pattern": "^[a-z0-9][a-z0-9-]*$",
+					"minLength": 1
+				},
+				"source": {
+					"oneOf": [
+						{
+							"type": "string",
+							"minLength": 1,
+							"description": "Relative source name; resolved against metadata.pluginRoot."
+						},
+						{ "$ref": "#/$defs/sourceObject" }
+					]
+				},
+				"description": { "type": "string" },
+				"version": {
+					"type": "string",
+					"description": "Omitted for first-party (SHA-ride, D11)."
+				},
+				"author": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"name": { "type": "string" },
+						"email": { "type": "string", "format": "email" },
+						"url": { "type": "string", "format": "uri" }
+					}
+				},
+				"homepage": { "type": "string", "format": "uri" },
+				"repository": { "type": "string", "format": "uri" },
+				"license": { "type": "string" },
+				"keywords": { "type": "array", "items": { "type": "string" } },
+				"category": { "type": "string" },
+				"tags": { "type": "array", "items": { "type": "string" } },
+				"commands": { "type": "array", "items": { "type": "string" } },
+				"agents": { "type": "array", "items": { "type": "string" } },
+				"hooks": {
+					"oneOf": [{ "type": "string" }, { "type": "object" }]
+				},
+				"mcpServers": {
+					"oneOf": [{ "type": "string" }, { "type": "object" }]
+				},
+				"strict": { "type": "boolean" }
+			}
+		},
+		"sourceObject": {
+			"type": "object",
+			"required": ["source"],
+			"properties": {
+				"source": {
+					"type": "string",
+					"enum": ["github", "git-subdir", "url", "npm"]
+				},
+				"repo": {
+					"type": "string",
+					"description": "owner/repo for source=github."
+				},
+				"url": {
+					"type": "string",
+					"format": "uri",
+					"description": "Git URL for source=git-subdir or source=url."
+				},
+				"path": {
+					"type": "string",
+					"description": "Subdirectory within the upstream repo (git-subdir) or plugin manifest path."
+				},
+				"ref": {
+					"type": "string",
+					"description": "Git ref (branch or tag). For git-subdir."
+				},
+				"sha": {
+					"type": "string",
+					"pattern": "^[a-f0-9]{40}$",
+					"description": "Full 40-char commit SHA. Required for vetted 3rd-party per D7."
+				},
+				"package": {
+					"type": "string",
+					"description": "NPM package name for source=npm."
+				},
+				"headers": {
+					"type": "object",
+					"additionalProperties": { "type": "string" },
+					"description": "HTTP headers for source=url."
+				}
+			},
+			"allOf": [
+				{
+					"if": { "properties": { "source": { "const": "github" } } },
+					"then": { "required": ["source", "repo"] }
+				},
+				{
+					"if": { "properties": { "source": { "const": "git-subdir" } } },
+					"then": { "required": ["source", "url", "path"] }
+				},
+				{
+					"if": { "properties": { "source": { "const": "url" } } },
+					"then": { "required": ["source", "url"] }
+				},
+				{
+					"if": { "properties": { "source": { "const": "npm" } } },
+					"then": { "required": ["source", "package"] }
+				}
+			]
+		}
+	}
 }

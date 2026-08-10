@@ -8,6 +8,7 @@ async checks ≤2s.
 Usage: registered as a PostToolUse hook in plugins/hooks/hooks/hooks.json
 (D15 — only the hooks plugin owns quality-gate hooks).
 """
+
 from __future__ import annotations
 
 import json
@@ -66,6 +67,7 @@ def _check_content(new_content: str) -> list[str]:
             continue
         try:
             import yaml
+
             cache = yaml.safe_load(cache_file.read_text())
         except Exception:
             continue
@@ -122,12 +124,16 @@ def main() -> int:  # nosonar — false positive: hook-script entrypoint always 
         return 0
 
     # Async-with-warning per spec §2 (non-blocking, hooks adds context to next turn)
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PostToolUse",
-            "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PostToolUse",
+                    "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
+                }
+            }
+        )
+    )
     return 0
 
 

@@ -1,4 +1,5 @@
 """Tests for scripts/_http.py — shared HTTP response guards."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock

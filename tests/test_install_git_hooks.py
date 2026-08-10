@@ -1,4 +1,5 @@
 """Tests for plugins/hooks/scripts/install_git_hooks.sh."""
+
 import shutil
 import subprocess
 from pathlib import Path
@@ -15,16 +16,20 @@ def _pre_commit_cli_works() -> bool:
     `import pre_commit` is not enough — the CLI requires additional deps
     (e.g. PyYAML) that the install script also requires.
     """
-    return subprocess.run(
-        ["python3", "-m", "pre_commit", "--version"],
-        capture_output=True,
-    ).returncode == 0
+    return (
+        subprocess.run(
+            ["python3", "-m", "pre_commit", "--version"],
+            capture_output=True,
+        ).returncode
+        == 0
+    )
 
 
 def test_install_sh_exists_and_executable() -> None:
     assert INSTALL_SH.is_file()
     import os
     import stat
+
     mode = os.stat(INSTALL_SH).st_mode
     assert mode & stat.S_IXUSR, "install_git_hooks.sh must be user-executable"
 
@@ -52,13 +57,9 @@ def test_install_sh_idempotent_in_real_repo() -> None:
         pytest.skip("python3 not installed")
     if not _pre_commit_cli_works():
         pytest.skip("pre-commit CLI not runnable (missing deps like pyyaml)")
-    first = subprocess.run(
-        ["bash", str(INSTALL_SH)], capture_output=True, text=True
-    )
+    first = subprocess.run(["bash", str(INSTALL_SH)], capture_output=True, text=True)
     assert first.returncode == 0, f"first run failed: {first.stderr}"
-    second = subprocess.run(
-        ["bash", str(INSTALL_SH)], capture_output=True, text=True
-    )
+    second = subprocess.run(["bash", str(INSTALL_SH)], capture_output=True, text=True)
     assert second.returncode == 0, f"second run failed: {second.stderr}"
     assert "already installed" in second.stderr.lower() or "OK" in second.stdout
 
@@ -87,18 +88,14 @@ def test_install_sh_skips_reinstall_when_already_present() -> None:
         git_common_dir = repo_root / git_common_dir
     hook_path = git_common_dir / "hooks" / "pre-commit"
     # Ensure installed first.
-    first = subprocess.run(
-        ["bash", str(INSTALL_SH)], capture_output=True, text=True
-    )
+    first = subprocess.run(["bash", str(INSTALL_SH)], capture_output=True, text=True)
     assert first.returncode == 0, f"first install failed: {first.stderr}"
     assert hook_path.is_file(), "hook file should exist after first install"
     mtime_before = hook_path.stat().st_mtime
     # Second run.
-    second = subprocess.run(
-        ["bash", str(INSTALL_SH)], capture_output=True, text=True
-    )
+    second = subprocess.run(["bash", str(INSTALL_SH)], capture_output=True, text=True)
     assert second.returncode == 0, f"second run failed: {second.stderr}"
     mtime_after = hook_path.stat().st_mtime
-    assert mtime_before == mtime_after, (
-        "second run should not modify the hook file (must short-circuit)"
-    )
+    assert (
+        mtime_before == mtime_after
+    ), "second run should not modify the hook file (must short-circuit)"

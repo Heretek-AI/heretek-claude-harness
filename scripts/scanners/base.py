@@ -4,6 +4,7 @@ and the `scan()` Protocol that every per-kind wrapper implements.
 This module has no third-party dependencies; the per-kind wrappers in
 skills.py / mcp.py / lsp.py import from here.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

@@ -4,6 +4,7 @@ Threads artifacts from one subagent to the next. The actual Agent SDK
 dispatch is injected via `dispatch=` so unit tests can stub it. In
 production (driver.py), `dispatch` is wired to the Agent tool.
 """
+
 from __future__ import annotations
 
 import json

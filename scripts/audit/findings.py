@@ -118,8 +118,7 @@ def load_findings(path: Path) -> list[Finding]:
         out.append(Finding.from_dict(d))
     if invalid_indexes:
         raise ValueError(
-            f"{path}: {len(invalid_indexes)} invalid finding(s): "
-            + " | ".join(invalid_indexes)
+            f"{path}: {len(invalid_indexes)} invalid finding(s): " + " | ".join(invalid_indexes)
         )
     return out
 
@@ -127,9 +126,7 @@ def load_findings(path: Path) -> list[Finding]:
 def save_findings(items: list[Finding], path: Path) -> None:
     """Write findings as a JSON array (canonical output format)."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps([f.to_dict() for f in items], indent=2, sort_keys=True) + "\n"
-    )
+    path.write_text(json.dumps([f.to_dict() for f in items], indent=2, sort_keys=True) + "\n")
 
 
 def severity_rank(finding: Finding) -> int:

@@ -1,13 +1,13 @@
 {
-  "name": "rust",
-  "displayName": "Rust",
-  "description": "Rust task plugin: rust-analyzer LSP, cargo-check skill.",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "lspServers": "./.lsp.json",
-  "skills": "./skills/",
-  "dependencies": []
+	"name": "rust",
+	"displayName": "Rust",
+	"description": "Rust task plugin: rust-analyzer LSP, cargo-check skill.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"lspServers": "./.lsp.json",
+	"skills": "./skills/",
+	"dependencies": []
 }

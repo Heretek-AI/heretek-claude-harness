@@ -1,19 +1,19 @@
 {
-  "lspServers": {
-    "rust": {
-      "command": "rust-analyzer",
-      "args": [],
-      "extensionToLanguage": {
-        ".rs": "rust"
-      }
-    },
-    "python": {
-      "command": "pyright-langserver",
-      "args": ["--stdio"],
-      "extensionToLanguage": {
-        ".py": "python",
-        ".pyi": "python"
-      }
-    }
-  }
+	"lspServers": {
+		"rust": {
+			"command": "rust-analyzer",
+			"args": [],
+			"extensionToLanguage": {
+				".rs": "rust"
+			}
+		},
+		"python": {
+			"command": "pyright-langserver",
+			"args": ["--stdio"],
+			"extensionToLanguage": {
+				".py": "python",
+				".pyi": "python"
+			}
+		}
+	}
 }

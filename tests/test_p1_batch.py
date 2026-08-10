@@ -7,6 +7,7 @@ Items:
 4. security_scan relative_to crashes when catalog outside repo_root.
 5. security_scan hardcoded `git checkout main` ignores default branch.
 """
+
 import sys
 from pathlib import Path
 
@@ -16,15 +17,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from scripts import refresh_pins, security_scan  # noqa: E402
-from scripts import stale_dep_intercept  # noqa: E402
 
 
 # ── Item 1: refresh_pins uses HEAD, not release SHA ─────────────────────────
 
 
-def test_update_shas_pins_release_not_head(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_update_shas_pins_release_not_head(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """`update_shas` should query `/repos/{up}/releases/latest` and pin that SHA,
     not the HEAD SHA. Mock both endpoints and assert the catalog gets the
     release SHA."""
@@ -34,7 +32,7 @@ def test_update_shas_pins_release_not_head(
         "  - name: p\n"
         "    items:\n"
         "      - id: foo\n"
-        '        upstream: rust-lang/rust-analyzer\n'
+        "        upstream: rust-lang/rust-analyzer\n"
         '        sha: "0000000000000000000000000000000000000000"\n'
         "        vetting: {}\n"
     )
@@ -63,7 +61,6 @@ def test_update_shas_pins_release_not_head(
 def test_check_item_license_missing_is_not_drift(monkeypatch: pytest.MonkeyPatch) -> None:
     """An item with no `license` field and upstream NOASSERTION must not be
     reported as drift (closes #96 item 2)."""
-    import datetime as dt
 
     item = {
         "id": "rust-analyzer",
@@ -76,12 +73,18 @@ def test_check_item_license_missing_is_not_drift(monkeypatch: pytest.MonkeyPatch
             "last_commit": "2026-08-04",
         },
     }
-    repo_meta = {"stargazers_count": 16000, "default_branch": "main",
-                 "pushed_at": "2026-08-04T00:00:00Z", "license": {"spdx_id": "NOASSERTION"}}
+    repo_meta = {
+        "stargazers_count": 16000,
+        "default_branch": "main",
+        "pushed_at": "2026-08-04T00:00:00Z",
+        "license": {"spdx_id": "NOASSERTION"},
+    }
 
-    monkeypatch.setattr(refresh_pins, "_github_get", lambda path, tok: (
-        repo_meta if path.endswith("/rust-lang/rust-analyzer") else []
-    ))
+    monkeypatch.setattr(
+        refresh_pins,
+        "_github_get",
+        lambda path, tok: (repo_meta if path.endswith("/rust-lang/rust-analyzer") else []),
+    )
 
     status, details = refresh_pins.check_item(item, gh_token="t")
     assert status != "stale", f"missing-license item falsely flagged: {details}"

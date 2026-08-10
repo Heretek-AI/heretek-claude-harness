@@ -1,4 +1,5 @@
 """Regression for Dependabot CVEs (#16). Pins runtime deps to safe minimum versions."""
+
 from __future__ import annotations
 
 from pathlib import Path

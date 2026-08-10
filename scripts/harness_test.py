@@ -152,9 +152,7 @@ def run_fixture(
             timeout=3600,  # 1 hour max per fixture
         )
         rc = proc.returncode
-        log_lines.append(
-            f"--- stdout ---\n{proc.stdout}\n--- stderr ---\n{proc.stderr}\n"
-        )
+        log_lines.append(f"--- stdout ---\n{proc.stdout}\n--- stderr ---\n{proc.stderr}\n")
     except subprocess.TimeoutExpired:
         log_lines.append("--- TIMEOUT after 3600s ---\n")
         rc = 124
@@ -193,28 +191,20 @@ def run_fixture(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="harness_test", description="run one harness fixture"
-    )
+    parser = argparse.ArgumentParser(prog="harness_test", description="run one harness fixture")
     parser.add_argument(
         "--fixture",
         required=True,
         help="fixture dir name under tests/fixtures/harness/",
     )
-    parser.add_argument(
-        "--output", required=True, help="output dir for artifact bundle"
-    )
-    parser.add_argument(
-        "--claude-cmd", default="claude", help="path to claude CLI (for tests)"
-    )
+    parser.add_argument("--output", required=True, help="output dir for artifact bundle")
+    parser.add_argument("--claude-cmd", default="claude", help="path to claude CLI (for tests)")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    fixture_dir = (
-        Path(__file__).parent.parent / "tests" / "fixtures" / "harness" / args.fixture
-    )
+    fixture_dir = Path(__file__).parent.parent / "tests" / "fixtures" / "harness" / args.fixture
     output_dir = Path(args.output)
     return run_fixture(fixture_dir, output_dir, claude_cmd=args.claude_cmd)
 

@@ -6,6 +6,7 @@ showing "what would change if you bumped to latest stable."
 This is research code. Production integration is a follow-up issue if
 the prototype proves out.
 """
+
 from __future__ import annotations
 
 import re
@@ -75,4 +76,5 @@ def _major_minor_diff(pinned: str, latest: str) -> str:
 
 if __name__ == "__main__":
     import sys
+
     print(annotate_diff(sys.stdin.read()))

@@ -1,16 +1,16 @@
 {
-  "version": 1,
-  "labels": ["security-scan", "tech-debt"],
-  "subagent_models": {
-    "explore": "haiku",
-    "planner": "sonnet",
-    "executor": "sonnet",
-    "test-engineer": "sonnet",
-    "verifier": "opus",
-    "critic": "opus"
-  },
-  "max_per_issue_attempts": 3,
-  "halt_after_cross_issue_rejects": 5,
-  "gate_timeout_s": 600,
-  "ledger_path": ".omc/state/issue-loop/ledger.json"
+	"version": 1,
+	"labels": ["security-scan", "tech-debt"],
+	"subagent_models": {
+		"explore": "haiku",
+		"planner": "sonnet",
+		"executor": "sonnet",
+		"test-engineer": "sonnet",
+		"verifier": "opus",
+		"critic": "opus"
+	},
+	"max_per_issue_attempts": 3,
+	"halt_after_cross_issue_rejects": 5,
+	"gate_timeout_s": 600,
+	"ledger_path": ".omc/state/issue-loop/ledger.json"
 }

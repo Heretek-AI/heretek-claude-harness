@@ -6,6 +6,7 @@ comments naming the doc-version consulted (from the freshness cache).
 This is research code. Production integration is a follow-up issue if
 the prototype proves out.
 """
+
 from __future__ import annotations
 
 import re
@@ -39,9 +40,24 @@ def _doc_version_for(lib: str) -> str | None:
 def _stdlib_libs() -> set[str]:
     """Approximation — Python stdlib modules (limited set; production would be complete)."""
     return {
-        "os", "sys", "json", "re", "pathlib", "collections", "typing",
-        "datetime", "time", "itertools", "functools", "subprocess",
-        "math", "random", "hashlib", "logging", "unittest", "io",
+        "os",
+        "sys",
+        "json",
+        "re",
+        "pathlib",
+        "collections",
+        "typing",
+        "datetime",
+        "time",
+        "itertools",
+        "functools",
+        "subprocess",
+        "math",
+        "random",
+        "hashlib",
+        "logging",
+        "unittest",
+        "io",
     }
 
 
@@ -79,4 +95,5 @@ def emit_provenance_comments(code: str) -> str:
 
 if __name__ == "__main__":
     import sys
+
     print(emit_provenance_comments(sys.stdin.read()))

@@ -43,8 +43,7 @@ def test_write_artifact_bundle_creates_files(tmp_path: Path) -> None:
     eval_input = json.loads((bundle / "eval_input.json").read_text())
     assert eval_input["fixture"] == "test-fixture"
     assert (
-        eval_input["patch_diff_sha256"]
-        == hashlib.sha256(b"diff --git a/foo b/foo\n").hexdigest()
+        eval_input["patch_diff_sha256"] == hashlib.sha256(b"diff --git a/foo b/foo\n").hexdigest()
     )
     assert "task_prompt" in eval_input
     assert "expected" in eval_input

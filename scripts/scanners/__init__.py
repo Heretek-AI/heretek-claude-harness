@@ -6,4 +6,5 @@ Each wrapper exposes:
 The pipeline (`scripts/security_scan.py`) dispatches to a wrapper based
 on the catalog item's `kind` field. See `base.py` for the contract.
 """
+
 from __future__ import annotations

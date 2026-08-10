@@ -285,9 +285,7 @@ CLUSTERS: dict[str, ClusterPrompt] = {
 def render_prompt(letter: str, repo_root: Path, commit_sha: str) -> str:
     """Substitute placeholders and return the ready-to-paste prompt."""
     cp = CLUSTERS[letter]  # raises KeyError for unknown letters
-    return cp.template.replace("{repo_root}", str(repo_root)).replace(
-        "{commit_sha}", commit_sha
-    )
+    return cp.template.replace("{repo_root}", str(repo_root)).replace("{commit_sha}", commit_sha)
 
 
 def main(argv: Iterable[str] | None = None) -> int:
@@ -298,9 +296,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         help="Cluster letter (A, B, C, D, or E).",
     )
     parser.add_argument("--repo-root", type=Path, required=True)
-    parser.add_argument(
-        "--commit-sha", required=True, help="Audit snapshot commit SHA."
-    )
+    parser.add_argument("--commit-sha", required=True, help="Audit snapshot commit SHA.")
     args = parser.parse_args(argv)
     print(render_prompt(args.cluster, args.repo_root, args.commit_sha))
     return 0

@@ -7,6 +7,7 @@ validation. An attacker controlling an upstream's `default_branch` field
 
 This file enforces the allowlist at every URL/ref construction site.
 """
+
 import sys
 from pathlib import Path
 
@@ -63,7 +64,10 @@ def test_update_shas_rejects_evil_default_branch(
     monkeypatch.setattr(
         refresh_pins,
         "_github_get",
-        lambda _path, _tok: {"default_branch": "../../etc/passwd", "object": {"sha": "deadbeef" * 5}},
+        lambda _path, _tok: {
+            "default_branch": "../../etc/passwd",
+            "object": {"sha": "deadbeef" * 5},
+        },
     )
 
     with pytest.raises(ValueError, match="default_branch"):

@@ -8,6 +8,7 @@ CLI:
     python scripts/security_scan.py --item context7  # debug: one item
     python scripts/security_scan.py --dry-run        # skip issue/PR creation
 """
+
 from __future__ import annotations
 
 import argparse
@@ -247,9 +248,7 @@ def _commit_catalog_bump(
             try:
                 require_ref_segment("default_branch_probe", probed)
             except ValueError as exc:
-                log.warning(
-                    "ignoring invalid default_branch_probe=%r: %s", probed, exc
-                )
+                log.warning("ignoring invalid default_branch_probe=%r: %s", probed, exc)
                 probed = "main"
         default_branch = probed
     subprocess.run(
@@ -470,15 +469,19 @@ def run(
             # SonarCloud S5443: never use /tmp directly — symlink/TOCTOU risk.
             # mkdtemp creates a 0o700 dir owned by us; cleanup is handled
             # by the next _shallow_clone call.
-            scratch = Path(
-                tempfile.mkdtemp(prefix=f"heretek-scan-{plugin_name}-{item_id}-")
-            )
+            scratch = Path(tempfile.mkdtemp(prefix=f"heretek-scan-{plugin_name}-{item_id}-"))
             report, scan_err = _scan_and_persist(
-                item=item, plugin_name=plugin_name, item_id=item_id,
-                composite_id=composite_id, upstream=upstream,
-                latest_sha=latest_sha, scratch=scratch,
-                output_dir=output_dir, effective_vt=effective_vt,
-                suppressions=suppressions, state_file=state_file,
+                item=item,
+                plugin_name=plugin_name,
+                item_id=item_id,
+                composite_id=composite_id,
+                upstream=upstream,
+                latest_sha=latest_sha,
+                scratch=scratch,
+                output_dir=output_dir,
+                effective_vt=effective_vt,
+                suppressions=suppressions,
+                state_file=state_file,
                 done_items=done_items,
             )
             if scan_err:
@@ -490,9 +493,14 @@ def run(
                 vt_calls += 1
 
             bump_err = _bump_and_draft_pr(
-                report=report, plugin_name=plugin_name, item_id=item_id,
-                composite_id=composite_id, latest_sha=latest_sha,
-                gh_token=gh_token, dry_run=dry_run, repo_root=repo_root,
+                report=report,
+                plugin_name=plugin_name,
+                item_id=item_id,
+                composite_id=composite_id,
+                latest_sha=latest_sha,
+                gh_token=gh_token,
+                dry_run=dry_run,
+                repo_root=repo_root,
                 catalog_path=catalog_path,
             )
             if bump_err:
@@ -506,11 +514,10 @@ def run(
     return ScanSummary(report_count=report_count, error_count=error_count)
 
 
-def _apply_suppressions(
-    report: ScannerReport, suppressions: set[tuple[str, str]]
-) -> ScannerReport:
+def _apply_suppressions(report: ScannerReport, suppressions: set[tuple[str, str]]) -> ScannerReport:
     """Downgrade suppressed findings to severity=info; preserve them in report."""
     from .suppression import is_suppressed  # local import to avoid cycles in tests
+
     new_findings = []
     downgraded = False
     for f in report.findings:
@@ -527,7 +534,9 @@ def _apply_suppressions(
             downgraded = True
         else:
             new_findings.append(f)
-    new_severity = "info" if (downgraded and report.severity in ("warn", "block")) else report.severity
+    new_severity = (
+        "info" if (downgraded and report.severity in ("warn", "block")) else report.severity
+    )
     return ScannerReport(
         item_id=report.item_id,
         scanner=report.scanner,
@@ -565,8 +574,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--vt-token", default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--item", default=None, help="restrict to one item id")
-    parser.add_argument("--pr-mode", action="store_true",
-                        help="run against a single item whose catalog SHA has been bumped (for PR required check)")
+    parser.add_argument(
+        "--pr-mode",
+        action="store_true",
+        help="run against a single item whose catalog SHA has been bumped (for PR required check)",
+    )
     args = parser.parse_args(argv)
 
     summary = run(

@@ -1,11 +1,11 @@
 {
-  "lspServers": {
-    "rust": {
-      "command": "rust-analyzer",
-      "args": [],
-      "extensionToLanguage": {
-        ".rs": "rust"
-      }
-    }
-  }
+	"lspServers": {
+		"rust": {
+			"command": "rust-analyzer",
+			"args": [],
+			"extensionToLanguage": {
+				".rs": "rust"
+			}
+		}
+	}
 }

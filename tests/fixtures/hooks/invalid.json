@@ -1,5 +1,5 @@
 {
-  "hooks": {
-    "PreToolUse": "this should be an array"
-  }
+	"hooks": {
+		"PreToolUse": "this should be an array"
+	}
 }

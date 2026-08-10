@@ -1,4 +1,5 @@
 """Tests for Layer-2 quality_gate.py."""
+
 import sys
 from pathlib import Path
 from unittest import mock

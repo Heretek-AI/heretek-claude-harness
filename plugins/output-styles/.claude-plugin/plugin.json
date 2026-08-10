@@ -1,12 +1,12 @@
 {
-  "name": "output-styles",
-  "displayName": "Output Styles",
-  "description": "Curated output-style presets: terse, detailed, tabular, explanatory.",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "outputStyles": "./output-styles/",
-  "dependencies": []
+	"name": "output-styles",
+	"displayName": "Output Styles",
+	"description": "Curated output-style presets: terse, detailed, tabular, explanatory.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"outputStyles": "./output-styles/",
+	"dependencies": []
 }

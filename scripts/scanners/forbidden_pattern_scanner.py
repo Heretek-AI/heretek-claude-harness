@@ -7,6 +7,7 @@ via additionalContext.
 D15 compliance: this lives in the hooks plugin only — no other plugin may
 declare hooks.
 """
+
 from __future__ import annotations
 
 import json
@@ -74,7 +75,10 @@ def _scan(file_path: str, content: str) -> list[str]:
         )
         result = subprocess.run(
             [ast_grep, "scan", "--inline-rules", rule, "--stdin"],
-            input=content, capture_output=True, text=True, timeout=2,
+            input=content,
+            capture_output=True,
+            text=True,
+            timeout=2,
         )
         if result.returncode == 0 and result.stdout.strip():
             severity_marker = "🚫" if pattern_def["severity"] == "error" else "⚠️"
@@ -102,12 +106,16 @@ def main() -> int:  # nosonar — false positive: hook-script entrypoint always 
     if not warnings:
         return 0
 
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PostToolUse",
-            "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PostToolUse",
+                    "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
+                }
+            }
+        )
+    )
     return 0
 
 

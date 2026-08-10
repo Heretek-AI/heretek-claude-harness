@@ -4,6 +4,7 @@ Catalog entries flow into URL paths, branch names, and session-state filenames.
 Validate against these regexes before any interpolation. Grow this module as
 new call sites need new patterns; do not invent one-off regexes at the call site.
 """
+
 from __future__ import annotations
 
 import re

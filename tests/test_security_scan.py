@@ -1,5 +1,6 @@
 """Tests for the security_scan.py orchestrator. External HTTP and scanners
 are mocked; see tests/fixtures/security_scan/ for end-to-end integration."""
+
 from __future__ import annotations
 
 import json
@@ -64,12 +65,14 @@ def test_run_emits_report_when_upstream_changed(
 ) -> None:
     """Upstream SHA differs → shallow-clone + scan + report."""
     mock_sha.return_value = ("a" * 40, "tag")
+
     # mock git clone: creates a fake checkout dir
     def fake_clone(*args, **kwargs):
         target = Path(kwargs.get("cwd", "/")) / "context7"
         target.mkdir(parents=True, exist_ok=True)
         (target / "SKILL.md").write_text("# fake")
         return MagicMock(returncode=0, stderr="", stdout="")
+
     mock_subprocess.side_effect = fake_clone
     mock_scan.return_value = ScannerReport(
         item_id="context7", scanner="skillspector", severity="clean"
@@ -146,6 +149,7 @@ def test_run_skips_first_party_items(tmp_path: Path) -> None:
 
 def test_scan_summary_dataclass_basic() -> None:
     from scripts.security_scan import ScanSummary
+
     s = ScanSummary(report_count=0, error_count=0)
     assert s.report_count == 0
 
@@ -212,15 +216,11 @@ def test_run_commits_catalog_bump_before_drafting_pr(
     draft_idx = call_order.index("draft_issue_and_pr")
     assert bump_idx < draft_idx, f"bump must precede draft: {call_order}"
     # git commit must happen before draft_issue_and_pr.
-    commit_idx = next(
-        (i for i, c in enumerate(call_order) if c == "git:commit"), -1
-    )
+    commit_idx = next((i for i, c in enumerate(call_order) if c == "git:commit"), -1)
     assert commit_idx >= 0, f"expected git commit, got: {call_order}"
     assert commit_idx < draft_idx, f"git commit must precede draft: {call_order}"
     # git push must happen before draft_issue_and_pr.
-    push_idx = next(
-        (i for i, c in enumerate(call_order) if c == "git:push"), -1
-    )
+    push_idx = next((i for i, c in enumerate(call_order) if c == "git:push"), -1)
     assert push_idx >= 0, f"expected git push, got: {call_order}"
     assert push_idx < draft_idx, f"git push must precede draft: {call_order}"
 
@@ -343,6 +343,7 @@ def test_run_falls_back_to_default_repo_when_env_var_absent(
 def test_get_latest_release_sha_returns_none_on_non_200(mock_get: MagicMock) -> None:
     """Upstream API non-200 (deleted repo, 404, 403 rate-limit) → (None, None)."""
     from scripts.security_scan import _get_latest_release_sha
+
     mock_get.return_value = MagicMock(status_code=404)
     sha, tag = _get_latest_release_sha("upstream/repo", gh_token=None)
     assert sha is None
@@ -353,6 +354,7 @@ def test_get_latest_release_sha_returns_none_on_non_200(mock_get: MagicMock) -> 
 def test_get_latest_release_sha_returns_target_commitish_when_200(mock_get: MagicMock) -> None:
     """200 response → returns target_commitish + tag_name from JSON."""
     from scripts.security_scan import _get_latest_release_sha
+
     mock_get.return_value = MagicMock(
         status_code=200,
         json=lambda: {"target_commitish": "abc" * 13 + "d", "tag_name": "v1.2.3"},
@@ -365,6 +367,7 @@ def test_get_latest_release_sha_returns_target_commitish_when_200(mock_get: Magi
 def test_dispatch_scanner_unsupported_kind_returns_block(tmp_path: Path) -> None:
     """Unknown item kind → `block` finding listing the offending kind."""
     from scripts.security_scan import _dispatch_scanner
+
     item = {"id": "weird", "kind": "exotic-format"}
     report = _dispatch_scanner(item, tmp_path, vt_token=None)
     assert report.severity == "block"
@@ -389,8 +392,10 @@ def test_run_increments_error_count_when_no_release_found(tmp_path: Path) -> Non
           date: 2026-08-04
 """
     )
-    with patch("scripts.security_scan._get_latest_release_sha") as mock_sha, \
-         patch("scripts.security_scan.draft_issue_and_pr") as mock_draft:
+    with (
+        patch("scripts.security_scan._get_latest_release_sha") as mock_sha,
+        patch("scripts.security_scan.draft_issue_and_pr") as mock_draft,
+    ):
         mock_sha.return_value = (None, None)
         summary = run(catalog_path=p, output_dir=tmp_path, dry_run=True, gh_token="t")
     assert summary.report_count == 0
@@ -427,14 +432,20 @@ def test_run_skips_malformed_upstream(tmp_path: Path) -> None:
 def test_main_returns_zero_when_no_errors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """CLI: empty catalog → exit 0."""
     from scripts.security_scan import main
+
     p = tmp_path / "catalog.yaml"
     p.write_text("plugins: []\n")
-    monkeypatch.setattr("sys.argv", [
-        "security_scan",
-        "--catalog", str(p),
-        "--output", str(tmp_path / "out"),
-        "--dry-run",
-    ])
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "security_scan",
+            "--catalog",
+            str(p),
+            "--output",
+            str(tmp_path / "out"),
+            "--dry-run",
+        ],
+    )
     rc = main()
     assert rc == 0
 
@@ -442,6 +453,7 @@ def test_main_returns_zero_when_no_errors(tmp_path: Path, monkeypatch: pytest.Mo
 def test_main_returns_one_when_errors(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """CLI: errors → exit 1 (for shell chaining in CI)."""
     from scripts.security_scan import main
+
     p = tmp_path / "catalog.yaml"
     p.write_text(
         """plugins:
@@ -457,12 +469,17 @@ def test_main_returns_one_when_errors(tmp_path: Path, monkeypatch: pytest.Monkey
           date: 2026-08-04
 """
     )
-    monkeypatch.setattr("sys.argv", [
-        "security_scan",
-        "--catalog", str(p),
-        "--output", str(tmp_path / "out"),
-        "--dry-run",
-    ])
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "security_scan",
+            "--catalog",
+            str(p),
+            "--output",
+            str(tmp_path / "out"),
+            "--dry-run",
+        ],
+    )
     with patch("scripts.security_scan._get_latest_release_sha") as mock_sha:
         mock_sha.return_value = (None, None)  # upstream not found → error++
         rc = main()
@@ -487,11 +504,10 @@ def test_run_applies_suppressions_to_finding_severity(
     """§8.7: a finding whose (scanner, rule_id) appears in catalog/reviews/*.md
     `<!-- suppress: ... -->` is downgraded to severity=info."""
     from scripts.security_scan import run
+
     reviews = tmp_path / "reviews"
     reviews.mkdir()
-    (reviews / "context7.md").write_text(
-        "<!-- suppress: skillspector:prompt-injection -->\n"
-    )
+    (reviews / "context7.md").write_text("<!-- suppress: skillspector:prompt-injection -->\n")
     mock_sha.return_value = ("a" * 40, "v1.0.0")
     mock_scan.return_value = ScannerReport(
         item_id="context7",
@@ -613,6 +629,7 @@ def test_run_writes_checkpoint_after_each_item(
     state_files = list(state_dir.glob("security-scan-*.json"))
     assert len(state_files) == 1
     import json as _json
+
     data = _json.loads(state_files[0].read_text())
     assert data.get("mcp-pack/context7") == "done"
 
@@ -636,6 +653,7 @@ def test_run_skips_items_already_in_checkpoint(
     # Pre-populate the checkpoint as if a previous run already finished the item.
     import json as _json
     from datetime import date as _date
+
     state_file = state_dir / f"security-scan-{_date.today().isoformat()}.json"
     state_dir.mkdir(parents=True, exist_ok=True)
     state_file.write_text(_json.dumps({"mcp-pack/context7": "done"}))
@@ -652,11 +670,13 @@ def test_run_skips_items_already_in_checkpoint(
 
 def test_load_done_items_handles_missing_file(tmp_path: Path) -> None:
     from scripts.security_scan import _load_done_items
+
     assert _load_done_items(tmp_path / "missing.json") == set()
 
 
 def test_load_done_items_handles_corrupt_file(tmp_path: Path) -> None:
     from scripts.security_scan import _load_done_items
+
     p = tmp_path / "state.json"
     p.write_text("{not json")
     assert _load_done_items(p) == set()

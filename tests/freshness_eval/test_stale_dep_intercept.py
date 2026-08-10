@@ -6,11 +6,11 @@ are written in for whichever libs each test needs, and stdin is mocked
 via `monkeypatch.setattr(sys, "stdin", ...)`. No test ever touches the
 real `catalog/freshness/` tree or relies on which libs the cron has run.
 """
+
 import io
 import json
 import sys
 
-import pytest
 
 import scripts.stale_dep_intercept as hook
 
@@ -111,9 +111,9 @@ def test_stale_dep_intercept_handles_write_event(monkeypatch, tmp_path, capsys):
     captured = capsys.readouterr()
     assert rc == 0
     output = json.loads(captured.out) if captured.out.strip() else {}
-    assert "hookSpecificOutput" in output, (
-        f"Write event should emit stale-pin warning, got: {output!r}"
-    )
+    assert (
+        "hookSpecificOutput" in output
+    ), f"Write event should emit stale-pin warning, got: {output!r}"
     assert "requests" in output["hookSpecificOutput"]["additionalContext"]
 
 
@@ -144,15 +144,13 @@ def test_stale_dep_intercept_handles_multiedit_event(monkeypatch, tmp_path, caps
     captured = capsys.readouterr()
     assert rc == 0
     output = json.loads(captured.out) if captured.out.strip() else {}
-    assert "hookSpecificOutput" in output, (
-        f"MultiEdit event should emit stale-pin warning, got: {output!r}"
-    )
+    assert (
+        "hookSpecificOutput" in output
+    ), f"MultiEdit event should emit stale-pin warning, got: {output!r}"
     assert "requests" in output["hookSpecificOutput"]["additionalContext"]
 
 
-def test_stale_dep_intercept_multiedit_silent_when_no_stale_edits(
-    monkeypatch, tmp_path, capsys
-):
+def test_stale_dep_intercept_multiedit_silent_when_no_stale_edits(monkeypatch, tmp_path, capsys):
     """#37: MultiEdit with no stale edits stays silent."""
     monkeypatch.setattr(hook, "CACHE_DIR", tmp_path)
     _write_cache(tmp_path, "requests", "2.32.0")
@@ -173,6 +171,4 @@ def test_stale_dep_intercept_multiedit_silent_when_no_stale_edits(
     rc = hook.main()
     captured = capsys.readouterr()
     assert rc == 0
-    assert captured.out == "", (
-        f"MultiEdit with fresh pin should be silent, got: {captured.out!r}"
-    )
+    assert captured.out == "", f"MultiEdit with fresh pin should be silent, got: {captured.out!r}"

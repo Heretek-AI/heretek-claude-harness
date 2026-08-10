@@ -1,4 +1,5 @@
 """Pytest config for detection tests."""
+
 import shutil
 import pytest
 

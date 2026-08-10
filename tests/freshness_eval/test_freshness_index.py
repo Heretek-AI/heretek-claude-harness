@@ -5,6 +5,7 @@ All tests are fully isolated: PyPI HTTP responses are mocked via
 per-test `tmp_path` via `monkeypatch`. No test ever touches the real
 catalog/freshness/ tree or makes a network call.
 """
+
 from unittest.mock import MagicMock, patch
 
 import yaml

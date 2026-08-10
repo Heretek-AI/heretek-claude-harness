@@ -1,12 +1,12 @@
 {
-  "name": "skills-pack",
-  "displayName": "Skills Pack",
-  "description": "Generic skills pack: caveman (terse token-saving replies) + superpowers (process discipline: invoke relevant skill BEFORE any response).",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "skills": "./skills/",
-  "dependencies": []
+	"name": "skills-pack",
+	"displayName": "Skills Pack",
+	"description": "Generic skills pack: caveman (terse token-saving replies) + superpowers (process discipline: invoke relevant skill BEFORE any response).",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"skills": "./skills/",
+	"dependencies": []
 }

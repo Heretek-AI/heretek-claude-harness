@@ -3,6 +3,7 @@
 diff_is_scoped() runs against a local repo (the worktree from Task 2).
 squash_merge() hits the GitHub API; in tests it is stubbed.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,8 +13,7 @@ from .branch import _run
 
 def _real_github_merge(*args, **kwargs) -> str:
     # Wired in driver.py. Tests stub this.
-    raise NotImplementedError("Merger.squash_merge requires a github_merge= "
-                              "callable in tests.")
+    raise NotImplementedError("Merger.squash_merge requires a github_merge= " "callable in tests.")
 
 
 class Merger:

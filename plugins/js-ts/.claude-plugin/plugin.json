@@ -1,13 +1,13 @@
 {
-  "name": "js-ts",
-  "displayName": "Js Ts",
-  "description": "JavaScript/TypeScript task plugin: biome LSP, typecheck skill.",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "lspServers": "./.lsp.json",
-  "skills": "./skills/",
-  "dependencies": []
+	"name": "js-ts",
+	"displayName": "Js Ts",
+	"description": "JavaScript/TypeScript task plugin: biome LSP, typecheck skill.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"lspServers": "./.lsp.json",
+	"skills": "./skills/",
+	"dependencies": []
 }

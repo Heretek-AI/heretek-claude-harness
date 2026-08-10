@@ -1,4 +1,5 @@
 """Tests for the plugin.json JSON Schema."""
+
 import json
 from pathlib import Path
 

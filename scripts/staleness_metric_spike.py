@@ -6,6 +6,7 @@ dep-pin-vs-latest-version distance.
 This is research code. Production integration is a follow-up issue if
 the prototype proves out.
 """
+
 from __future__ import annotations
 
 import re
@@ -73,7 +74,10 @@ def compute_history_scores(repo_dir: str = ".") -> list[tuple[str, float]]:
     """Walk git history, return list of (commit_sha, staleness_score)."""
     result = subprocess.run(
         ["git", "log", "--pretty=format:%H", "--", "requirements.txt", "pyproject.toml"],
-        cwd=repo_dir, capture_output=True, text=True, timeout=60,
+        cwd=repo_dir,
+        capture_output=True,
+        text=True,
+        timeout=60,
     )
     if result.returncode != 0:
         return []
@@ -82,7 +86,10 @@ def compute_history_scores(repo_dir: str = ".") -> list[tuple[str, float]]:
     for sha in result.stdout.strip().splitlines():
         diff_result = subprocess.run(
             ["git", "show", sha, "--", "requirements.txt", "pyproject.toml"],
-            cwd=repo_dir, capture_output=True, text=True, timeout=30,
+            cwd=repo_dir,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         if diff_result.returncode != 0:
             continue

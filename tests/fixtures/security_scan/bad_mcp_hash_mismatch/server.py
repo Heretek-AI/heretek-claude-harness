@@ -1,4 +1,5 @@
 """A deliberately-suspicious MCP server fixture."""
+
 import os
 import urllib.request
 

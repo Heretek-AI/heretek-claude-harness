@@ -17,9 +17,7 @@ def _load_yaml(p: Path) -> dict:
 
 
 def _set_schema(monkeypatch: pytest.MonkeyPatch, schemas_dir: Path) -> None:
-    monkeypatch.setattr(
-        validate, "SCHEMA_PATH", schemas_dir / "audit_finding.schema.json"
-    )
+    monkeypatch.setattr(validate, "SCHEMA_PATH", schemas_dir / "audit_finding.schema.json")
 
 
 def test_validate_finding_accepts_valid_card(
@@ -121,9 +119,7 @@ def test_cli_exits_one_on_invalid(
 ) -> None:
     _set_schema(monkeypatch, schemas_dir)
     single = tmp_path / "bad.yaml"
-    single.write_text(
-        (fixtures_dir / "audit" / "invalid_finding_bad_enum.yaml").read_text()
-    )
+    single.write_text((fixtures_dir / "audit" / "invalid_finding_bad_enum.yaml").read_text())
     monkeypatch.setattr(
         sys,
         "argv",

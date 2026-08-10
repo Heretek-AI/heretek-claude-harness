@@ -1,4 +1,5 @@
 """Tests for scripts/suppression.py — false-positive suppression per spec §8.7."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -29,7 +30,9 @@ This is a known false-positive.
 def test_load_suppressions_collects_multiple_files(tmp_path: Path) -> None:
     reviews = tmp_path / "reviews"
     reviews.mkdir()
-    (reviews / "a.md").write_text("<!-- suppress: skillspector:R1 -->\n<!-- suppress: socket:R2 -->\n")
+    (reviews / "a.md").write_text(
+        "<!-- suppress: skillspector:R1 -->\n<!-- suppress: socket:R2 -->\n"
+    )
     (reviews / "b.md").write_text("<!-- suppress: virustotal:vt-verdict -->\n")
     sup = load_suppressions(reviews)
     assert ("skillspector", "R1") in sup

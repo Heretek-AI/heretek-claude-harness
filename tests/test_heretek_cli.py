@@ -41,35 +41,27 @@ def telemetry_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-def test_show_prints_events(
-    telemetry_root: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_show_prints_events(telemetry_root: Path, capsys: pytest.CaptureFixture) -> None:
     assert cli.main(["telemetry", "show"]) == 0
     captured = capsys.readouterr()
     assert "PostToolUse" in captured.out
     assert "Edit" in captured.out
 
 
-def test_show_filters_by_tool(
-    telemetry_root: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_show_filters_by_tool(telemetry_root: Path, capsys: pytest.CaptureFixture) -> None:
     assert cli.main(["telemetry", "show", "--tool", "Read"]) == 0
     captured = capsys.readouterr()
     assert "(no events)" in captured.err
 
 
-def test_grep_finds_matching_events(
-    telemetry_root: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_grep_finds_matching_events(telemetry_root: Path, capsys: pytest.CaptureFixture) -> None:
     assert cli.main(["telemetry", "grep", "Edit"]) == 0
     captured = capsys.readouterr()
     parsed = json.loads(captured.out.strip().splitlines()[0])
     assert parsed["tool_name"] == "Edit"
 
 
-def test_diff_compares_two_sessions(
-    telemetry_root: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_diff_compares_two_sessions(telemetry_root: Path, capsys: pytest.CaptureFixture) -> None:
     (telemetry_root / "sessions" / "2026-08-08" / "session-bbb.jsonl").write_text(
         json.dumps(
             {
@@ -101,26 +93,20 @@ def test_export_refuses_without_pii_flag(
     assert "PII" in captured.err
 
 
-def test_export_writes_with_pii_flag(
-    telemetry_root: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_export_writes_with_pii_flag(telemetry_root: Path, capsys: pytest.CaptureFixture) -> None:
     assert cli.main(["telemetry", "export", "--i-understand-pii-implications"]) == 0
     out = telemetry_root / "exports" / "export.jsonl"
     assert out.exists()
     assert out.read_text().strip().startswith("{")
 
 
-def test_config_set_writes_properties(
-    telemetry_root: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_config_set_writes_properties(telemetry_root: Path, capsys: pytest.CaptureFixture) -> None:
     assert cli.main(["telemetry", "config", "set", "retention_days", "60"]) == 0
     config = (telemetry_root / "config.properties").read_text()
     assert "retention_days: 60" in config
 
 
-def test_schema_prints_schema(
-    telemetry_root: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_schema_prints_schema(telemetry_root: Path, capsys: pytest.CaptureFixture) -> None:
     assert cli.main(["telemetry", "schema"]) == 0
     captured = capsys.readouterr()
     parsed = json.loads(captured.out)

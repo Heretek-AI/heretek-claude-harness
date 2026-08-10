@@ -8,6 +8,7 @@ Usage:
     python -m scripts.freshness_index --all
     python -m scripts.freshness_index --lib pyyaml --dry-run
 """
+
 from __future__ import annotations
 
 import argparse

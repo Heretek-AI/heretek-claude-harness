@@ -1,4 +1,5 @@
 """Tests for the Layer-1 fast-gate dispatcher."""
+
 import json
 import subprocess
 import sys
@@ -25,10 +26,10 @@ def create_samples() -> None:
     _write(FIXTURES / "good_sample.py", "def hello():\n    print('hello')\n")
     _write(FIXTURES / "bad_sample.py", "def f():pass\nundefined_var_xyz\n")
     # rustfmt 2021 requires the body on its own indented line.
-    _write(FIXTURES / "good_sample.rs", "fn main() {\n    println!(\"hi\");\n}\n")
-    _write(FIXTURES / "bad_sample.rs", "fn main(){println!(\"hi\");}\n")
+    _write(FIXTURES / "good_sample.rs", 'fn main() {\n    println!("hi");\n}\n')
+    _write(FIXTURES / "bad_sample.rs", 'fn main(){println!("hi");}\n')
     # biome requires double-quoted strings and a single trailing newline.
-    _write(FIXTURES / "good_sample.js", "const message = \"hi\";\nconsole.log(message);\n")
+    _write(FIXTURES / "good_sample.js", 'const message = "hi";\nconsole.log(message);\n')
     _write(FIXTURES / "bad_sample.js", "function hello(){console.log('hi')}\n")
     _write(FIXTURES / "sample.md", "# hello\n")
 
@@ -148,7 +149,9 @@ def test_dispatch_fails_open_on_linter_internal_error(monkeypatch: pytest.Monkey
     assert code == 0, "returncode>=2 should fail-open, not block"
 
 
-def test_dispatch_fails_open_on_stderr_internal_error_marker(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_dispatch_fails_open_on_stderr_internal_error_marker(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """returncode==1 with stderr containing 'internal error' marker must fail-open (#97)."""
     payload = (FIXTURES / "good_python.json").read_text()
     fake = subprocess.CompletedProcess(
@@ -181,14 +184,16 @@ def test_dispatch_fails_open_on_path_traversal(
     A hostile payload (e.g. '../../etc/passwd.py') must NOT be passed to
     a linter subprocess. The wrapper writes a stderr message and exits 0.
     """
-    payload = json.dumps({
-        "tool_name": "Edit",
-        "tool_input": {
-            "file_path": "../../etc/passwd.py",
-            "old_string": "",
-            "new_string": "",
-        },
-    })
+    payload = json.dumps(
+        {
+            "tool_name": "Edit",
+            "tool_input": {
+                "file_path": "../../etc/passwd.py",
+                "old_string": "",
+                "new_string": "",
+            },
+        }
+    )
     invoked = []
 
     def fail_if_called(*_args, **_kwargs):

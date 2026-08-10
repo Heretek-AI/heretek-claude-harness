@@ -1,81 +1,81 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://heretek.ai/schemas/hooks.schema.json",
-  "title": "Claude Code hooks.json",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["hooks"],
-  "properties": {
-    "hooks": {
-      "type": "object",
-      "additionalProperties": { "$ref": "#/$defs/eventMatcherList" },
-      "properties": {
-        "PreToolUse": { "$ref": "#/$defs/eventMatcherList" },
-        "UserPromptSubmit": { "$ref": "#/$defs/eventMatcherList" },
-        "PostToolUse": { "$ref": "#/$defs/eventMatcherList" },
-        "Notification": { "$ref": "#/$defs/eventMatcherList" },
-        "Stop": { "$ref": "#/$defs/eventMatcherList" },
-        "SubagentStop": { "$ref": "#/$defs/eventMatcherList" },
-        "PreCompact": { "$ref": "#/$defs/eventMatcherList" },
-        "SessionStart": { "$ref": "#/$defs/eventMatcherList" },
-        "SessionEnd": { "$ref": "#/$defs/eventMatcherList" }
-      }
-    }
-  },
-  "$defs": {
-    "eventMatcherList": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/matcher" }
-    },
-    "matcher": {
-      "type": "object",
-      "required": ["hooks"],
-      "properties": {
-        "matcher": {
-          "type": "string",
-          "description": "Tool name regex (e.g. 'Edit|Write|MultiEdit'). Empty string = all tools."
-        },
-        "hooks": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/$defs/hook" }
-        }
-      }
-    },
-    "hook": {
-      "type": "object",
-      "required": ["type"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["command", "prompt"]
-        },
-        "command": { "type": "string" },
-        "prompt": { "type": "string" },
-        "timeout": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Per-hook timeout in seconds (integer per Claude Code hooks reference). Layer-1 fast gates set timeout=1; the wrapper script enforces the <100ms goal internally and exits fast on overrun."
-        },
-        "async": {
-          "type": "boolean",
-          "description": "Run asynchronously; never block the agent loop."
-        },
-        "if": {
-          "type": "string",
-          "description": "Conditional expression for tool input (e.g. 'Bash(git *)')."
-        }
-      },
-      "allOf": [
-        {
-          "if": { "properties": { "type": { "const": "command" } } },
-          "then": { "required": ["command"] }
-        },
-        {
-          "if": { "properties": { "type": { "const": "prompt" } } },
-          "then": { "required": ["prompt"] }
-        }
-      ]
-    }
-  }
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://heretek.ai/schemas/hooks.schema.json",
+	"title": "Claude Code hooks.json",
+	"type": "object",
+	"additionalProperties": false,
+	"required": ["hooks"],
+	"properties": {
+		"hooks": {
+			"type": "object",
+			"additionalProperties": { "$ref": "#/$defs/eventMatcherList" },
+			"properties": {
+				"PreToolUse": { "$ref": "#/$defs/eventMatcherList" },
+				"UserPromptSubmit": { "$ref": "#/$defs/eventMatcherList" },
+				"PostToolUse": { "$ref": "#/$defs/eventMatcherList" },
+				"Notification": { "$ref": "#/$defs/eventMatcherList" },
+				"Stop": { "$ref": "#/$defs/eventMatcherList" },
+				"SubagentStop": { "$ref": "#/$defs/eventMatcherList" },
+				"PreCompact": { "$ref": "#/$defs/eventMatcherList" },
+				"SessionStart": { "$ref": "#/$defs/eventMatcherList" },
+				"SessionEnd": { "$ref": "#/$defs/eventMatcherList" }
+			}
+		}
+	},
+	"$defs": {
+		"eventMatcherList": {
+			"type": "array",
+			"items": { "$ref": "#/$defs/matcher" }
+		},
+		"matcher": {
+			"type": "object",
+			"required": ["hooks"],
+			"properties": {
+				"matcher": {
+					"type": "string",
+					"description": "Tool name regex (e.g. 'Edit|Write|MultiEdit'). Empty string = all tools."
+				},
+				"hooks": {
+					"type": "array",
+					"minItems": 1,
+					"items": { "$ref": "#/$defs/hook" }
+				}
+			}
+		},
+		"hook": {
+			"type": "object",
+			"required": ["type"],
+			"properties": {
+				"type": {
+					"type": "string",
+					"enum": ["command", "prompt"]
+				},
+				"command": { "type": "string" },
+				"prompt": { "type": "string" },
+				"timeout": {
+					"type": "integer",
+					"minimum": 1,
+					"description": "Per-hook timeout in seconds (integer per Claude Code hooks reference). Layer-1 fast gates set timeout=1; the wrapper script enforces the <100ms goal internally and exits fast on overrun."
+				},
+				"async": {
+					"type": "boolean",
+					"description": "Run asynchronously; never block the agent loop."
+				},
+				"if": {
+					"type": "string",
+					"description": "Conditional expression for tool input (e.g. 'Bash(git *)')."
+				}
+			},
+			"allOf": [
+				{
+					"if": { "properties": { "type": { "const": "command" } } },
+					"then": { "required": ["command"] }
+				},
+				{
+					"if": { "properties": { "type": { "const": "prompt" } } },
+					"then": { "required": ["prompt"] }
+				}
+			]
+		}
+	}
 }

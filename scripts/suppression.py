@@ -11,6 +11,7 @@ The CODEOWNERS gate in .github/CODEOWNERS requires the `security` plugin owner
 to approve any change to a catalog/reviews/*.md file, so suppressions are
 human-reviewed.
 """
+
 from __future__ import annotations
 
 import re
@@ -19,9 +20,7 @@ from pathlib import Path
 # A suppression comment looks like:
 #   <!-- suppress: <scanner>:<rule_id> -->
 # Group 1 = scanner, Group 2 = rule_id.
-SUPPRESSION_RE = re.compile(
-    r"<!--\s*suppress:\s*([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)\s*-->"
-)
+SUPPRESSION_RE = re.compile(r"<!--\s*suppress:\s*([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)\s*-->")
 
 
 def load_suppressions(reviews_dir: Path) -> set[tuple[str, str]]:
@@ -44,9 +43,7 @@ def load_suppressions(reviews_dir: Path) -> set[tuple[str, str]]:
     return suppressions
 
 
-def is_suppressed(
-    suppressions: set[tuple[str, str]], *, scanner: str, rule_id: str | None
-) -> bool:
+def is_suppressed(suppressions: set[tuple[str, str]], *, scanner: str, rule_id: str | None) -> bool:
     """A finding is suppressed if (scanner, rule_id) is in the set.
 
     rule_id is None (anonymous finding) → never suppressed; require an explicit

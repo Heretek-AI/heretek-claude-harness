@@ -14,6 +14,7 @@ Checks:
 If pinned_sha is None, the SHA-match check is skipped (catalog doesn't
 carry it for LSPs today; TODO if we add a sha field for LSPs in v2).
 """
+
 from __future__ import annotations
 
 import json
@@ -41,9 +42,7 @@ ALLOWLIST = frozenset(
 )
 
 # github commit URL pattern
-GITHUB_COMMIT_RE = re.compile(
-    r"^https?://github\.com/[\w.-]+/[\w.-]+/commit/([0-9a-f]{40})/?$"
-)
+GITHUB_COMMIT_RE = re.compile(r"^https?://github\.com/[\w.-]+/[\w.-]+/commit/([0-9a-f]{40})/?$")
 
 
 def _find_config(path: Path) -> Optional[Path]:
@@ -93,7 +92,9 @@ def _missing_config_report(item_id: str, path: Path) -> ScannerReport:
     )
 
 
-def _invalid_json_report(item_id: str, path: Path, cfg_path: Path, err: json.JSONDecodeError) -> ScannerReport:
+def _invalid_json_report(
+    item_id: str, path: Path, cfg_path: Path, err: json.JSONDecodeError
+) -> ScannerReport:
     return ScannerReport(
         item_id=item_id,
         scanner="config-lint",
@@ -115,7 +116,9 @@ def _check_command(
     """Validate cfg['command'] is a string on ALLOWLIST. Returns (block_report, findings)."""
     if not isinstance(command, str):
         block = _block_invalid(
-            item_id, rel_cfg, "command",
+            item_id,
+            rel_cfg,
+            "command",
             f"LSP 'command' must be a string, got {type(command).__name__}",
         )
         return block, []
@@ -125,8 +128,7 @@ def _check_command(
                 path=f"{rel_cfg}:command",
                 line=None,
                 message=(
-                    f"LSP command '{command}' not on allowlist "
-                    f"(allowed: {sorted(ALLOWLIST)})"
+                    f"LSP command '{command}' not on allowlist " f"(allowed: {sorted(ALLOWLIST)})"
                 ),
                 rule_id="lsp-command-unknown",
             )
@@ -145,7 +147,9 @@ def _check_urls(
             continue
         if not isinstance(url, str):
             block = _block_invalid(
-                item_id, rel_cfg, url_field,
+                item_id,
+                rel_cfg,
+                url_field,
                 f"LSP '{url_field}' must be a string, got {type(url).__name__}",
             )
             return block, findings
@@ -176,9 +180,7 @@ def _compute_severity(findings: list[Finding]) -> Severity:
     return "clean" if not findings else _severity_from_findings(findings)
 
 
-def scan_lsp(
-    path: Path, *, item_id: str, pinned_sha: Optional[str] = None
-) -> ScannerReport:
+def scan_lsp(path: Path, *, item_id: str, pinned_sha: Optional[str] = None) -> ScannerReport:
     """Lint the LSP config in `path`. Returns a ScannerReport."""
     findings: list[Finding] = []
 
@@ -196,7 +198,9 @@ def scan_lsp(
     # D11 shape check: top-level must be a JSON object.
     if not isinstance(cfg, dict):
         return _block_invalid(
-            item_id, rel_cfg, "<root>",
+            item_id,
+            rel_cfg,
+            "<root>",
             f"LSP config top-level must be a JSON object, got {type(cfg).__name__}",
         )
 

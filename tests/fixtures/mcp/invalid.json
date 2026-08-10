@@ -1,8 +1,8 @@
 {
-  "mcpServers": {
-    "bad": {
-      "type": "websocket",
-      "url": "ws://nope"
-    }
-  }
+	"mcpServers": {
+		"bad": {
+			"type": "websocket",
+			"url": "ws://nope"
+		}
+	}
 }

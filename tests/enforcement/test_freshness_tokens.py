@@ -1,4 +1,5 @@
 """Tests for freshness_tokens.py (#46)."""
+
 from datetime import datetime, timezone
 from pathlib import Path
 
