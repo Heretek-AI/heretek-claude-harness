@@ -18,6 +18,7 @@ should also be read end-to-end by the controller before dispatch.
 """
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -133,10 +134,10 @@ def _resolve_plan_path(raw: str) -> Path | None:
     otherwise read arbitrary files.
     """
     try:
-        resolved = Path(raw).resolve(strict=True)
+        resolved = Path(os.path.realpath(raw))
     except (OSError, RuntimeError):
         return None
-    cwd = Path.cwd().resolve()
+    cwd = Path(os.path.realpath(os.getcwd()))
     try:
         resolved.relative_to(cwd)
     except ValueError:
