@@ -3,6 +3,7 @@
 import datetime as dt
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -216,3 +217,25 @@ def test_update_shas_rejects_non_dict_root(
 
     with pytest.raises(ValueError, match="catalog.yaml root must be a dict"):
         refresh_pins.update_shas(catalog, gh_token="fake")
+
+
+# ---------------------------------------------------------------------------
+# Issue #164 — HTTP response body-size guard
+# ---------------------------------------------------------------------------
+
+
+def test_github_get_rejects_huge_content_length(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Issue #164: Content-Length > 50 MB on a /repos API call is swallowed as
+    `{}` (matches `_github_get`'s existing uniform fault-tolerance — any
+    `Exception` inside the `try` returns `{}`). Without the guard, the
+    mock's `.json()` would be called and a `MagicMock` returned — so this
+    test discriminates against a regression that drops the `check_content_length`
+    call."""
+    import requests as _requests
+
+    huge = MagicMock()
+    huge.headers = {"Content-Length": "99999999999"}
+    huge.status_code = 200  # explicitly 200, so origin/main falls into .json()
+    huge.json.return_value = {"would_have_been": "leaked"}
+    monkeypatch.setattr(_requests, "get", lambda *_a, **_k: huge)
+    assert refresh_pins._github_get("/repos/foo/releases/latest", gh_token="fake") == {}

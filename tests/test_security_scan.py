@@ -660,3 +660,24 @@ def test_load_done_items_handles_corrupt_file(tmp_path: Path) -> None:
     p = tmp_path / "state.json"
     p.write_text("{not json")
     assert _load_done_items(p) == set()
+
+
+# ---------------------------------------------------------------------------
+# Issue #164 — HTTP response body-size guard
+# ---------------------------------------------------------------------------
+
+
+@patch("scripts.security_scan.requests.get")
+def test_get_latest_release_sha_rejects_huge_content_length(mock_get: MagicMock) -> None:
+    """Issue #164: Content-Length > 50 MB on the releases/latest response
+    raises ValueError before `.json()` is parsed. `_get_latest_release_sha`
+    has no try/except wrapper, so the guard's ValueError propagates to the
+    caller (intentional — the orchestration layer owns retry/fallback)."""
+    from scripts.security_scan import _get_latest_release_sha
+
+    huge = MagicMock()
+    huge.headers = {"Content-Length": "99999999999"}
+    huge.status_code = 200
+    mock_get.return_value = huge
+    with pytest.raises(ValueError, match="exceeds cap"):
+        _get_latest_release_sha("upstream/repo", gh_token="fake")

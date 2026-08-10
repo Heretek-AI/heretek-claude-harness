@@ -29,6 +29,7 @@ import yaml
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts._allowlist import require_ref_segment, require_upstream
+from scripts._http import check_content_length
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CATALOG = REPO_ROOT / "catalog" / "catalog.yaml"
@@ -61,6 +62,7 @@ def _github_get(path: str, gh_token: Optional[str]) -> dict:
         if gh_token:
             headers["Authorization"] = f"Bearer {gh_token}"
         r = requests.get(f"{GITHUB_API}{path}", headers=headers, timeout=10)
+        check_content_length(r)
         if r.status_code == 200:
             return r.json()
         return {}

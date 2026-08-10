@@ -11,6 +11,7 @@ from typing import Optional
 
 import requests
 
+from ._http import check_content_length
 from .scanners.base import ScannerReport
 
 log = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ def _search_existing_issue(*, token: str, repo: str, title: str) -> Optional[str
         },
         timeout=10,
     )
+    check_content_length(r)
     if r.status_code != 200:
         return None
     items = r.json().get("items", [])
@@ -50,6 +52,7 @@ def _create_issue(*, token: str, repo: str, title: str, body: str, labels: list[
         json={"title": title, "body": body, "labels": labels},
         timeout=10,
     )
+    check_content_length(r)
     r.raise_for_status()
     data = r.json()
     return data["html_url"], data["number"]
@@ -62,6 +65,7 @@ def _create_branch(*, token: str, repo: str, branch: str, base_sha: str) -> str:
         json={"ref": f"refs/heads/{branch}", "sha": base_sha},
         timeout=10,
     )
+    check_content_length(r)
     r.raise_for_status()
     return r.json()["ref"]
 
@@ -73,6 +77,7 @@ def _create_pr(*, token: str, repo: str, title: str, body: str, head: str, base:
         json={"title": title, "body": body, "head": head, "base": base, "draft": True},
         timeout=10,
     )
+    check_content_length(r)
     r.raise_for_status()
     data = r.json()
     return data["html_url"], data["number"]
@@ -133,6 +138,7 @@ def draft_issue_and_pr(
             headers=_gh_headers(gh_token),
             timeout=10,
         )
+        check_content_length(r)
         r.raise_for_status()
     except requests.HTTPError as e:
         raise RuntimeError(

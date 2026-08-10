@@ -31,6 +31,7 @@ from scripts._allowlist import (  # noqa: E402,I001
     require_sha,
     require_upstream,
 )
+from scripts._http import check_content_length
 
 import requests
 import yaml
@@ -79,6 +80,7 @@ def _get_latest_release_sha(
         headers=headers,
         timeout=10,
     )
+    check_content_length(r)
     if r.status_code != 200:
         return None, None
     data = r.json()
@@ -91,6 +93,7 @@ def _get_latest_release_sha(
             headers=headers,
             timeout=10,
         )
+        check_content_length(r2)
         if r2.status_code == 200:
             target = r2.json().get("commit", {}).get("sha") or None
         else:
