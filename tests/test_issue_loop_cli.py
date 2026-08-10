@@ -501,7 +501,6 @@ def _capture_main(argv: list[str], gh_runner: FakeGH | None = None) -> _Captured
     import contextlib
 
     buf = io.StringIO()
-    rc = 1
     try:
         with contextlib.redirect_stdout(buf):
             rc = cli.main(argv, gh_runner=gh_runner)
