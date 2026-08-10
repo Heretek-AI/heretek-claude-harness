@@ -22,6 +22,16 @@ TOOL_TABLE: dict[str, tuple[str, list[str]]] = {
     "sonarqube": ("sonar-scanner", ["sonar-scanner"]),
 }
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _resolve_scope_path(raw: str) -> Path:
+    """Resolve scope path against REPO_ROOT; reject escapes."""
+    resolved = (REPO_ROOT / raw).resolve()
+    if not resolved.is_relative_to(REPO_ROOT):
+        raise ValueError(f"scope path {raw!r} escapes REPO_ROOT")
+    return resolved
+
 
 def parse_scope(arg: str) -> dict:
     """Parse a /quality-gate:run argument into a scope dict."""
@@ -29,6 +39,7 @@ def parse_scope(arg: str) -> dict:
         return {"scope": "repo"}
     if arg == "diff":
         return {"scope": "diff"}
+    _resolve_scope_path(arg)
     return {"scope": "path", "path": arg}
 
 
@@ -43,7 +54,7 @@ def resolve_tools() -> list[str]:
 
 def _scope_cwd(scope: dict) -> Path:
     if scope.get("scope") == "path":
-        return Path(scope["path"])
+        return _resolve_scope_path(scope["path"])
     return Path(".")
 
 
