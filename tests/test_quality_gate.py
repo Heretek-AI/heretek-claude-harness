@@ -22,6 +22,27 @@ def test_parse_scope_path() -> None:
     assert quality_gate.parse_scope("src/foo") == {"scope": "path", "path": "src/foo"}
 
 
+def test_parse_scope_rejects_traversal() -> None:
+    """`..`-traversal must raise ValueError; never become subprocess cwd (#161)."""
+    with pytest.raises(ValueError, match="escapes REPO_ROOT"):
+        quality_gate.parse_scope("../../etc")
+
+
+def test_parse_scope_rejects_absolute_outside_repo() -> None:
+    """Absolute paths outside REPO_ROOT must raise ValueError (#161)."""
+    with pytest.raises(ValueError):
+        quality_gate.parse_scope("/etc")
+
+
+def test_parse_scope_accepts_repo_relative() -> None:
+    """Valid repo-relative paths parse normally and _scope_cwd resolves under REPO_ROOT (#161)."""
+    scope = quality_gate.parse_scope("plugins/hooks")
+    assert scope == {"scope": "path", "path": "plugins/hooks"}
+    repo_root = Path(quality_gate.__file__).resolve().parents[2]
+    cwd = quality_gate._scope_cwd(scope)
+    assert cwd.is_relative_to(repo_root)
+
+
 def test_parse_scope_empty_defaults_to_repo() -> None:
     assert quality_gate.parse_scope("") == {"scope": "repo"}
 
