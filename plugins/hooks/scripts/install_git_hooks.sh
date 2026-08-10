@@ -29,7 +29,12 @@ if ! python3 -m pre_commit --version >/dev/null 2>&1; then
 fi
 
 # 5. Idempotency check: short-circuit if hooks are already installed (#97).
-if [[ -f "$REPO_ROOT/.git/hooks/pre-commit" ]] && grep -q "pre-commit" "$REPO_ROOT/.git/hooks/pre-commit" 2>/dev/null; then
+# Use `git rev-parse --git-common-dir` because `pre-commit install` writes
+# hooks to the common git dir (shared with the main checkout when running
+# in a worktree). Hardcoding `$REPO_ROOT/.git/hooks/pre-commit` misses the
+# hook when `$REPO_ROOT` is a worktree (where `.git/` is a file).
+HOOK_PATH="$(git -C "$REPO_ROOT" rev-parse --git-common-dir)/hooks/pre-commit"
+if [[ -f "$HOOK_PATH" ]] && grep -q "pre-commit" "$HOOK_PATH" 2>/dev/null; then
     echo "install_git_hooks: pre-commit hooks already installed; skipping" >&2
     echo "install_git_hooks: OK (pre-commit + pre-push hooks already installed in $REPO_ROOT)"
     exit 0
