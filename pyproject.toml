@@ -21,3 +21,21 @@ markers = [
 
 [tool.coverage]
 xml_output = "coverage.xml"
+
+# Ruff config — wired into plugins/hooks/.pre-commit-config.yaml.
+# Aligns with the repo's existing style (single-letter loop vars, late
+# imports for sys.path manipulation, fixtures with intentional bad code).
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# E741: single-letter variable name `l` is common shorthand in this repo
+# (used for `ledger`, `loop`, etc.); accept it.
+ignore = ["E741"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test fixtures intentionally contain bad code that scanners must detect.
+"tests/fixtures/**" = ["F821", "F841", "E402"]
+# Scripts in scripts/scanners/ manipulate sys.path before importing scanner
+# modules; the late imports are intentional.
+"scripts/scanners/**" = ["E402"]
