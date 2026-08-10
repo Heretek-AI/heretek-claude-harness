@@ -35,6 +35,21 @@ DISPATCH_TABLE: dict[str, tuple[str, list[str]]] = {
     ".css": ("biome", ["biome", "check", "--no-errors-on-unmatched", "{}"]),
 }
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _validate_file_path(file_path: Path) -> Path | None:
+    """Resolve file_path and reject escapes outside REPO_ROOT.
+
+    Returns the resolved Path if it stays under REPO_ROOT, else None.
+    `strict=False` lets us check paths that don't exist yet (hooks fire on
+    Write before the file lands).
+    """
+    resolved = file_path.resolve(strict=False)
+    if not resolved.is_relative_to(REPO_ROOT):
+        return None
+    return resolved
+
 
 def parse_payload(payload_text: str) -> dict:
     """Parse a Claude Code hook payload and return {tool_name, file_path}.
@@ -86,6 +101,14 @@ def dispatch(file_path: Path, time_budget_s: float = 0.1) -> int:
     if entry is None:
         return 0
     binary, argv_template = entry
+    validated = _validate_file_path(file_path)
+    if validated is None:
+        print(
+            f"fast_gate: {file_path} escapes REPO_ROOT; failing open",
+            file=sys.stderr,
+        )
+        return 0
+    file_path = validated
     # Biome is always invoked via npx so we can pin the major version for
     # determinism (avoid upstream surprise changes breaking CI).
     if binary == "biome":
