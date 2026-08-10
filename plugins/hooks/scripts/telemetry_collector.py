@@ -26,9 +26,26 @@ from typing import Any
 
 import jsonschema
 
-TELEMETRY_ROOT = Path(
-    os.environ.get("HERETEK_TELEMETRY_ROOT", Path.home() / ".heretek" / "telemetry")
-)
+
+def _resolve_telemetry_root() -> Path:
+    """Resolve HERETEK_TELEMETRY_ROOT against the safe root (~/.heretek).
+
+    Rejects values that resolve outside the safe root with RuntimeError. Telemetry
+    is per-user (not per-repo), so the safe root lives under Path.home().
+    """
+    safe_root = (Path.home() / ".heretek").resolve()
+    raw = os.environ.get("HERETEK_TELEMETRY_ROOT")
+    if raw is None:
+        return (safe_root / "telemetry").resolve()
+    candidate = Path(raw).resolve()
+    if not candidate.is_relative_to(safe_root):
+        raise RuntimeError(
+            f"HERETEK_TELEMETRY_ROOT {raw!r} escapes safe root {safe_root}"
+        )
+    return candidate
+
+
+TELEMETRY_ROOT = _resolve_telemetry_root()
 SCHEMA_PATH = (
     Path(__file__).parent.parent.parent.parent
     / "tests"

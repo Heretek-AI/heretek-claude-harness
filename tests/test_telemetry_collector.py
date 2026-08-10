@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -203,3 +204,34 @@ def test_main_returns_zero_when_build_event_fails(
         assert tc.main() == 0
     captured = capsys.readouterr()
     assert "build_event failed" in captured.err
+
+
+def test_telemetry_root_rejects_escape(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression for issue #163: HERETEK_TELEMETRY_ROOT must reject values
+    that resolve outside ~/.heretek. Validation runs at import time, so we
+    reload the module under a hostile env var and expect RuntimeError."""
+    monkeypatch.setenv("HERETEK_TELEMETRY_ROOT", "/tmp/anywhere")
+    try:
+        with pytest.raises(RuntimeError, match="escapes safe root"):
+            importlib.reload(tc)
+    finally:
+        # Restore module to a sane state for subsequent tests.
+        monkeypatch.delenv("HERETEK_TELEMETRY_ROOT", raising=False)
+        importlib.reload(tc)
+
+
+def test_telemetry_root_accepts_safe_subpath(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression for issue #163: paths inside ~/.heretek must be accepted,
+    including nested subdirectories like ~/.heretek/telemetry/sub."""
+    safe_path = str((Path.home() / ".heretek" / "telemetry" / "sub").resolve())
+    monkeypatch.setenv("HERETEK_TELEMETRY_ROOT", safe_path)
+    try:
+        importlib.reload(tc)
+        assert tc.TELEMETRY_ROOT == Path(safe_path)
+    finally:
+        monkeypatch.delenv("HERETEK_TELEMETRY_ROOT", raising=False)
+        importlib.reload(tc)
