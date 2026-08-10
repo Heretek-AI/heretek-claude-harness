@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import typing
 
 from scripts.issue_loop.classifier import Path, classify
 from scripts.issue_loop.ledger import IssueRef
@@ -52,11 +53,8 @@ def test_default_path_is_investigate():
 
 
 def test_path_enum_values_are_stable():
-    assert Path("fix") == "fix"
-    assert Path("investigate") == "investigate"
-    assert Path("spec") == "spec"
-    assert Path("break-down") == "break-down"
-    assert Path("skip") == "skip"
+    values = set(typing.get_args(Path))
+    assert values == {"fix", "investigate", "spec", "break-down", "skip"}
 
 
 def test_empty_body_classifies_as_investigate():
