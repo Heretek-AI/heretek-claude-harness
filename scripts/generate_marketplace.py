@@ -119,7 +119,10 @@ def generate(catalog_path: Path, output_path: Path) -> dict:
     }
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.resolve().write_text(json.dumps(generated, indent=2, sort_keys=True) + "\n")
+    resolved = output_path.resolve()
+    tmp = resolved.with_suffix(resolved.suffix + ".tmp")
+    tmp.write_text(json.dumps(generated, indent=2, sort_keys=True) + "\n")
+    tmp.replace(resolved)
     return generated
 
 
