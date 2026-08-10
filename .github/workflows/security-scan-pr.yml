@@ -27,7 +27,7 @@ jobs:
           node-version: "20"
 
       - name: Install Python deps
-        run: pip install --only-binary=:all: -r requirements-dev.txt
+        run: "pip install --only-binary :all: -r requirements-dev.txt"
 
       - name: Determine bumped item
         id: detect

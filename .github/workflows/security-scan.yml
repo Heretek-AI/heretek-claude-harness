@@ -109,7 +109,7 @@ jobs:
         with:
           python-version: "3.10"
       - name: Install runtime deps
-        run: pip install --only-binary=:all: -r requirements-dev.txt
+        run: "pip install --only-binary :all: -r requirements-dev.txt"
       - name: Refresh freshness cache
         run: python -m scripts.freshness_index --all
       - name: Commit refreshed cache
