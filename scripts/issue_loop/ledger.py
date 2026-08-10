@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-TERMINAL = frozenset({"merged", "skipped"})
+TERMINAL = frozenset({"merged", "skipped", "investigated"})
 
 
 @dataclass(frozen=True)
@@ -52,6 +52,11 @@ class Ledger:
                 "last_error": None,
                 "started_at": None,
                 "finished_at": None,
+                "path": None,
+                "findings_path": None,
+                "spec_path": None,
+                "sub_issues": [],
+                "events": [],
             }
         return self._entries[key]
 
@@ -95,6 +100,13 @@ class Ledger:
         e["status"] = "failed"
         e["last_error"] = error
         # do NOT set finished_at -- failed is non-terminal
+        self._save()
+
+    def mark_investigated(self, issue_number: int, findings_path: str) -> None:
+        e = self._ensure(issue_number)
+        e["status"] = "investigated"
+        e["findings_path"] = findings_path
+        e["finished_at"] = self._now()
         self._save()
 
     def record_verifier_reject(self) -> int:
