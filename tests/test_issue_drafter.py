@@ -108,3 +108,21 @@ def test_draft_raises_on_base_ref_http_error(
             item="context7",
             new_sha="0" * 40,
         )
+
+
+# ---------------------------------------------------------------------------
+# Issue #164 — HTTP response body-size guard
+# ---------------------------------------------------------------------------
+
+
+def test_search_existing_issue_rejects_huge_content_length() -> None:
+    """Issue #164: a ~100 GB Content-Length in the search response must raise
+    before `.json()` is called (defends against hostile/upstream OOM)."""
+    from scripts.issue_drafter import _search_existing_issue
+
+    huge = MagicMock()
+    huge.headers = {"Content-Length": "99999999999"}
+    huge.status_code = 200
+    with patch("scripts.issue_drafter.requests.get", return_value=huge):
+        with pytest.raises(ValueError, match="exceeds cap"):
+            _search_existing_issue(token="fake", repo="owner/repo", title="t")
