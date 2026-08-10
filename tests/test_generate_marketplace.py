@@ -106,3 +106,24 @@ def test_main_writes_and_exits_zero(
     )
     assert generate_marketplace.main() == 0
     assert out.is_file()
+
+
+def test_generate_atomic_write_preserves_existing_on_interrupt(
+    tmp_path: Path, fixtures_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """If the tmp-file write raises, the original marketplace.json stays intact."""
+    catalog = fixtures_dir / "catalog" / "single_plugin.yaml"
+    out = tmp_path / "marketplace.json"
+    sentinel = '{"preserved": true}\n'
+    out.write_text(sentinel)
+
+    def _explode(_self: Path, _target: Path) -> int:
+        raise OSError("simulated interrupt mid-write")
+
+    monkeypatch.setattr(Path, "replace", _explode)
+    with pytest.raises(OSError, match="simulated interrupt"):
+        generate_marketplace.generate(catalog, out)
+    # Original file untouched; tmp sibling may linger (next run overwrites).
+    assert out.read_text() == sentinel
+    assert not (out.parent / (out.name + ".tmp")).exists() or \
+        (out.parent / (out.name + ".tmp")).read_text() != sentinel
