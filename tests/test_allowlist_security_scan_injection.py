@@ -114,6 +114,45 @@ def test_commit_branch_constructs_safe_branch_name(tmp_path: Path, monkeypatch: 
             assert "security-scan/rust-clippy-deadbeefdead" in argv
 
 
+@pytest.mark.parametrize(
+    "malicious",
+    ["../../etc", "--upload-pack=evil", "main; rm -rf /", "main|cat /etc/passwd"],
+)
+def test_commit_branch_rejects_malicious_default_branch(
+    malicious: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """HERETEK_DEFAULT_BRANCH with traversal or shell metacharacters must be
+    ignored; the reset checkout must fall back to 'main'."""
+    catalog = tmp_path / "catalog.yaml"
+    catalog.write_text("plugins: []\n")
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+
+    captured: list[list[str]] = []
+
+    def fake_run(argv, **_kw):
+        captured.append(list(argv))
+        return _FakeCompletedProcess(0)
+
+    monkeypatch.setattr(security_scan.subprocess, "run", fake_run)
+    monkeypatch.setattr(security_scan, "bump_item_sha", lambda *a, **k: None)
+    monkeypatch.setenv("HERETEK_DEFAULT_BRANCH", malicious)
+
+    security_scan._commit_catalog_bump(
+        catalog_path=catalog,
+        repo_root=repo_root,
+        plugin="p",
+        item_id="foo",
+        new_sha="deadbeef" * 5,
+        vetting_date="2026-08-06",
+    )
+
+    reset = [a for a in captured if a[:2] == ["git", "checkout"] and "-b" not in a]
+    assert reset, "expected a reset checkout"
+    assert reset[-1][-1] == "main"
+    assert all(malicious not in str(a) for a in captured)
+
+
 class _FakeCompletedProcess:
     def __init__(self, returncode: int) -> None:
         self.returncode = returncode
