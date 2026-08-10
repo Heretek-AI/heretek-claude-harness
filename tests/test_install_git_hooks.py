@@ -72,7 +72,20 @@ def test_install_sh_skips_reinstall_when_already_present() -> None:
     if not _pre_commit_cli_works():
         pytest.skip("pre-commit CLI not runnable (missing deps like pyyaml)")
     repo_root = Path(__file__).resolve().parents[1]
-    hook_path = repo_root / ".git" / "hooks" / "pre-commit"
+    # Resolve hooks path via `git rev-parse --git-common-dir` so the test
+    # works in worktrees. In a worktree, `.git/` is a file pointing at the
+    # worktree-specific git dir, but `pre-commit install` writes hooks to
+    # the COMMON git dir (shared with the main checkout). Hardcoding
+    # `<repo_root>/.git/hooks/pre-commit` only works in a non-worktree clone.
+    git_common_dir = Path(
+        subprocess.check_output(
+            ["git", "-C", str(repo_root), "rev-parse", "--git-common-dir"],
+            text=True,
+        ).strip()
+    )
+    if not git_common_dir.is_absolute():
+        git_common_dir = repo_root / git_common_dir
+    hook_path = git_common_dir / "hooks" / "pre-commit"
     # Ensure installed first.
     first = subprocess.run(
         ["bash", str(INSTALL_SH)], capture_output=True, text=True
