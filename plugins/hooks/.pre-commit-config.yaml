@@ -1,17 +1,53 @@
 # heretek hooks plugin — Layer 3 pre-commit framework config.
 # Installed by /hooks:install-git-hooks; runs on pre-commit + pre-push.
+# Spec: docs/superpowers/specs/2026-08-10-precommit-mechanical-gates-design.md
+# D30: plugin-internal location. D37: fail_fast at root for developer time.
+# D20: every remote repo pinned to a 40-char hex SHA.
 
+# Minimum pre-commit framework version. v3.5 added modern hook YAML schema
+# (e.g. `additional_dependencies`) and the `language_version` resolver.
+minimum_pre_commit_version: "3.5.0"
+
+# Install BOTH pre-commit AND pre-push hooks. The install_git_hooks.sh
+# script invokes `pre-commit install` without args; this setting expands
+# that to include the pre-push stage.
 default_install_hook_types: [pre-commit, pre-push]
 default_stages: [pre-commit, pre-push]
 
+# D37: fail_fast on local runs so developers see the first violation and
+# fix it before re-running. CI sets fail-fast off (per pre-commit/action
+# defaults) so PRs surface every violation in a single round-trip.
+fail_fast: true
+
 repos:
+  # 1. Hygiene: trailing whitespace, EOF newline, merge-conflict markers,
+  # large file blocks, YAML/TOML/JSON syntax checks.
+  # Pin: v6.0.0 → 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c (2025-08-09).
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+
+  # 2. Python: Ruff lint + format. Already used in plugins/hooks Layer 1
+  # fast_gate.py; this wires the same gate into git commit.
+  # Pin: v0.6.9 → 75b98813cfb7e663870a28c74366a1e99d7bfe79.
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9
+    rev: 75b98813cfb7e663870a28c74366a1e99d7bfe79
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
 
+  # 3. heretek-fast-gate (local). Already enforced by Claude Code's
+  # PreToolUse hook (Layer 1); this catches `git commit` invocations that
+  # bypass the agent loop.
   - repo: local
     hooks:
       - id: heretek-fast-gate
@@ -19,14 +55,43 @@ repos:
         entry: python3 plugins/hooks/scripts/fast_gate.py
         language: system
         types: [python]
-        # Fast gate is also enforced by Claude Code's PreToolUse hook;
-        # this catches git commits that bypass the agent loop.
 
+  # 4. JS/TS: Biome format. Mirrors plugins/js-ts/biome-lsp.
+  # Pin: v0.6.1 → 19865851e014cbe6138e295365f95ca51bf953f8.
+  - repo: https://github.com/biomejs/pre-commit
+    rev: 19865851e014cbe6138e295365f95ca51bf953f8
+    hooks:
+      - id: biome-check
+        # biome-check is the default apply-on-detect entry shipped by
+        # biomejs/pre-commit; no extra args needed. additional_dependencies
+        # installs biome into the hook venv so the hook works without a
+        # system biome install. Pre-commit caches this.
+        additional_dependencies: ["@biomejs/biome@1.9.4"]
+
+  # 5. Shell: shellcheck-py wrapper (MIT). Shellcheck binary itself is GPL
+  # but the wrapper is MIT and scans .sh files in the repo. Coverage
+  # already exists in .github/workflows/shellcheck.yml; this adds it to
+  # git commit so devs catch issues before pushing.
+  # Pin: v0.10.0.1 → a23f6b85d0fdd5bb9d564e2579e678033debbdff.
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
+    rev: a23f6b85d0fdd5bb9d564e2579e678033debbdff
     hooks:
       - id: shellcheck
         # Issue #150: local feedback for shell-script issues before push.
         # Mirrors the CI workflow (.github/workflows/shellcheck.yml);
         # Severity matches CI: blocks on warning+error; info/style are filtered (don't fail the dev loop).
         args: ["--severity=warning"]
+
+  # 6. Secrets: gitleaks pre-commit. Hardblocks API keys, tokens, etc.
+  # CI has a broader security-scan-digest workflow; this adds dev-time
+  # fast path so secrets are caught before push.
+  # Pin: v8.30.1 → 83d9cd684c87d95d656c1458ef04895a7f1cbd8e.
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e
+    hooks:
+      - id: gitleaks
+
+# Rust fmt/clippy (doublify/pre-commit-rust) is intentionally NOT included
+# in A0: that repo's latest release is v1.0 from 2020, which fails D7
+# (last_commit ≤ 12 months). A maintained Rust wrapper will be vetted in
+# slice A3 alongside cargo-machete and fallow.
