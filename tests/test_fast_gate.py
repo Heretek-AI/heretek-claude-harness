@@ -170,3 +170,36 @@ def test_dispatch_still_blocks_on_normal_violation(monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(fast_gate.subprocess, "run", lambda *a, **kw: fake)
     code = fast_gate.run(payload, time_budget_s=0.05)
     assert code == 2, "returncode==1 with normal violation must still block"
+
+
+def test_dispatch_fails_open_on_path_traversal(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture,
+) -> None:
+    """Regression (#162): file_path that escapes REPO_ROOT must fail-open.
+
+    A hostile payload (e.g. '../../etc/passwd.py') must NOT be passed to
+    a linter subprocess. The wrapper writes a stderr message and exits 0.
+    """
+    payload = json.dumps({
+        "tool_name": "Edit",
+        "tool_input": {
+            "file_path": "../../etc/passwd.py",
+            "old_string": "",
+            "new_string": "",
+        },
+    })
+    invoked = []
+
+    def fail_if_called(*_args, **_kwargs):
+        invoked.append(_args)
+        raise AssertionError("subprocess.run must not be called for escape")
+
+    monkeypatch.setitem(fast_gate._FORCE_BINARY, "ruff", "/usr/bin/true")
+    monkeypatch.setattr(fast_gate.subprocess, "run", fail_if_called)
+    code = fast_gate.run(payload, time_budget_s=0.05)
+    assert code == 0
+    assert invoked == [], "linter subprocess must not be invoked on escape"
+    err = capsys.readouterr().err
+    assert "escapes REPO_ROOT" in err
+    assert "failing open" in err
