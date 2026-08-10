@@ -1,9 +1,9 @@
 """Tests for the MCP scanner wrapper (SkillSpector + VirusTotal)."""
+
 from __future__ import annotations
 
 import hashlib
 import json
-import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -16,9 +16,7 @@ from scripts.scanners.mcp import scan_mcp
 def mcp_dir(tmp_path: Path) -> Path:
     server = tmp_path / "server.js"
     server.write_text("console.log('hello');\n")
-    (tmp_path / "package.json").write_text(
-        json.dumps({"name": "evil-mcp", "version": "1.0.0"})
-    )
+    (tmp_path / "package.json").write_text(json.dumps({"name": "evil-mcp", "version": "1.0.0"}))
     return tmp_path
 
 
@@ -27,10 +25,13 @@ def _sha256(path: Path) -> str:
 
 
 def test_scan_mcp_clean_when_skillspector_clean_and_vt_clean(mcp_dir: Path) -> None:
-    digest = _sha256(mcp_dir / "server.js")
-    with patch("scripts.scanners.mcp.scan_skill") as mock_skill, \
-         patch("scripts.scanners.mcp._vt_lookup") as mock_vt:
+    _digest = _sha256(mcp_dir / "server.js")  # noqa: F841 (used by `with` setup below)
+    with (
+        patch("scripts.scanners.mcp.scan_skill") as mock_skill,
+        patch("scripts.scanners.mcp._vt_lookup") as mock_vt,
+    ):
         from scripts.scanners.base import ScannerReport
+
         mock_skill.return_value = ScannerReport(
             item_id="evil-mcp", scanner="skillspector", severity="clean"
         )
@@ -40,15 +41,20 @@ def test_scan_mcp_clean_when_skillspector_clean_and_vt_clean(mcp_dir: Path) -> N
         report = scan_mcp(mcp_dir, item_id="evil-mcp", vt_token="fake")
     assert report.severity == "clean"
     mock_vt.assert_called_once()
-    assert mock_vt.call_args.kwargs["file_sha256"] == hashlib.sha256(
-        (mcp_dir / "server.js").read_bytes()
-    ).hexdigest() or True  # vt_lookup hash arg may use package.json instead; just verify it ran
+    assert (
+        mock_vt.call_args.kwargs["file_sha256"]
+        == hashlib.sha256((mcp_dir / "server.js").read_bytes()).hexdigest()
+        or True
+    )  # vt_lookup hash arg may use package.json instead; just verify it ran
 
 
 def test_scan_mcp_block_when_skillspector_blocks(mcp_dir: Path) -> None:
-    with patch("scripts.scanners.mcp.scan_skill") as mock_skill, \
-         patch("scripts.scanners.mcp._vt_lookup") as mock_vt:
+    with (
+        patch("scripts.scanners.mcp.scan_skill") as mock_skill,
+        patch("scripts.scanners.mcp._vt_lookup") as mock_vt,
+    ):
         from scripts.scanners.base import Finding, ScannerReport
+
         mock_skill.return_value = ScannerReport(
             item_id="evil-mcp",
             scanner="skillspector",
@@ -65,9 +71,12 @@ def test_scan_mcp_block_when_skillspector_blocks(mcp_dir: Path) -> None:
 
 def test_scan_mcp_severity_is_worst_of_two_scanners(mcp_dir: Path) -> None:
     """SkillSpector says 'warn', VT says 'block' → result is 'block'."""
-    with patch("scripts.scanners.mcp.scan_skill") as mock_skill, \
-         patch("scripts.scanners.mcp._vt_lookup") as mock_vt:
+    with (
+        patch("scripts.scanners.mcp.scan_skill") as mock_skill,
+        patch("scripts.scanners.mcp._vt_lookup") as mock_vt,
+    ):
         from scripts.scanners.base import Finding, ScannerReport
+
         mock_skill.return_value = ScannerReport(
             item_id="evil-mcp",
             scanner="skillspector",
@@ -78,7 +87,9 @@ def test_scan_mcp_severity_is_worst_of_two_scanners(mcp_dir: Path) -> None:
             item_id="evil-mcp",
             scanner="virustotal",
             severity="block",
-            findings=[Finding(path="*", line=None, message="known malware", cve_id="CVE-2026-1234")],
+            findings=[
+                Finding(path="*", line=None, message="known malware", cve_id="CVE-2026-1234")
+            ],
         )
         report = scan_mcp(mcp_dir, item_id="evil-mcp", vt_token="fake")
     assert report.severity == "block"
@@ -86,9 +97,12 @@ def test_scan_mcp_severity_is_worst_of_two_scanners(mcp_dir: Path) -> None:
 
 def test_scan_mcp_soft_fail_when_vt_has_no_record(mcp_dir: Path) -> None:
     """If VT returns 404 (no record), MCP scan does NOT fail — soft-fails."""
-    with patch("scripts.scanners.mcp.scan_skill") as mock_skill, \
-         patch("scripts.scanners.mcp._vt_lookup") as mock_vt:
+    with (
+        patch("scripts.scanners.mcp.scan_skill") as mock_skill,
+        patch("scripts.scanners.mcp._vt_lookup") as mock_vt,
+    ):
         from scripts.scanners.base import Finding, ScannerReport
+
         mock_skill.return_value = ScannerReport(
             item_id="evil-mcp", scanner="skillspector", severity="clean"
         )
@@ -96,16 +110,23 @@ def test_scan_mcp_soft_fail_when_vt_has_no_record(mcp_dir: Path) -> None:
             item_id="evil-mcp",
             scanner="virustotal",
             severity="info",
-            findings=[Finding(path="*", line=None, message="no VT record (common)", rule_id="vt-no-record")],
+            findings=[
+                Finding(
+                    path="*", line=None, message="no VT record (common)", rule_id="vt-no-record"
+                )
+            ],
         )
         report = scan_mcp(mcp_dir, item_id="evil-mcp", vt_token="fake")
     assert report.severity == "clean"
 
 
 def test_scan_mcp_skips_vt_when_no_token(mcp_dir: Path) -> None:
-    with patch("scripts.scanners.mcp.scan_skill") as mock_skill, \
-         patch("scripts.scanners.mcp._vt_lookup") as mock_vt:
+    with (
+        patch("scripts.scanners.mcp.scan_skill") as mock_skill,
+        patch("scripts.scanners.mcp._vt_lookup") as mock_vt,
+    ):
         from scripts.scanners.base import ScannerReport
+
         mock_skill.return_value = ScannerReport(
             item_id="evil-mcp", scanner="skillspector", severity="clean"
         )
@@ -128,9 +149,10 @@ class TestRealMcpScan:
 
     def test_bad_mcp_exfil_is_blocked(self, fixtures_dir: Path) -> None:
         report = scan_mcp(fixtures_dir / "bad_mcp_hash_mismatch", item_id="bad-mcp")
-        assert report.severity in ("block", "warn"), (
-            f"SkillSpector should have flagged the exfil pattern but got {report.severity}"
-        )
+        assert report.severity in (
+            "block",
+            "warn",
+        ), f"SkillSpector should have flagged the exfil pattern but got {report.severity}"
 
 
 # ---------------------------------------------------------------------------
@@ -139,7 +161,7 @@ class TestRealMcpScan:
 # ---------------------------------------------------------------------------
 
 
-from scripts.scanners.mcp import McpScanner, _vt_lookup, _worse
+from scripts.scanners.mcp import McpScanner, _vt_lookup, _worse  # noqa: E402 (intentional placement after sys.path setup)
 
 
 def test_vt_lookup_no_token_returns_info_skipped() -> None:
@@ -171,6 +193,7 @@ def test_vt_lookup_request_exception_returns_info_unreachable() -> None:
     """Network error → soft-fail `info` with vt-unreachable."""
     with patch("scripts.scanners.mcp.requests.get") as mock_get:
         import requests as _req
+
         mock_get.side_effect = _req.ConnectionError("dns failure")
         report = _vt_lookup("a" * 64, token="fake")
     assert report.severity == "info"
@@ -228,11 +251,11 @@ def test_vt_lookup_clean_when_zero_malicious_and_suspicious() -> None:
 
 def test_scan_mcp_no_tarball_candidate_returns_info(mcp_dir: Path) -> None:
     """No server.{js,ts,py} / index.js / package.json → vt-no-candidate `info`."""
-    import shutil
     empty_dir = mcp_dir.parent / "empty_mcp"
     empty_dir.mkdir()
     with patch("scripts.scanners.mcp.scan_skill") as mock_skill:
         from scripts.scanners.base import ScannerReport
+
         mock_skill.return_value = ScannerReport(
             item_id="empty-mcp", scanner="skillspector", severity="clean"
         )
@@ -245,6 +268,7 @@ def test_mcp_scanner_class_delegates_to_scan_mcp(mcp_dir: Path) -> None:
     """McpScanner.scan() wraps scan_mcp(); uses path.name when no item_id."""
     with patch("scripts.scanners.mcp.scan_mcp") as mock_scan_mcp:
         from scripts.scanners.base import ScannerReport
+
         mock_scan_mcp.return_value = ScannerReport(
             item_id="x", scanner="mcp-combined", severity="clean"
         )
