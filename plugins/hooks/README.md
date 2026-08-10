@@ -7,7 +7,7 @@
 The `hooks` plugin is the heretek marketplace's differentiator. It runs:
 - **Layer 1 (fast blocking, <100ms):** `ruff` for Python, `rustfmt` for Rust, `biome` for JS/TS/JSON/CSS on every Claude Code `Edit`/`Write`/`MultiEdit`. Fail-open on time-budget overrun.
 - **Layer 2 (on-demand):** `/quality-gate:run` slash command runs clippy, megalinter, tdd-guard, jscpd, sonarqube on the repo.
-- **Layer 3 (git hooks):** `/hooks:install-git-hooks` installs pre-commit + pre-push hooks via the pre-commit framework.
+- **Layer 3 (git hooks):** `/hooks:install-git-hooks` installs pre-commit + pre-push hooks via the pre-commit framework. Tools: hygiene (trailing whitespace, EOF, YAML/TOML/JSON syntax, large file blocks, merge-conflict markers), Ruff lint+format, Biome format, shellcheck, gitleaks, heretek fast gate (local). `fail_fast: true` at the root for developer time.
 
 ## Install
 

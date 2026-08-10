@@ -23,6 +23,20 @@ All notable changes to the `heretek` Claude Code marketplace are recorded here. 
 
 ## Unreleased
 
-(none — every v1.0.0 entry is closed above)
+### Added
+
+- **#206, #207, #208** Pre-commit framework rollout (sub-spec A0):
+  `plugins/hooks/.pre-commit-config.yaml` (plugin-internal per D15/D30) with
+  hygiene + Ruff + Biome + shellcheck + gitleaks + heretek fast gate. SHA-pinned
+  per D20. `fail_fast: true` at root per D37. New CI workflow
+  `.github/workflows/pre-commit.yml` (closes #207). CONTRIBUTING.md updated
+  with the pre-commit install + bind commands (closes #208). Spec at
+  `docs/superpowers/specs/2026-08-10-precommit-mechanical-gates-design.md`.
+
+### Fixed
+
+- Pre-existing `install_git_hooks.sh` mode change (0644 → 0755) so the
+  user-execute bit required by `test_install_sh_exists_and_executable`
+  is preserved.
 
 [Older versions]: see git history.
