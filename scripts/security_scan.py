@@ -114,6 +114,8 @@ def _shallow_clone(upstream: str, sha: str, target: Path) -> None:
     if target.exists():
         shutil.rmtree(target)
     target.mkdir(parents=True, exist_ok=True)
+    # MUST be called before URL interpolation; security contract: require_upstream + require_sha
+    # defense-in-depth against SSRF via git transport options (e.g. --upload-pack=evil).
     subprocess.run(
         ["git", "clone", "--no-checkout", f"https://github.com/{upstream}.git", "."],
         cwd=str(target),
