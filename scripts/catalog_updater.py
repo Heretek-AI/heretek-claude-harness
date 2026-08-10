@@ -79,6 +79,8 @@ def bump_item_sha(
 
     yaml = _make_yaml()
     data = yaml.load(_safe_read(catalog_path))
+    if not isinstance(data, dict):
+        raise ValueError("catalog.yaml root must be a dict")
     item = _find_item(data, plugin_name, item_id)
     if item is None:
         raise ItemNotFound(f"{plugin_name}/{item_id}")
