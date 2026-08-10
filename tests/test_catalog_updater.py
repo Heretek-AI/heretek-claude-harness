@@ -173,3 +173,28 @@ def test_module_entry_point_invokes_main(tmp_path: Path, monkeypatch: pytest.Mon
     with pytest.raises(SystemExit) as exc_info:
         runpy.run_module("scripts.catalog_updater", run_name="__main__")
     assert exc_info.value.code == 0
+
+
+# ---------------------------------------------------------------------------
+# Issue #158 — list/empty-rooted catalog.yaml must fail cleanly (not via
+# AttributeError) once the `isinstance(data, dict)` guard was added.
+# ---------------------------------------------------------------------------
+
+
+def test_bump_item_sha_rejects_non_dict_root(tmp_path: Path) -> None:
+    """List-rooted YAML → ValueError (not AttributeError from data.get on list)."""
+    p = tmp_path / "catalog.yaml"
+    p.write_text("- a\n- b\n")
+    with pytest.raises(ValueError, match="catalog.yaml root must be a dict"):
+        bump_item_sha(p, "rust", "rust-analyzer", "0" * 40, "2026-08-05")
+    # Guard fires before _apply_item_updates, so no .tmp sidecar is ever opened.
+    assert not (tmp_path / "catalog.yaml.tmp").exists()
+
+
+def test_bump_item_sha_rejects_empty_file(tmp_path: Path) -> None:
+    """Empty file → ValueError (ruamel returns None for empty input)."""
+    p = tmp_path / "catalog.yaml"
+    p.write_text("")
+    with pytest.raises(ValueError, match="catalog.yaml root must be a dict"):
+        bump_item_sha(p, "rust", "rust-analyzer", "0" * 40, "2026-08-05")
+    assert not (tmp_path / "catalog.yaml.tmp").exists()
