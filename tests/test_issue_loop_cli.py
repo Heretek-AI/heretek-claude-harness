@@ -371,6 +371,23 @@ def test_log_event_multiple_events_accumulate(ledger_path: Path) -> None:
     assert [e["kind"] for e in events] == ["info", "warn"]
 
 
+def test_mark_investigated_sets_status_and_findings_path(ledger_path: Path) -> None:
+    rc = run(
+        "mark-investigated",
+        "158",
+        "--findings-path",
+        "/tmp/findings.json",
+        ledger_path=ledger_path,
+    )
+    assert rc == 0
+    from scripts.issue_loop.ledger import Ledger
+
+    entry = Ledger(ledger_path)._entries["158"]
+    assert entry["status"] == "investigated"
+    assert entry["findings_path"] == "/tmp/findings.json"
+    assert entry["finished_at"] is not None
+
+
 def test_register_sub_issue_adds_to_sub_issues_list(ledger_path: Path) -> None:
     rc = run(
         "register-sub-issue",
@@ -491,8 +508,3 @@ def _capture_main(argv: list[str], gh_runner: FakeGH | None = None) -> _Captured
     except SystemExit as exc:
         return _Captured(int(exc.code or 1), buf.getvalue())
     return _Captured(rc, buf.getvalue())
-
-
-def _last_stdout(gh: FakeGH) -> str:
-    """Helper for unused legacy assertion path."""
-    return gh.stdout

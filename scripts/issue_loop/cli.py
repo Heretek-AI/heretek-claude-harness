@@ -138,6 +138,11 @@ def _cmd_mark_failed(args: argparse.Namespace, ledger: Ledger) -> int:
     return 0
 
 
+def _cmd_mark_investigated(args: argparse.Namespace, ledger: Ledger) -> int:
+    ledger.mark_investigated(args.issue_number, args.findings_path)
+    return 0
+
+
 def _cmd_record_reject(args: argparse.Namespace, ledger: Ledger) -> int:
     print(ledger.record_verifier_reject())
     return 0
@@ -214,8 +219,6 @@ def _cmd_classify(args: argparse.Namespace, ledger: Ledger) -> int:
                 ".body",
             ]
         )
-        if args.repo:
-            pass  # _list already added --repo; gh inherits
         body = getattr(body_proc, "stdout", "") or ""
     except Exception:
         body = ""
@@ -271,6 +274,13 @@ def _build_parser() -> argparse.ArgumentParser:
     pf.add_argument("issue_number", type=int)
     pf.add_argument("--error", required=True)
 
+    pi = sub.add_parser(
+        "mark-investigated",
+        help="Mark an issue investigated (terminal) and record the findings path.",
+    )
+    pi.add_argument("issue_number", type=int)
+    pi.add_argument("--findings-path", required=True)
+
     sub.add_parser(
         "record-reject",
         help="Increment the cross-issue reject counter; print new value.",
@@ -324,6 +334,7 @@ def main(
         "mark-merged": _cmd_mark_merged,
         "mark-skipped": _cmd_mark_skipped,
         "mark-failed": _cmd_mark_failed,
+        "mark-investigated": _cmd_mark_investigated,
         "record-reject": _cmd_record_reject,
         "reset-rejects": _cmd_reset_rejects,
         "rejects-in-a-row": _cmd_rejects_in_a_row,

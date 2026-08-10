@@ -1,7 +1,7 @@
 """Persistent ledger for the issue-loop driver.
 
 JSON file at .omc/state/issue-loop/ledger.json. One entry per issue.
-Status transitions are monotonic: pending -> {merged | skipped | failed}.
+Status transitions are monotonic: pending -> {merged | skipped | investigated | failed}.
 `failed` is non-terminal; the loop retries on the next tick.
 """
 
