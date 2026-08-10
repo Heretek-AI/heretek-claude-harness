@@ -221,6 +221,8 @@ def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[st
     yaml = YAML()
     yaml.preserve_quotes = True
     data = yaml.load(catalog_path.resolve().read_text())
+    if not isinstance(data, dict):
+        raise ValueError("catalog.yaml root must be a dict")
 
     updates: list[tuple[str, str, str]] = []
     for plugin in data.get("plugins", []):
