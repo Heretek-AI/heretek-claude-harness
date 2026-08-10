@@ -22,7 +22,7 @@ TOOL_TABLE: dict[str, tuple[str, list[str]]] = {
     "sonarqube": ("sonar-scanner", ["sonar-scanner"]),
 }
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 def _resolve_scope_path(raw: str) -> Path:

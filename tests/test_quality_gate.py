@@ -38,7 +38,7 @@ def test_parse_scope_accepts_repo_relative() -> None:
     """Valid repo-relative paths parse normally and _scope_cwd resolves under REPO_ROOT (#161)."""
     scope = quality_gate.parse_scope("plugins/hooks")
     assert scope == {"scope": "path", "path": "plugins/hooks"}
-    repo_root = Path(quality_gate.__file__).resolve().parents[2]
+    repo_root = Path(quality_gate.__file__).resolve().parents[3]
     cwd = quality_gate._scope_cwd(scope)
     assert cwd.is_relative_to(repo_root)
 
