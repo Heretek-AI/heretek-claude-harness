@@ -1,4 +1,5 @@
 """Tests for scripts/refresh_pins.py."""
+
 import datetime as dt
 import sys
 from pathlib import Path
@@ -21,7 +22,12 @@ def test_check_item_offline_returns_skipped_without_network() -> None:
         "upstream": "rust-lang/rust-analyzer",
         "sha": "0123456789abcdef0123456789abcdef01234567",
         "license": "MIT",
-        "vetting": {"status": "approved", "date": "2026-08-04", "stars": 16000, "last_commit": "2026-08-04"},
+        "vetting": {
+            "status": "approved",
+            "date": "2026-08-04",
+            "stars": 16000,
+            "last_commit": "2026-08-04",
+        },
     }
     status, details = refresh_pins.check_item(item, gh_token=None)
     # For a fresh item with no token, the offline branch returns "skipped" exactly.
@@ -40,14 +46,21 @@ def test_check_item_detects_stale_last_commit() -> None:
         "upstream": "someorg/old-thing",
         "sha": "abc",
         "license": "MIT",
-        "vetting": {"status": "approved", "date": old_date, "stars": 1000, "last_commit": old_date},
+        "vetting": {
+            "status": "approved",
+            "date": old_date,
+            "stars": 1000,
+            "last_commit": old_date,
+        },
     }
     status, details = refresh_pins.check_item(item, gh_token=None)
     # The offline check should at least surface the stale date.
     assert details.get("last_commit") == old_date or status == "stale_commit"
 
 
-def test_check_catalog_returns_list_per_item(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_check_catalog_returns_list_per_item(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """check_catalog walks every plugin's items[] and emits one entry per item."""
     # No network calls; offline behavior.
     monkeypatch.setattr(refresh_pins, "_github_get", lambda *_a, **_k: {})
@@ -92,7 +105,9 @@ def test_bump_sha_returns_updated_item() -> None:
     assert new["vetting"]["date"] != "2026-01-01"
 
 
-def test_main_no_token_prints_table(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture) -> None:
+def test_main_no_token_prints_table(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
     """`main` with no token prints a status table to stdout and exits 0 (don't fail on stale)."""
     monkeypatch.setattr("sys.argv", ["refresh_pins.py", "--catalog", str(FIXTURE)])
     rc = refresh_pins.main()
@@ -101,7 +116,9 @@ def test_main_no_token_prints_table(tmp_path: Path, monkeypatch: pytest.MonkeyPa
     assert "rust-analyzer" in captured.out or "ghost-tool" in captured.out
 
 
-def test_update_shas_writes_new_release_sha(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_update_shas_writes_new_release_sha(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """--update-shas fetches upstream's latest release SHA and writes it back."""
     import shutil
 
@@ -121,21 +138,27 @@ def test_update_shas_writes_new_release_sha(tmp_path: Path, monkeypatch: pytest.
     monkeypatch.setattr(refresh_pins, "_github_get", fake_get)
 
     updates = refresh_pins.update_shas(catalog, gh_token="test-token")
-    assert any(item_id == "rust-analyzer" and new_sha == new for item_id, _, new in updates)
+    assert any(
+        item_id == "rust-analyzer" and new_sha == new for item_id, _, new in updates
+    )
 
     # Catalog was modified on disk with the new SHA.
     import yaml as _yaml
+
     new_data = _yaml.safe_load(catalog.read_text())
     items = new_data["plugins"][0]["items"]
     rust = next(it for it in items if it["id"] == "rust-analyzer")
     assert rust["sha"] == new_sha
 
 
-def test_update_shas_requires_token(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+def test_update_shas_requires_token(
+    tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
     """--update-shas without a GitHub token is refused."""
     fixture = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
     catalog = tmp_path / "catalog.yaml"
     import shutil
+
     shutil.copy(fixture, catalog)
 
     with pytest.raises(SystemExit) as exc_info:
@@ -146,21 +169,50 @@ def test_update_shas_requires_token(tmp_path: Path, capsys: pytest.CaptureFixtur
     assert "GITHUB_TOKEN" in captured.err or "github-token" in captured.err
 
 
-def test_update_shas_preserves_comments(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_update_shas_preserves_comments(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Round-trip preserves inline `# review` comments (regression for f60cfa2)."""
     fixture = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
     catalog = tmp_path / "catalog.yaml"
     import shutil
+
     shutil.copy(fixture, catalog)
 
     new_sha = "a" * 40
-    monkeypatch.setattr(refresh_pins, "_github_get", lambda *_a, **_k: {
-        "default_branch": "master",
-        "object": {"sha": new_sha},
-    })
+    monkeypatch.setattr(
+        refresh_pins,
+        "_github_get",
+        lambda *_a, **_k: {
+            "default_branch": "master",
+            "object": {"sha": new_sha},
+        },
+    )
 
     refresh_pins.update_shas(catalog, gh_token="t")
     text = catalog.read_text()
     # The fixture has a top-level `# heretek marketplace — source of truth.` comment;
     # ruamel.yaml must preserve it.
     assert "# heretek marketplace" in text or "# source of truth" in text
+
+
+def test_update_shas_rejects_non_dict_root(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Regression for #157: update_shas rejects non-dict catalog.yaml root with ValueError.
+
+    ruamel.yaml round-trip loads a YAML list as a Python list. Without the
+    isinstance(data, dict) guard, the next line (`data.get("plugins", [])`)
+    would raise AttributeError on a list — surfacing malformed catalogs with
+    a confusing error. The guard promotes this to a clear ValueError.
+    """
+    catalog = tmp_path / "catalog.yaml"
+    # Root is a YAML list, not a mapping.
+    catalog.write_text("- one\n- two\n")
+
+    # Patch _github_get to a no-op so the test stays hermetic if the guard
+    # ever regresses and the code falls through to the SHA-write loop.
+    monkeypatch.setattr(refresh_pins, "_github_get", lambda *_a, **_k: {})
+
+    with pytest.raises(ValueError, match="catalog.yaml root must be a dict"):
+        refresh_pins.update_shas(catalog, gh_token="fake")
