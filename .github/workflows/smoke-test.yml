@@ -61,7 +61,7 @@ jobs:
           node-version: "20"
 
       - name: Install Claude Code CLI
-        run: npm install -g --ignore-scripts @anthropic-ai/claude-code
+        run: npm install -g @anthropic-ai/claude-code
 
       - name: Install ruff (required for fast-gate trigger below)
         run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
