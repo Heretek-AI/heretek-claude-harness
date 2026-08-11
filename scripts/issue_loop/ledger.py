@@ -24,7 +24,16 @@ class IssueRef:
 
 class Ledger:
     def __init__(self, path: Path) -> None:
-        self.path = self._validate_path(path)
+        # Validate path: reject '..' components before any filesystem op.
+        # SonarCloud pythonsecurity:S8707 wants explicit validation at the
+        # access site; inlined rather than via a helper so the static
+        # analyzer traces the data flow.
+        for part in path.parts:
+            if part == "..":
+                raise ValueError(
+                    f"ledger path {path!r} contains '..' component"
+                )
+        self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.path.exists():
             # TODO(follow-up): I5 — no error handling for corrupt/truncated JSON.
@@ -33,19 +42,14 @@ class Ledger:
             self._entries = {}
             self._save()
 
-    @staticmethod
-    def _validate_path(path: Path) -> Path:
-        """Reject paths with '..' components (path-traversal escape attempt).
-
-        Prevents LLM-driven CLI callers from directing ledger writes outside
-        the intended directory via path traversal.
-        """
-        for part in path.parts:
-            if part == "..":
-                raise ValueError(f"ledger path {path!r} contains '..' component")
-        return path
-
     def _save(self) -> None:
+        # Belt-and-suspenders: re-validate before write in case self.path
+        # was reassigned. Addresses SonarCloud S8707 at the write site.
+        for part in self.path.parts:
+            if part == "..":
+                raise ValueError(
+                    f"ledger path {self.path!r} contains '..' component"
+                )
         self.path.write_text(json.dumps(self._entries, indent=2, sort_keys=True))
 
     def _now(self) -> str:
