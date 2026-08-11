@@ -81,6 +81,29 @@ def build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def compute_diff(a: Summary, b: Summary) -> dict:
+    """Compute the comparison diff between two agent summaries.
+
+    Returns a dict matching the spec's diff.json schema (spec §4).
+    Positive deltas mean agent A (heretek) did better.
+    """
+    a_pass = {t.task_id for t in a.per_task if t.verdict == "pass"}
+    b_pass = {t.task_id for t in b.per_task if t.verdict == "pass"}
+    a_all = {t.task_id for t in a.per_task}
+    b_all = {t.task_id for t in b.per_task}
+    return {
+        "commit_sha": a.commit_sha,
+        "delta_pass_rate": a.pass_rate - b.pass_rate,
+        "delta_passed": a.passed - b.passed,
+        "tasks_agent_a_passed_b_failed": sorted(a_pass - b_pass),
+        "tasks_agent_b_passed_a_failed": sorted(b_pass - a_pass),
+        "tasks_both_passed": sorted(a_pass & b_pass),
+        "tasks_both_failed": sorted((a_all & b_all) - (a_pass | b_pass)),
+        "wall_clock_delta_sec": a.wall_clock_sec_total - b.wall_clock_sec_total,
+        "tokens_delta": a.tokens_total - b.tokens_total,
+    }
+
+
 if __name__ == "__main__":
     # Surface the CLI surface for `python -m scripts.comparison_report --help`.
     build_arg_parser().parse_args()
