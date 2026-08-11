@@ -20,10 +20,7 @@ def test_collector_entry_in_pre_tool_use() -> None:
     collector_entries = [
         entry
         for entry in pre
-        if any(
-            "telemetry_collector.py" in h.get("command", "")
-            for h in entry.get("hooks", [])
-        )
+        if any("telemetry_collector.py" in h.get("command", "") for h in entry.get("hooks", []))
     ]
     assert len(collector_entries) == 1
     assert collector_entries[0]["matcher"] == "Edit|Write|MultiEdit|Read|Bash"
@@ -38,10 +35,7 @@ def test_collector_entry_in_post_tool_use() -> None:
     collector_entries = [
         entry
         for entry in post
-        if any(
-            "telemetry_collector.py" in h.get("command", "")
-            for h in entry.get("hooks", [])
-        )
+        if any("telemetry_collector.py" in h.get("command", "") for h in entry.get("hooks", []))
     ]
     assert len(collector_entries) == 1
 
@@ -49,15 +43,11 @@ def test_collector_entry_in_post_tool_use() -> None:
 def test_existing_hooks_preserved() -> None:
     data = json.loads(HOOKS_JSON.read_text())
     pre_commands = [
-        h["command"]
-        for entry in data["hooks"]["PreToolUse"]
-        for h in entry.get("hooks", [])
+        h["command"] for entry in data["hooks"]["PreToolUse"] for h in entry.get("hooks", [])
     ]
     assert any("fast_gate.py" in c for c in pre_commands)
     post_commands = [
-        h["command"]
-        for entry in data["hooks"]["PostToolUse"]
-        for h in entry.get("hooks", [])
+        h["command"] for entry in data["hooks"]["PostToolUse"] for h in entry.get("hooks", [])
     ]
     for expected in [
         "stale_dep_intercept.py",

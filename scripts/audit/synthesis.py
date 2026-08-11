@@ -99,9 +99,7 @@ def _present_cluster_findings(items: list[findings.Finding]) -> set[str]:
     return present
 
 
-def _coverage_gaps_section(
-    cluster_results_dir: Path, items: list[findings.Finding]
-) -> list[str]:
+def _coverage_gaps_section(cluster_results_dir: Path, items: list[findings.Finding]) -> list[str]:
     """Detect missing clusters and zero-finding clusters."""
     present_files = _present_cluster_files(cluster_results_dir)
     present_findings = _present_cluster_findings(items)
@@ -192,9 +190,7 @@ def synthesize(
 
     # Filter SonarCloud exclusions
     if sonar_exclusions:
-        all_findings = [
-            f for f in all_findings if f.evidence.file not in sonar_exclusions
-        ]
+        all_findings = [f for f in all_findings if f.evidence.file not in sonar_exclusions]
 
     deduped, dup_count = _dedupe(all_findings)
 

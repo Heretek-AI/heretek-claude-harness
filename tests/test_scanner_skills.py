@@ -1,5 +1,6 @@
 """Tests for the SkillSpector wrapper. The SkillSpector CLI is mocked;
 see tests/fixtures/security_scan/ for real-fixture integration tests."""
+
 from __future__ import annotations
 
 import json
@@ -121,12 +122,14 @@ class TestRealSkillSpector:
 
     def test_prompt_inject_skill_is_blocked(self, fixtures_dir: Path) -> None:
         report = scan_skill(fixtures_dir / "bad_skill_prompt_inject", item_id="bad-skill-inject")
-        assert report.severity in ("block", "warn"), (
-            f"SkillSpector should have flagged prompt injection but got {report.severity}"
-        )
+        assert report.severity in (
+            "block",
+            "warn",
+        ), f"SkillSpector should have flagged prompt injection but got {report.severity}"
 
     def test_exfil_skill_is_blocked(self, fixtures_dir: Path) -> None:
         report = scan_skill(fixtures_dir / "bad_skill_exfil", item_id="bad-skill-exfil")
-        assert report.severity in ("block", "warn"), (
-            f"SkillSpector should have flagged curl|bash but got {report.severity}"
-        )
+        assert report.severity in (
+            "block",
+            "warn",
+        ), f"SkillSpector should have flagged curl|bash but got {report.severity}"

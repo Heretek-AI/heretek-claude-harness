@@ -14,7 +14,9 @@ def test_fix_path_when_body_has_file_line_and_small_fix_words():
         title="Security: yaml.load without Loader in scripts/catalog_updater.py:81",
         files=["scripts/catalog_updater.py"],
     )
-    body = "Found `yaml.load(...)` call at `scripts/catalog_updater.py:81`. Fix: use yaml.safe_load."
+    body = (
+        "Found `yaml.load(...)` call at `scripts/catalog_updater.py:81`. Fix: use yaml.safe_load."
+    )
     assert classify(issue, body=body) == "fix"
 
 
@@ -27,9 +29,7 @@ def test_fix_path_requires_both_anchor_and_fix_keyword():
 
 
 def test_spec_path_when_body_has_design_keywords_no_anchor():
-    issue = IssueRef(
-        number=176, title="docs(research): MVP-1 Codegen fan-out", files=[]
-    )
+    issue = IssueRef(number=176, title="docs(research): MVP-1 Codegen fan-out", files=[])
     body = "Deep research shows two MCP targets. Design a plugin scaffolding flow with audit and research scope."
     assert classify(issue, body=body) == "spec"
 

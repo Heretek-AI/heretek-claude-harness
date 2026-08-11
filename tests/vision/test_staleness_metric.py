@@ -1,4 +1,5 @@
 """Tests for staleness_metric_spike.py (#49)."""
+
 import pytest
 from pathlib import Path
 

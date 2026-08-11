@@ -1,6 +1,6 @@
 """Verify every hook referenced in plugins/hooks/hooks/hooks.json has an
 ADR (approved) or a rejected.md entry (rejected)."""
-import re
+
 from pathlib import Path
 
 import pytest
@@ -13,6 +13,7 @@ REJECTED = REPO_ROOT / "catalog" / "rejected.md"
 
 def _hook_identifiers_in_hooks_json() -> list[str]:
     import json
+
     data = json.loads(HOOKS_JSON.read_text())
     # Walk every hook entry and extract the command's basename as the ID.
     ids: list[str] = []

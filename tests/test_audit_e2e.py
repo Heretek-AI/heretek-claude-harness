@@ -36,9 +36,7 @@ def test_e2e_synthesize_then_build_issues(tmp_path: Path) -> None:
     assert "Medium: 1" in md
 
     # Step 2: build-issues (via the synthesis JSON)
-    fs = [
-        findings.Finding.from_dict(d) for d in json.loads(result.json_path.read_text())
-    ]
+    fs = [findings.Finding.from_dict(d) for d in json.loads(result.json_path.read_text())]
     payloads = issues.build_issue_payloads(fs)
     # 1 critical + 1 high -> 2 issues; medium excluded.
     assert len(payloads) == 2
@@ -47,9 +45,7 @@ def test_e2e_synthesize_then_build_issues(tmp_path: Path) -> None:
     assert any("Single Responsibility" in t for t in titles)
 
 
-def test_e2e_run_all_via_driver(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_e2e_run_all_via_driver(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Call the driver's synthesize subcommand end-to-end via the CLI."""
     out_dir = tmp_path / "out"
     monkeypatch.setattr(
@@ -71,9 +67,7 @@ def test_e2e_run_all_via_driver(
     assert any(out_dir.glob("audit-harness-self-*.json"))
 
 
-def test_e2e_emit_prompts_then_synthesize(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_e2e_emit_prompts_then_synthesize(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """emit-prompts + synthesize via the driver."""
     prompts_dir = tmp_path / "prompts"
     monkeypatch.setattr(

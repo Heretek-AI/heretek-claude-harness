@@ -4,13 +4,13 @@ All tests are fully isolated: synthetic stdin payloads are injected via
 `monkeypatch.setattr(sys, "stdin", ...)`, and stdout is captured via
 `capsys`. No test ever touches the real catalog or filesystem state.
 """
+
 import io
 import json
 import sys
 import time
 from pathlib import Path
 
-import pytest
 
 import scripts.scanners.ast_grep_scanner as hook
 
@@ -46,10 +46,12 @@ def test_ast_grep_scanner_blocks_error_severity_pattern(monkeypatch, capsys):
     assert "hookSpecificOutput" in out, f"expected hook output, got: {out}"
     specific = out["hookSpecificOutput"]
     assert specific["hookEventName"] == "PreToolUse"
-    assert specific["permissionDecision"] == "ask", \
-        f"expected permissionDecision=ask, got: {specific}"
-    assert "rust-todo-macro" in specific["permissionDecisionReason"], \
-        f"expected pattern ID in reason, got: {specific}"
+    assert (
+        specific["permissionDecision"] == "ask"
+    ), f"expected permissionDecision=ask, got: {specific}"
+    assert (
+        "rust-todo-macro" in specific["permissionDecisionReason"]
+    ), f"expected pattern ID in reason, got: {specific}"
 
 
 def test_ast_grep_scanner_allows_clean_code(monkeypatch, capsys):

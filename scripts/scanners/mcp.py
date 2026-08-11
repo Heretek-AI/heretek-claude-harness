@@ -3,6 +3,7 @@ up the upstream tarball in VirusTotal. Severity is the worst of the two.
 
 CLI usage: see scan_mcp().
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -62,7 +63,9 @@ def _vt_lookup(file_sha256: str, *, token: Optional[str]) -> ScannerReport:
             scanner="virustotal",
             severity="info",
             findings=[
-                Finding(path="*", line=None, message=f"VT request error: {e}", rule_id="vt-unreachable")
+                Finding(
+                    path="*", line=None, message=f"VT request error: {e}", rule_id="vt-unreachable"
+                )
             ],
         )
 
@@ -72,7 +75,9 @@ def _vt_lookup(file_sha256: str, *, token: Optional[str]) -> ScannerReport:
             scanner="virustotal",
             severity="info",
             findings=[
-                Finding(path="*", line=None, message="no VT record (common)", rule_id="vt-no-record")
+                Finding(
+                    path="*", line=None, message="no VT record (common)", rule_id="vt-no-record"
+                )
             ],
         )
 
@@ -82,7 +87,9 @@ def _vt_lookup(file_sha256: str, *, token: Optional[str]) -> ScannerReport:
             scanner="virustotal",
             severity="info",
             findings=[
-                Finding(path="*", line=None, message=f"VT HTTP {r.status_code}", rule_id="vt-http-error")
+                Finding(
+                    path="*", line=None, message=f"VT HTTP {r.status_code}", rule_id="vt-http-error"
+                )
             ],
         )
 
@@ -93,7 +100,9 @@ def _vt_lookup(file_sha256: str, *, token: Optional[str]) -> ScannerReport:
             item_id=file_sha256[:12],
             scanner="virustotal",
             severity="warn",
-            findings=[Finding(path="*", line=None, message="VT invalid JSON", rule_id="vt-invalid-json")],
+            findings=[
+                Finding(path="*", line=None, message="VT invalid JSON", rule_id="vt-invalid-json")
+            ],
         )
 
     stats = data.get("data", {}).get("attributes", {}).get("last_analysis_stats", {})
@@ -144,7 +153,12 @@ def scan_mcp(path: Path, *, item_id: str, vt_token: Optional[str] = None) -> Sca
                 scanner="virustotal",
                 severity="info",
                 findings=[
-                    Finding(path="*", line=None, message="no tarball candidate in MCP dir", rule_id="vt-no-candidate")
+                    Finding(
+                        path="*",
+                        line=None,
+                        message="no tarball candidate in MCP dir",
+                        rule_id="vt-no-candidate",
+                    )
                 ],
             )
         else:

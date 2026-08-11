@@ -1,11 +1,11 @@
 {
-  "name": "web-frontend",
-  "displayName": "Web Frontend",
-  "description": "Web frontend task plugin: chrome-devtools MCP for browser introspection + lighthouse skill for accessibility/performance/SEO scoring.",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "dependencies": []
+	"name": "web-frontend",
+	"displayName": "Web Frontend",
+	"description": "Web frontend task plugin: chrome-devtools MCP for browser introspection + lighthouse skill for accessibility/performance/SEO scoring.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"dependencies": []
 }

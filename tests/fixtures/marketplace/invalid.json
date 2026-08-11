@@ -1,5 +1,5 @@
 {
-  "name": "",
-  "owner": {},
-  "plugins": "this should be an array, not a string"
+	"name": "",
+	"owner": {},
+	"plugins": "this should be an array, not a string"
 }

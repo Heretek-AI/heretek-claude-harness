@@ -1,15 +1,12 @@
 {
-  "name": "hooks",
-  "displayName": "Hooks",
-  "description": "Hooks flagship: 3-layer quality gates (fast blocking <100ms, slow on-demand, git pre-commit).",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "commands": [
-    "./commands/quality-gate.md",
-    "./commands/install-git-hooks.md"
-  ],
-  "dependencies": []
+	"name": "hooks",
+	"displayName": "Hooks",
+	"description": "Hooks flagship: 3-layer quality gates (fast blocking <100ms, slow on-demand, git pre-commit).",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"commands": ["./commands/quality-gate.md", "./commands/install-git-hooks.md"],
+	"dependencies": []
 }

@@ -20,9 +20,7 @@ from pathlib import Path
 TELEMETRY_ROOT = Path(
     os.environ.get("HERETEK_TELEMETRY_ROOT", Path.home() / ".heretek" / "telemetry")
 )
-SCHEMA_PATH = (
-    Path(__file__).parent.parent / "tests" / "fixtures" / "telemetry_schema.json"
-)
+SCHEMA_PATH = Path(__file__).parent.parent / "tests" / "fixtures" / "telemetry_schema.json"
 
 
 def _iter_session_files(root: Path) -> list[Path]:
@@ -136,9 +134,7 @@ def cmd_telemetry_config(args: argparse.Namespace) -> int:
                 k, v = line.split(":", 1)
                 existing[k.strip()] = v.strip()
     existing[args.key] = args.value
-    config_path.write_text(
-        "\n".join(f"{k}: {v}" for k, v in sorted(existing.items())) + "\n"
-    )
+    config_path.write_text("\n".join(f"{k}: {v}" for k, v in sorted(existing.items())) + "\n")
     print(f"set {args.key}={args.value} in {config_path}")
     return 0
 
@@ -153,9 +149,7 @@ def cmd_telemetry_schema(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="heretek", description="heretek marketplace CLI"
-    )
+    parser = argparse.ArgumentParser(prog="heretek", description="heretek marketplace CLI")
     sub = parser.add_subparsers(dest="group", required=True)
     tel = sub.add_parser("telemetry", help="local hook event log inspection")
     tel_sub = tel.add_subparsers(dest="command", required=True)
@@ -179,9 +173,7 @@ def build_parser() -> argparse.ArgumentParser:
     diff.set_defaults(func=cmd_telemetry_diff)
 
     exp = tel_sub.add_parser("export", help="bundle for upload (opt-in)")
-    exp.add_argument(
-        "--out", help="output path (default: ~/.heretek/telemetry/exports/)"
-    )
+    exp.add_argument("--out", help="output path (default: ~/.heretek/telemetry/exports/)")
     exp.add_argument(
         "--i-understand-pii-implications",
         action="store_true",
@@ -190,9 +182,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     exp.set_defaults(func=cmd_telemetry_export)
 
-    cfg = tel_sub.add_parser(
-        "config", help="read/write ~/.heretek/telemetry/config.properties"
-    )
+    cfg = tel_sub.add_parser("config", help="read/write ~/.heretek/telemetry/config.properties")
     cfg_sub = cfg.add_subparsers(dest="subcommand", required=True)
     cfg_set = cfg_sub.add_parser("set", help="set a config key")
     cfg_set.add_argument("key")

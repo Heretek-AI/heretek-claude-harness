@@ -13,6 +13,7 @@ budget elapses. Claude Code's hook timeout is integer seconds (our
 `timeout: 1` is an aggressive override; the wrapper's
 `subprocess.run(timeout=0.1)` enforces the sub-second goal).
 """
+
 from __future__ import annotations
 
 import json
@@ -157,9 +158,7 @@ def dispatch(file_path: Path, time_budget_s: float = 0.1) -> int:
     # Internal errors (returncode >= 2, or stderr markers like 'internal error')
     # must fail-open so a broken linter never blocks the Edit/Write loop (#97).
     stderr_lower = (result.stderr or "").lower()
-    is_internal_error = (
-        result.returncode >= 2 or "internal error" in stderr_lower
-    )
+    is_internal_error = result.returncode >= 2 or "internal error" in stderr_lower
     if is_internal_error:
         print(
             f"fast_gate: linter returned {result.returncode} "

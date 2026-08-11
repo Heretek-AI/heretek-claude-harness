@@ -6,6 +6,7 @@ Warn-only patterns live in the async #40 scanner (forbidden_pattern_scanner).
 
 D15 compliance: this lives in the hooks plugin only.
 """
+
 from __future__ import annotations
 
 import json
@@ -58,7 +59,10 @@ def _scan(file_path: str, content: str) -> list[dict]:
         )
         result = subprocess.run(
             [ast_grep, "scan", "--inline-rules", rule, "--stdin"],
-            input=content, capture_output=True, text=True, timeout=1,
+            input=content,
+            capture_output=True,
+            text=True,
+            timeout=1,
         )
         if result.returncode == 0 and result.stdout.strip():
             matches.append(pattern_def)
@@ -82,13 +86,17 @@ def main() -> int:  # nosonar — false positive: hook-script entrypoint always 
         return 0
 
     summary = "; ".join(f"{m['id']}: {m['reason']}" for m in matches)
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "ask",
-            "permissionDecisionReason": f"AST-grep blocked pattern(s): {summary}",
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "ask",
+                    "permissionDecisionReason": f"AST-grep blocked pattern(s): {summary}",
+                }
+            }
+        )
+    )
     return 0
 
 

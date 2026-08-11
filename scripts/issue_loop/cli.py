@@ -186,9 +186,7 @@ def _cmd_log_event(args: argparse.Namespace, ledger: Ledger) -> int:
 
 def _cmd_register_sub_issue(args: argparse.Namespace, ledger: Ledger) -> int:
     entry = ledger._ensure(args.parent)
-    entry.setdefault("sub_issues", []).append(
-        {"child": args.child, "relation": args.relation}
-    )
+    entry.setdefault("sub_issues", []).append({"child": args.child, "relation": args.relation})
     ledger._save()
     return 0
 
@@ -253,9 +251,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub = p.add_subparsers(dest="subcommand", required=False)
 
-    sub.add_parser(
-        "select-next", help="Print the next eligible IssueRef as JSON, or {} if empty."
-    )
+    sub.add_parser("select-next", help="Print the next eligible IssueRef as JSON, or {} if empty.")
 
     pa = sub.add_parser("mark-attempt", help="Bump attempts for an issue.")
     pa.add_argument("issue_number", type=int)
@@ -264,9 +260,7 @@ def _build_parser() -> argparse.ArgumentParser:
     pm.add_argument("issue_number", type=int)
     pm.add_argument("--pr-url", required=True)
 
-    ps = sub.add_parser(
-        "mark-skipped", help="Mark an issue skipped; resets cross-issue rejects."
-    )
+    ps = sub.add_parser("mark-skipped", help="Mark an issue skipped; resets cross-issue rejects.")
     ps.add_argument("issue_number", type=int)
     ps.add_argument("--reason", required=True)
 
@@ -287,9 +281,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     sub.add_parser("reset-rejects", help="Zero the cross-issue reject counter.")
     sub.add_parser("rejects-in-a-row", help="Print the current reject count.")
-    sub.add_parser(
-        "status", help="Print {merged, skipped, failed, pending} counts as JSON."
-    )
+    sub.add_parser("status", help="Print {merged, skipped, failed, pending} counts as JSON.")
 
     ple = sub.add_parser("log-event", help="Append an event log entry for an issue.")
     ple.add_argument("issue_number", type=int)

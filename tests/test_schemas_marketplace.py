@@ -1,4 +1,5 @@
 """Tests for the marketplace.json JSON Schema."""
+
 import json
 from pathlib import Path
 

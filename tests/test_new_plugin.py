@@ -1,4 +1,5 @@
 """Tests for scripts/new_plugin.py."""
+
 import json
 import sys
 from pathlib import Path
@@ -37,9 +38,7 @@ def test_scaffold_rejects_invalid_name(tmp_path: Path) -> None:
         new_plugin.scaffold(tmp_path, "Rust Plugin!", "bad name")
 
 
-def test_main_creates_and_exits_zero(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_main_creates_and_exits_zero(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         sys,
         "argv",

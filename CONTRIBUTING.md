@@ -118,6 +118,35 @@ git diff --exit-code .claude-plugin/marketplace.json
 
 The CI workflow (`.github/workflows/validate.yml`) runs the same checks automatically.
 
+## Pre-commit framework
+
+A `pre-commit` framework config lives at `plugins/hooks/.pre-commit-config.yaml`
+and runs hygiene, Ruff, Biome, shellcheck, gitleaks, and the heretek fast gate
+on every `git commit` and `git push`. To install it locally:
+
+```bash
+# Install the framework
+pip install pre-commit
+
+# Bind it to this repo (idempotent)
+python3 -m pre_commit install --config plugins/hooks/.pre-commit-config.yaml
+```
+
+To run the full suite manually without committing:
+
+```bash
+python3 -m pre_commit run --all-files --config plugins/hooks/.pre-commit-config.yaml
+```
+
+If a hook fails, fix the issue (or use `git commit --no-verify` to bypass — but
+this is **discouraged**; the CI workflow `.github/workflows/pre-commit.yml`
+will block the PR anyway). The install is also bundled into the hooks plugin:
+
+```bash
+/plugin install hooks@heretek
+/hooks:install-git-hooks
+```
+
 ## ShellCheck
 
 CI enforces [ShellCheck](https://www.shellcheck.net/) on every `*.sh` file. To run locally:

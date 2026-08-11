@@ -14,15 +14,9 @@ from .ledger import IssueRef
 Path = Literal["fix", "investigate", "spec", "break-down", "skip"]
 
 _FILE_LINE_RE = re.compile(r"`?[\w./\-]{1,256}\.[A-Za-z]{1,10}:\d{1,7}`?")
-_FIX_KEYWORDS = re.compile(
-    r"\b(fix|patch|replace|use\s+\w+\s+instead)\b", re.IGNORECASE
-)
-_SPEC_KEYWORDS = re.compile(
-    r"\b(research|audit|design|plugin|skill|system)\b", re.IGNORECASE
-)
-_BREAKDOWN_KEYWORDS = re.compile(
-    r"\b(split|decompose|sub-?tasks?|phase)\b", re.IGNORECASE
-)
+_FIX_KEYWORDS = re.compile(r"\b(fix|patch|replace|use\s+\w+\s+instead)\b", re.IGNORECASE)
+_SPEC_KEYWORDS = re.compile(r"\b(research|audit|design|plugin|skill|system)\b", re.IGNORECASE)
+_BREAKDOWN_KEYWORDS = re.compile(r"\b(split|decompose|sub-?tasks?|phase)\b", re.IGNORECASE)
 _SKIP_KEYWORDS = re.compile(
     r"\b(duplicate|won'?t\s+fix|by\s+design|not\s+applicable)\b", re.IGNORECASE
 )
@@ -31,9 +25,7 @@ _SKIP_KEYWORDS = re.compile(
 def classify(issue: IssueRef, body: str = "") -> Path:
     """Heuristic route from issue to a processing path."""
     text = f"{issue.title} {body}".lower()
-    has_anchor = bool(_FILE_LINE_RE.search(issue.title)) or bool(
-        _FILE_LINE_RE.search(body)
-    )
+    has_anchor = bool(_FILE_LINE_RE.search(issue.title)) or bool(_FILE_LINE_RE.search(body))
 
     if _SKIP_KEYWORDS.search(text):
         return "skip"

@@ -1,31 +1,46 @@
 {
-  "mcpServers": {
-    "context7": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"]
-    },
-    "github": {
-      "type": "stdio",
-      "command": "docker",
-      "args": ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
-      }
-    },
-    "codebase-memory-mcp": {
-      "type": "stdio",
-      "command": "codebase-memory-mcp",
-      "args": []
-    },
-    "serena": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["--from", "serena-agent", "serena", "start-mcp-server", "--context", "claude-code", "--project-from-cwd"]
-    },
-    "context7-http": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp"
-    }
-  }
+	"mcpServers": {
+		"context7": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp@latest"]
+		},
+		"github": {
+			"type": "stdio",
+			"command": "docker",
+			"args": [
+				"run",
+				"-i",
+				"--rm",
+				"-e",
+				"GITHUB_PERSONAL_ACCESS_TOKEN",
+				"ghcr.io/github/github-mcp-server"
+			],
+			"env": {
+				"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+			}
+		},
+		"codebase-memory-mcp": {
+			"type": "stdio",
+			"command": "codebase-memory-mcp",
+			"args": []
+		},
+		"serena": {
+			"type": "stdio",
+			"command": "uvx",
+			"args": [
+				"--from",
+				"serena-agent",
+				"serena",
+				"start-mcp-server",
+				"--context",
+				"claude-code",
+				"--project-from-cwd"
+			]
+		},
+		"context7-http": {
+			"type": "http",
+			"url": "https://mcp.context7.com/mcp"
+		}
+	}
 }

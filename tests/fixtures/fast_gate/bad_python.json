@@ -1,8 +1,8 @@
 {
-  "tool_name": "Edit",
-  "tool_input": {
-    "file_path": "tests/fixtures/fast_gate/bad_sample.py",
-    "old_string": "",
-    "new_string": "import os\ndef f( ):pass\n"
-  }
+	"tool_name": "Edit",
+	"tool_input": {
+		"file_path": "tests/fixtures/fast_gate/bad_sample.py",
+		"old_string": "",
+		"new_string": "import os\ndef f( ):pass\n"
+	}
 }

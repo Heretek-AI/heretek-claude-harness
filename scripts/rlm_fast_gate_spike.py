@@ -11,6 +11,7 @@ The scaffold:
 
 Per the spike protocol, this is opt-in via env var ENABLE_RLM_SPIKE=1.
 """
+
 from __future__ import annotations
 
 import json
@@ -38,12 +39,16 @@ def main() -> int:  # nosonar — false positive: hook-script entrypoint always 
     verdict = "clean"
     latency_ms = (time.time() - start) * 1000
 
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PostToolUse",
-            "additionalContext": f"rlm-spike: verdict={verdict} latency={latency_ms:.0f}ms (stub)",
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PostToolUse",
+                    "additionalContext": f"rlm-spike: verdict={verdict} latency={latency_ms:.0f}ms (stub)",
+                }
+            }
+        )
+    )
     return 0
 
 

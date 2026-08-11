@@ -1,4 +1,5 @@
 """Tests for counterfactual_diffs_spike.py (#47)."""
+
 import pytest
 from pathlib import Path
 
@@ -13,8 +14,9 @@ def test_annotate_diff_flags_stale_pin():
 
     annotated = annotate_diff(diff)
     # Annotation should mention a newer version exists
-    assert "latest stable" in annotated.lower() or "counterfactual" in annotated.lower(), \
-        f"expected counterfactual annotation, got: {annotated}"
+    assert (
+        "latest stable" in annotated.lower() or "counterfactual" in annotated.lower()
+    ), f"expected counterfactual annotation, got: {annotated}"
 
 
 def test_annotate_diff_passes_through_unrelated_changes():

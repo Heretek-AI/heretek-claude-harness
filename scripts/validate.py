@@ -6,6 +6,7 @@ Run as CLI:
 Exit codes: 0 on success, 1 on any schema failure. Each failure is printed
 to stderr so CI logs make failures obvious.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -40,9 +41,7 @@ def _validate_one(schema: dict, instance: dict, label: str) -> list[str]:
     return [f"{label}: {e.message}" for e in validator.iter_errors(instance)]
 
 
-def _validate_plugin_manifests(
-    repo_root: Path, schemas: dict[str, dict]
-) -> list[str]:
+def _validate_plugin_manifests(repo_root: Path, schemas: dict[str, dict]) -> list[str]:
     """Walk plugins/<name>/.claude-plugin/ and validate plugin.json + sibling manifests."""
     errors: list[str] = []
     plugins_root = repo_root / "plugins"
@@ -93,9 +92,7 @@ def validate_all(repo_root: Path, schemas_dir: Path | None = None) -> list[str]:
             errors.append(f".claude-plugin/marketplace.json: invalid JSON ({exc.msg})")
         else:
             errors.extend(
-                _validate_one(
-                    schemas["marketplace"], instance, ".claude-plugin/marketplace.json"
-                )
+                _validate_one(schemas["marketplace"], instance, ".claude-plugin/marketplace.json")
             )
 
     errors.extend(_validate_plugin_manifests(repo_root, schemas))

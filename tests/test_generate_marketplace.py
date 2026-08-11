@@ -1,4 +1,5 @@
 """Tests for scripts/generate_marketplace.py."""
+
 import json
 import sys
 from pathlib import Path
@@ -58,9 +59,7 @@ def test_generate_strips_internal_fields(tmp_path: Path, fixtures_dir: Path) -> 
     assert "items" not in plugin
 
 
-def test_generate_3rd_party_source_object_preserved(
-    tmp_path: Path, fixtures_dir: Path
-) -> None:
+def test_generate_3rd_party_source_object_preserved(tmp_path: Path, fixtures_dir: Path) -> None:
     """3rd-party source objects with sha pins must be preserved as-is."""
     _write(
         tmp_path / "catalog.yaml",
@@ -125,5 +124,7 @@ def test_generate_atomic_write_preserves_existing_on_interrupt(
         generate_marketplace.generate(catalog, out)
     # Original file untouched; tmp sibling may linger (next run overwrites).
     assert out.read_text() == sentinel
-    assert not (out.parent / (out.name + ".tmp")).exists() or \
-        (out.parent / (out.name + ".tmp")).read_text() != sentinel
+    assert (
+        not (out.parent / (out.name + ".tmp")).exists()
+        or (out.parent / (out.name + ".tmp")).read_text() != sentinel
+    )

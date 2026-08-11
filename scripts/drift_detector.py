@@ -7,6 +7,7 @@ Watches agent Edit events for trajectory signals:
 
 Per D15: this lives in the hooks plugin only.
 """
+
 from __future__ import annotations
 
 import ast
@@ -19,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts._allowlist import require_session_id  # noqa: E402
 
+
 def _resolve_session_state_dir() -> Path:
     """Resolve HERETEK_SESSION_STATE_DIR against the safe root (Path.cwd() / ".heretek").
 
@@ -30,9 +32,7 @@ def _resolve_session_state_dir() -> Path:
         return (safe_root / "session_state").resolve()
     candidate = Path(raw).resolve()
     if not candidate.is_relative_to(safe_root):
-        raise ValueError(
-            f"HERETEK_SESSION_STATE_DIR {raw!r} escapes safe root {safe_root}"
-        )
+        raise ValueError(f"HERETEK_SESSION_STATE_DIR {raw!r} escapes safe root {safe_root}")
     return candidate
 
 
@@ -67,7 +67,9 @@ def _load_state(session_id: str) -> dict:
     return state
 
 
-def _save_state(session_id: str, state: dict) -> None:  # nosonar — false positive: session_id validated against SESSION_ID_RE
+def _save_state(
+    session_id: str, state: dict
+) -> None:  # nosonar — false positive: session_id validated against SESSION_ID_RE
     _session_state_path(session_id).write_text(json.dumps(state))
 
 
@@ -136,9 +138,7 @@ def _detect_warnings(
         )
 
     # Rule 2: file length monotonically increasing across last 5 edits to same file
-    recent_diffs = [
-        e["diff_size"] for e in state["edits"] if e["file"] == file_path
-    ][-5:]
+    recent_diffs = [e["diff_size"] for e in state["edits"] if e["file"] == file_path][-5:]
     if (
         len(recent_diffs) >= MONOTONIC_DIFF_THRESHOLD
         and all(d > 0 for d in recent_diffs)
@@ -206,12 +206,16 @@ def main() -> int:  # nosonar — false positive: hook-script entrypoint always 
     if not warnings:
         return 0
 
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PostToolUse",
-            "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PostToolUse",
+                    "additionalContext": "\n".join(f"⚠️  {w}" for w in warnings),
+                }
+            }
+        )
+    )
     return 0
 
 

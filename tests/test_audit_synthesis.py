@@ -89,9 +89,7 @@ def test_synthesize_writes_report_and_json(tmp_path: Path, schemas_dir: Path) ->
 def test_synthesize_skips_sonar_excluded(tmp_path: Path, schemas_dir: Path) -> None:
     cluster_dir = tmp_path / "in"
     cluster_dir.mkdir()
-    (cluster_dir / "A.yaml").write_text(
-        "[" + json.dumps(_finding(file="scripts/excl.py")) + "]"
-    )
+    (cluster_dir / "A.yaml").write_text("[" + json.dumps(_finding(file="scripts/excl.py")) + "]")
     result = synthesis.synthesize(
         cluster_dir,
         tmp_path / "out",

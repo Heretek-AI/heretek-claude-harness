@@ -4,6 +4,7 @@ All four signals must be green/approved/passed before the loop proceeds
 to merge. Polled on a short interval until all signals are terminal or
 the timeout fires.
 """
+
 from __future__ import annotations
 
 import time

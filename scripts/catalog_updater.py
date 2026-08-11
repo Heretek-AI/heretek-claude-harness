@@ -5,6 +5,7 @@ CLI:
     python scripts/catalog_updater.py --plugin rust --item rust-analyzer \\
             --sha <40-char> --vetting-date 2026-08-05
 """
+
 from __future__ import annotations
 
 import argparse
@@ -52,9 +53,7 @@ def _find_item(data: dict, plugin_name: str, item_id: str) -> dict | None:
     return None
 
 
-def _apply_item_updates(
-    item: dict, new_sha: str, vetting_date: str, cve_scan: str | None
-) -> None:
+def _apply_item_updates(item: dict, new_sha: str, vetting_date: str, cve_scan: str | None) -> None:
     """In-place update of sha + vetting.date (+ optional cve_scan)."""
     item["sha"] = new_sha
     vetting = item.setdefault("vetting", {})

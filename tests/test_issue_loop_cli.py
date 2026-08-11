@@ -71,9 +71,7 @@ def run(*args: str, ledger_path: Path, gh: FakeGH | None = None) -> int:
 # ---------------------------------------------------------------------------
 
 
-def test_select_next_returns_lowest_unprocessed(
-    ledger_path: Path, fake_gh: type[FakeGH]
-) -> None:
+def test_select_next_returns_lowest_unprocessed(ledger_path: Path, fake_gh: type[FakeGH]) -> None:
     gh = fake_gh()
     gh.payload = [
         {"number": 159, "title": "Ignore env var B", "body": ""},
@@ -83,9 +81,7 @@ def test_select_next_returns_lowest_unprocessed(
     rc = run("select-next", ledger_path=ledger_path, gh=gh)
     assert rc == 0
     # Re-invoke with capture so we can assert against stdout.
-    captured = _capture_main(
-        ["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh
-    )
+    captured = _capture_main(["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh)
     assert captured.returncode == 0
     assert json.loads(captured.stdout) == {
         "number": 158,
@@ -99,16 +95,12 @@ def test_select_next_empty_queue_returns_empty_object(
 ) -> None:
     gh = fake_gh()
     gh.payload = []
-    captured = _capture_main(
-        ["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh
-    )
+    captured = _capture_main(["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh)
     assert captured.returncode == 0
     assert captured.stdout.strip() == "{}"
 
 
-def test_select_next_skips_already_merged(
-    ledger_path: Path, fake_gh: type[FakeGH]
-) -> None:
+def test_select_next_skips_already_merged(ledger_path: Path, fake_gh: type[FakeGH]) -> None:
     gh = fake_gh()
     gh.payload = [
         {"number": 158, "title": "x", "body": ""},
@@ -126,16 +118,12 @@ def test_select_next_skips_already_merged(
         ],
         gh_runner=gh,
     )
-    captured = _capture_main(
-        ["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh
-    )
+    captured = _capture_main(["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh)
     assert captured.returncode == 0
     assert json.loads(captured.stdout)["number"] == 159
 
 
-def test_select_next_skips_at_attempt_cap(
-    ledger_path: Path, fake_gh: type[FakeGH]
-) -> None:
+def test_select_next_skips_at_attempt_cap(ledger_path: Path, fake_gh: type[FakeGH]) -> None:
     gh = fake_gh()
     gh.payload = [
         {"number": 158, "title": "x", "body": ""},
@@ -148,9 +136,7 @@ def test_select_next_skips_at_attempt_cap(
     led.mark_attempt(158)
     led.mark_attempt(158)
     led.mark_attempt(158)
-    captured = _capture_main(
-        ["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh
-    )
+    captured = _capture_main(["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh)
     assert captured.returncode == 0
     assert json.loads(captured.stdout)["number"] == 159
 
@@ -166,9 +152,7 @@ def test_select_next_extracts_files_from_issue_body(
             "body": "Found in `scripts/refresh_pins.py:223` and `scripts/catalog_updater.py:81`",
         },
     ]
-    captured = _capture_main(
-        ["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh
-    )
+    captured = _capture_main(["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh)
     assert captured.returncode == 0
     data = json.loads(captured.stdout)
     assert data["number"] == 158
@@ -176,14 +160,10 @@ def test_select_next_extracts_files_from_issue_body(
     assert "scripts/catalog_updater.py" in data["files"]
 
 
-def test_select_next_gh_failure_returns_nonzero(
-    ledger_path: Path, fake_gh: type[FakeGH]
-) -> None:
+def test_select_next_gh_failure_returns_nonzero(ledger_path: Path, fake_gh: type[FakeGH]) -> None:
     gh = fake_gh()
     gh.raise_on_call = True
-    captured = _capture_main(
-        ["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh
-    )
+    captured = _capture_main(["--ledger-path", str(ledger_path), "select-next"], gh_runner=gh)
     assert captured.returncode != 0
 
 
@@ -234,9 +214,7 @@ def test_mark_skipped_resets_rejects(ledger_path: Path) -> None:
 
 
 def test_mark_failed_is_non_terminal(ledger_path: Path) -> None:
-    rc = run(
-        "mark-failed", "158", "--error", "gate: sonar-failed", ledger_path=ledger_path
-    )
+    rc = run("mark-failed", "158", "--error", "gate: sonar-failed", ledger_path=ledger_path)
     assert rc == 0
     from scripts.issue_loop.ledger import Ledger
 
@@ -279,15 +257,9 @@ def test_rejects_in_a_row_zero_initially(ledger_path: Path) -> None:
 
 
 def test_status_reports_counts(ledger_path: Path) -> None:
-    _capture_main(
-        ["--ledger-path", str(ledger_path), "mark-merged", "158", "--pr-url", "u"]
-    )
-    _capture_main(
-        ["--ledger-path", str(ledger_path), "mark-skipped", "159", "--reason", "x"]
-    )
-    _capture_main(
-        ["--ledger-path", str(ledger_path), "mark-failed", "160", "--error", "y"]
-    )
+    _capture_main(["--ledger-path", str(ledger_path), "mark-merged", "158", "--pr-url", "u"])
+    _capture_main(["--ledger-path", str(ledger_path), "mark-skipped", "159", "--reason", "x"])
+    _capture_main(["--ledger-path", str(ledger_path), "mark-failed", "160", "--error", "y"])
     captured = _capture_main(["--ledger-path", str(ledger_path), "status"])
     data = json.loads(captured.stdout)
     assert data == {"merged": 1, "skipped": 1, "failed": 1, "pending": 0}
@@ -312,9 +284,7 @@ def test_mark_merged_does_not_reset_rejects(ledger_path: Path) -> None:
     # Per ledger.py: reset only happens on mark_skipped. mark_merged also
     # resets — verify.
     _capture_main(["--ledger-path", str(ledger_path), "record-reject"])
-    _capture_main(
-        ["--ledger-path", str(ledger_path), "mark-merged", "158", "--pr-url", "u"]
-    )
+    _capture_main(["--ledger-path", str(ledger_path), "mark-merged", "158", "--pr-url", "u"])
     captured = _capture_main(["--ledger-path", str(ledger_path), "rejects-in-a-row"])
     # ledger.mark_merged does NOT reset; mark_skipped does
     assert captured.stdout.strip() == "1"
@@ -401,9 +371,7 @@ def test_register_sub_issue_adds_to_sub_issues_list(ledger_path: Path) -> None:
     assert rc == 0
     from scripts.issue_loop.ledger import Ledger
 
-    assert Ledger(ledger_path)._entries["1"]["sub_issues"] == [
-        {"child": 10, "relation": "blocks"}
-    ]
+    assert Ledger(ledger_path)._entries["1"]["sub_issues"] == [{"child": 10, "relation": "blocks"}]
 
 
 def test_register_sub_issue_multiple_children_accumulate(ledger_path: Path) -> None:
@@ -431,9 +399,7 @@ def test_register_sub_issue_multiple_children_accumulate(ledger_path: Path) -> N
     assert len(sub) == 2
 
 
-def test_classify_subcommand_prints_path(
-    ledger_path: Path, fake_gh: type[FakeGH]
-) -> None:
+def test_classify_subcommand_prints_path(ledger_path: Path, fake_gh: type[FakeGH]) -> None:
     gh = fake_gh()
     gh.payload = [
         {
@@ -442,9 +408,7 @@ def test_classify_subcommand_prints_path(
             "body": "Fix this.",
         },
     ]
-    captured = _capture_main(
-        ["--ledger-path", str(ledger_path), "classify", "158"], gh_runner=gh
-    )
+    captured = _capture_main(["--ledger-path", str(ledger_path), "classify", "158"], gh_runner=gh)
     assert captured.returncode == 0
     assert captured.stdout.strip() == "fix"
 
@@ -460,9 +424,7 @@ def test_classify_subcommand_investigate_for_enhancement(
             "body": "Deep research on plugin scaffolding",
         },
     ]
-    captured = _capture_main(
-        ["--ledger-path", str(ledger_path), "classify", "1"], gh_runner=gh
-    )
+    captured = _capture_main(["--ledger-path", str(ledger_path), "classify", "1"], gh_runner=gh)
     assert captured.stdout.strip() == "spec"
 
 

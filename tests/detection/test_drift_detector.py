@@ -6,6 +6,7 @@ synthetic stdin payloads are injected via `monkeypatch.setattr(sys, "stdin", ...
 and stdout is captured via `capsys`. No test ever touches the real
 `.heretek/session_state/` tree.
 """
+
 import io
 import json
 import sys
@@ -98,17 +99,13 @@ def test_drift_detector_warns_on_monotonic_growth(monkeypatch, tmp_path, capsys)
         old = "x" * total
         new = "x" * (total + d)
         total += d
-        out = _capture_output(
-            monkeypatch, _build_payload(sid, str(target), new, old), capsys
-        )
+        out = _capture_output(monkeypatch, _build_payload(sid, str(target), new, old), capsys)
     assert "hookSpecificOutput" in out, f"expected monotonic-growth warning, got: {out}"
     ctx = out["hookSpecificOutput"]["additionalContext"]
     assert "strictly increasing" in ctx, f"expected monotonicity text in: {ctx}"
 
 
-def test_drift_detector_no_monotonicity_warning_on_steady_growth(
-    monkeypatch, tmp_path, capsys
-):
+def test_drift_detector_no_monotonicity_warning_on_steady_growth(monkeypatch, tmp_path, capsys):
     """#41: constant diff_sizes across edits do NOT trigger monotonicity warning.
 
     diff_size must be strictly increasing — constant appends are fine.
@@ -123,14 +120,12 @@ def test_drift_detector_no_monotonicity_warning_on_steady_growth(
     for i in range(3):
         old = "x" * i
         new = "x" * (i + 1)  # diff_size = 1 every time
-        out = _capture_output(
-            monkeypatch, _build_payload(sid, str(target), new, old), capsys
-        )
+        out = _capture_output(monkeypatch, _build_payload(sid, str(target), new, old), capsys)
     assert "hookSpecificOutput" in out, f"expected at least repeated-edit warning, got: {out}"
     ctx = out["hookSpecificOutput"]["additionalContext"]
-    assert "strictly increasing" not in ctx, (
-        f"constant diff_size must not produce monotonicity warning, got: {ctx}"
-    )
+    assert (
+        "strictly increasing" not in ctx
+    ), f"constant diff_size must not produce monotonicity warning, got: {ctx}"
 
 
 def test_drift_detector_warns_on_unreferenced_import(monkeypatch, tmp_path, capsys):
@@ -182,9 +177,7 @@ def test_drift_detector_silent_when_import_referenced(monkeypatch, tmp_path, cap
     assert out2 == {}, f"referenced import should not warn, got: {out2}"
 
 
-def test_drift_detector_migrates_legacy_state_with_length_key(
-    monkeypatch, tmp_path, capsys
-):
+def test_drift_detector_migrates_legacy_state_with_length_key(monkeypatch, tmp_path, capsys):
     """Re-review I-NEW-1: legacy edit records use `length` instead of `diff_size`.
 
     Pre-populate a state file with the old schema, then ensure the hook loads
@@ -195,13 +188,17 @@ def test_drift_detector_migrates_legacy_state_with_length_key(
     target = tmp_path / "foo.py"
     state_file = tmp_path / f"{sid}.json"
     # 2 legacy entries for the SAME path the next edit will target.
-    state_file.write_text(json.dumps({
-        "edits": [
-            {"file": str(target), "length": 5},
-            {"file": str(target), "length": 7},
-        ],
-        "imports": {},
-    }))
+    state_file.write_text(
+        json.dumps(
+            {
+                "edits": [
+                    {"file": str(target), "length": 5},
+                    {"file": str(target), "length": 7},
+                ],
+                "imports": {},
+            }
+        )
+    )
 
     # If migration fails, recent_diffs lookup will raise KeyError and the
     # hook will exit non-zero — guard against that regression.
@@ -216,9 +213,7 @@ def test_drift_detector_migrates_legacy_state_with_length_key(
     assert "drift" in ctx.lower(), f"expected drift warning after legacy migration, got: {out}"
 
 
-def test_drift_detector_ignores_reimports_from_old_string(
-    monkeypatch, tmp_path, capsys
-):
+def test_drift_detector_ignores_reimports_from_old_string(monkeypatch, tmp_path, capsys):
     """Re-review I-NEW-2: imports that exist in old_string are NOT new.
 
     If an import appears in both old_string and new_string, it must not be
@@ -246,14 +241,12 @@ def test_drift_detector_ignores_reimports_from_old_string(
         capsys,
     )
     ctx2 = out2.get("hookSpecificOutput", {}).get("additionalContext", "")
-    assert "added import(s) not referenced" not in ctx2, (
-        f"re-imported symbol must not warn about being unreferenced: {out2}"
-    )
+    assert (
+        "added import(s) not referenced" not in ctx2
+    ), f"re-imported symbol must not warn about being unreferenced: {out2}"
 
 
-def test_drift_detector_ignores_imports_used_in_same_edit(
-    monkeypatch, tmp_path, capsys
-):
+def test_drift_detector_ignores_imports_used_in_same_edit(monkeypatch, tmp_path, capsys):
     """Re-review I-NEW-2: imports used in the SAME edit are not pending.
 
     A single edit that introduces and uses an import (e.g., `import os;
@@ -277,20 +270,16 @@ def test_drift_detector_ignores_imports_used_in_same_edit(
     # used in edit 1 → never queued.
     out2 = _capture_output(
         monkeypatch,
-        _build_payload(
-            sid, str(target), "y = 1\n", "import os\nx = os.getcwd()\n"
-        ),
+        _build_payload(sid, str(target), "y = 1\n", "import os\nx = os.getcwd()\n"),
         capsys,
     )
     ctx2 = out2.get("hookSpecificOutput", {}).get("additionalContext", "")
-    assert "added import(s) not referenced" not in ctx2, (
-        f"import used in same edit must not warn on next, got: {out2}"
-    )
+    assert (
+        "added import(s) not referenced" not in ctx2
+    ), f"import used in same edit must not warn on next, got: {out2}"
 
 
-def test_drift_detector_warns_once_per_unreferenced_import(
-    monkeypatch, tmp_path, capsys
-):
+def test_drift_detector_warns_once_per_unreferenced_import(monkeypatch, tmp_path, capsys):
     """Re-review M-NEW: unreferenced imports warn on next edit only, then drop.
 
     Import added and never referenced → warns on edit 2 but NOT on edit 3,
@@ -315,9 +304,9 @@ def test_drift_detector_warns_once_per_unreferenced_import(
         capsys,
     )
     ctx2 = out2.get("hookSpecificOutput", {}).get("additionalContext", "")
-    assert "added import(s) not referenced" in ctx2, (
-        f"expected unreferenced-import warning on edit 2, got: {out2}"
-    )
+    assert (
+        "added import(s) not referenced" in ctx2
+    ), f"expected unreferenced-import warning on edit 2, got: {out2}"
 
     # Edit 3: another edit that still doesn't reference `os` → must NOT
     # re-warn about `os` (dropped from pending after edit 2).
@@ -328,9 +317,9 @@ def test_drift_detector_warns_once_per_unreferenced_import(
         capsys,
     )
     ctx3 = out3.get("hookSpecificOutput", {}).get("additionalContext", "")
-    assert "added import(s) not referenced" not in ctx3, (
-        f"third edit must not re-warn about dropped import, got: {out3}"
-    )
+    assert (
+        "added import(s) not referenced" not in ctx3
+    ), f"third edit must not re-warn about dropped import, got: {out3}"
 
 
 def test_drift_detector_rejects_session_state_env_var_traversal(monkeypatch):
@@ -338,16 +327,16 @@ def test_drift_detector_rejects_session_state_env_var_traversal(monkeypatch):
     monkeypatch.setenv("HERETEK_SESSION_STATE_DIR", "/tmp/evil")
     import importlib
     import scripts.drift_detector as hook
+
     with pytest.raises(ValueError, match="escapes safe root"):
         importlib.reload(hook)
 
 
-def test_drift_detector_accepts_session_state_env_var_inside_safe_root(
-    monkeypatch
-):
+def test_drift_detector_accepts_session_state_env_var_inside_safe_root(monkeypatch):
     """#160: env var pointing inside Path.cwd() / '.heretek' must be accepted."""
     import importlib
     import scripts.drift_detector as hook
+
     safe_child = (Path.cwd() / ".heretek" / "sub").resolve()
     monkeypatch.setenv("HERETEK_SESSION_STATE_DIR", str(safe_child))
     importlib.reload(hook)  # must NOT raise
@@ -358,6 +347,7 @@ def test_drift_detector_default_session_state_dir_when_env_unset(monkeypatch):
     """#160 (happy path): unset env var falls back to Path.cwd() / '.heretek' / 'session_state'."""
     import importlib
     import scripts.drift_detector as hook
+
     monkeypatch.delenv("HERETEK_SESSION_STATE_DIR", raising=False)
     importlib.reload(hook)  # must NOT raise
     expected = (Path.cwd() / ".heretek" / "session_state").resolve()

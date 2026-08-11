@@ -6,6 +6,7 @@ and applies them to pattern definitions (promote/demote severities).
 Active model is resolved from env var HERETEK_ACTIVE_MODEL, defaulting to
 'claude-opus-4' (the lightest enforcement profile).
 """
+
 from __future__ import annotations
 
 import os

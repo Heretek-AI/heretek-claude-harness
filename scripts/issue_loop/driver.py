@@ -2,6 +2,7 @@
 waits the gate, merges, advances the ledger. Resumable: on each entry,
 reads ledger first and picks up where the last tick left off.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -77,9 +78,7 @@ class IssueLoop:
                 return
             rejects = self.ledger.record_verifier_reject()
             if rejects >= 5:
-                raise SystemExit(
-                    f"verifier_rejects_in_a_row={rejects} >= 5 — halting loop"
-                )
+                raise SystemExit(f"verifier_rejects_in_a_row={rejects} >= 5 — halting loop")
             # Re-enter from planner is handled by the ralph prompt; here we
             # just record the failure and skip to next issue.
             self.ledger.mark_failed(issue.number, "verifier rejected")
@@ -98,9 +97,7 @@ class IssueLoop:
         if not self.merger.diff_is_scoped(branch_name, issue.files):
             self.ledger.mark_failed(issue.number, "diff-sanity failed")
             return
-        self.squash_merge(
-            branch=branch_name, pr_number=pr_number, issue_number=issue.number
-        )
+        self.squash_merge(branch=branch_name, pr_number=pr_number, issue_number=issue.number)
         self.ledger.mark_merged(issue.number, pr_url)
         self.ledger.reset_verifier_rejects()
 

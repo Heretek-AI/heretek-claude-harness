@@ -5,13 +5,13 @@ analyzers and reports a unified pass/fail. Tools not installed are
 silently skipped (fail-open) so users with partial tooling don't get
 spurious failures.
 """
+
 from __future__ import annotations
 
 import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable
 
 # Map: tool name -> (binary to check on PATH, argv template to run on repo)
 TOOL_TABLE: dict[str, tuple[str, list[str]]] = {

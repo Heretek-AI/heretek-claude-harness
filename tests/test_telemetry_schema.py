@@ -1,4 +1,5 @@
 """Schema fixture is well-formed JSON Schema (Draft-7) and validates."""
+
 from __future__ import annotations
 
 import json

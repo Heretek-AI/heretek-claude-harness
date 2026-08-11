@@ -1,8 +1,29 @@
 {
-  "lspServers": {
-    "rust": { "command": "rust-analyzer", "args": [], "extensionToLanguage": {".rs": "rust"} },
-    "python": { "command": "basedpyright-langserver", "args": ["--stdio"], "extensionToLanguage": {".py": "python"} },
-    "go": { "command": "gopls", "args": [], "extensionToLanguage": {".go": "go"} },
-    "cpp": { "command": "clangd", "args": [], "extensionToLanguage": {".c": "c", ".cpp": "cpp", ".h": "c", ".hpp": "cpp"} }
-  }
+	"lspServers": {
+		"rust": {
+			"command": "rust-analyzer",
+			"args": [],
+			"extensionToLanguage": { ".rs": "rust" }
+		},
+		"python": {
+			"command": "basedpyright-langserver",
+			"args": ["--stdio"],
+			"extensionToLanguage": { ".py": "python" }
+		},
+		"go": {
+			"command": "gopls",
+			"args": [],
+			"extensionToLanguage": { ".go": "go" }
+		},
+		"cpp": {
+			"command": "clangd",
+			"args": [],
+			"extensionToLanguage": {
+				".c": "c",
+				".cpp": "cpp",
+				".h": "c",
+				".hpp": "cpp"
+			}
+		}
+	}
 }

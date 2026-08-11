@@ -40,7 +40,7 @@ jobs:
           cache: pip
 
       - name: Install Python deps
-        run: pip install --only-binary=:all: -r requirements-dev.txt
+        run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
 
       - name: Run schema validation
         run: python scripts/validate.py
@@ -61,10 +61,20 @@ jobs:
           node-version: "20"
 
       - name: Install Claude Code CLI
-        run: npm install -g --ignore-scripts @anthropic-ai/claude-code
+        # Pin the npm version (SonarCloud S4502: "Using dependencies
+        # without locking resolved versions"). 2.1.227 is the latest
+        # stable from anthropics/claude-code releases.
+        # We deliberately omit --ignore-scripts because the
+        # @anthropic-ai/claude-code postinstall builds the native
+        # binary the runtime needs. SonarCloud S2648
+        # ("Omitting --ignore-scripts allows lifecycle scripts to run")
+        # flags this as a security hotspot — accept in SonarCloud UI
+        # since we trust the pinned version from the official
+        # anthropics org.
+        run: npm install -g @anthropic-ai/claude-code@2.1.227
 
       - name: Install ruff (required for fast-gate trigger below)
-        run: pip install --only-binary=:all: ruff==0.16.1
+        run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
 
       - name: Add heretek marketplace locally
         run: claude plugin marketplace add ./
@@ -147,7 +157,7 @@ jobs:
           cache: pip
 
       - name: Install runtime + dev deps
-        run: pip install --only-binary=:all: -r requirements-dev.txt ast-grep-cli
+        run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
 
       - name: Populate freshness cache
         run: python -m scripts.freshness_index --all

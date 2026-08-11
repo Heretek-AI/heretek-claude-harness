@@ -1,4 +1,5 @@
 """Tests for svok_provenance_spike.py (#48)."""
+
 import pytest
 from pathlib import Path
 

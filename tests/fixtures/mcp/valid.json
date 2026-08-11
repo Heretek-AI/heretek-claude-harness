@@ -1,15 +1,15 @@
 {
-  "mcpServers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/"
-    },
-    "local-tool": {
-      "command": "/usr/local/bin/my-mcp-server",
-      "args": ["--config", "/etc/my-mcp/config.json"],
-      "env": {
-        "MY_API_URL": "https://internal.example.com"
-      }
-    }
-  }
+	"mcpServers": {
+		"github": {
+			"type": "http",
+			"url": "https://api.githubcopilot.com/mcp/"
+		},
+		"local-tool": {
+			"command": "/usr/local/bin/my-mcp-server",
+			"args": ["--config", "/etc/my-mcp/config.json"],
+			"env": {
+				"MY_API_URL": "https://internal.example.com"
+			}
+		}
+	}
 }

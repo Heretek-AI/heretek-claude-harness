@@ -1,6 +1,6 @@
 """Tests for lookup_gate.py (#45)."""
+
 import json
-import os
 import subprocess
 import sys
 import time
@@ -21,19 +21,29 @@ def _run_gate(file_path: str, content: str, sentinel_age_hours: float = 0) -> di
     # Always (re)create the sentinel — age 0 means "consulted right now".
     SENTINEL_FILE.parent.mkdir(parents=True, exist_ok=True)
     import json as _json
-    SENTINEL_FILE.write_text(_json.dumps({
-        "last_lookup_at": time.time() - (sentinel_age_hours * 3600),
-    }))
 
-    payload = json.dumps({
-        "session_id": "test-lookup",
-        "hook_event_name": "PostToolUse",
-        "tool_name": "Edit",
-        "tool_input": {"file_path": file_path, "new_string": content},
-    })
+    SENTINEL_FILE.write_text(
+        _json.dumps(
+            {
+                "last_lookup_at": time.time() - (sentinel_age_hours * 3600),
+            }
+        )
+    )
+
+    payload = json.dumps(
+        {
+            "session_id": "test-lookup",
+            "hook_event_name": "PostToolUse",
+            "tool_name": "Edit",
+            "tool_input": {"file_path": file_path, "new_string": content},
+        }
+    )
     result = subprocess.run(
         [sys.executable, str(LOOKUP_GATE)],
-        input=payload, capture_output=True, text=True, timeout=5,
+        input=payload,
+        capture_output=True,
+        text=True,
+        timeout=5,
     )
     return json.loads(result.stdout) if result.stdout.strip() else {}
 
@@ -49,8 +59,9 @@ def test_lookup_gate_warns_on_tracked_lib_without_recent_lookup(tmp_path, monkey
         pytest.skip("populate catalog/freshness/requests.yaml first")
 
     output = _run_gate(str(fake_req), fake_req.read_text(), sentinel_age_hours=999)
-    assert "lookup" in json.dumps(output).lower() or "freshness" in json.dumps(output).lower(), \
-        f"expected lookup warning, got: {output}"
+    assert (
+        "lookup" in json.dumps(output).lower() or "freshness" in json.dumps(output).lower()
+    ), f"expected lookup warning, got: {output}"
 
 
 def test_lookup_gate_silent_after_recent_lookup(tmp_path, monkeypatch):

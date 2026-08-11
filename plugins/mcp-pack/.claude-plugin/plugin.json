@@ -1,12 +1,12 @@
 {
-  "name": "mcp-pack",
-  "displayName": "Mcp Pack",
-  "description": "Generic MCP servers: context7 (live docs fetcher), github-mcp-server (official GitHub API), codebase-memory-mcp (cross-module code graph), serena (LSP-backed symbol/refs).",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "mcpServers": "./.mcp.json",
-  "dependencies": []
+	"name": "mcp-pack",
+	"displayName": "Mcp Pack",
+	"description": "Generic MCP servers: context7 (live docs fetcher), github-mcp-server (official GitHub API), codebase-memory-mcp (cross-module code graph), serena (LSP-backed symbol/refs).",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"mcpServers": "./.mcp.json",
+	"dependencies": []
 }

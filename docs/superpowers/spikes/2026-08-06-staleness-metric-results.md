@@ -62,4 +62,3 @@ After all three fixes, re-run the pilot on heretek's history and verify non-zero
 - Tests: `tests/vision/test_staleness_metric.py` (2 passing; bypass `parse_pins_from_diff()` by design)
 - Protocol: `docs/superpowers/spikes/2026-08-06-staleness-metric-spike-protocol.md`
 - Pilot CSV: `/tmp/staleness.csv`
-

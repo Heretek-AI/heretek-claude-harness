@@ -20,6 +20,7 @@ FileNotFoundError, yaml.YAMLError) so the user sees a clear stderr
 message instead of a Python traceback. Idempotent: re-running on the
 same catalog produces byte-identical output (verified by Task 11).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -38,9 +39,7 @@ DEFAULT_OUTPUT = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 _INTERNAL_FIELDS = {"components", "items"}
 
 
-def _normalize_source(
-    source: dict | str, plugin_root: str | None = None
-) -> dict | str:
+def _normalize_source(source: dict | str, plugin_root: str | None = None) -> dict | str:
     """Translate the catalog's source shape into the marketplace.json shape.
 
     Relative sources are resolved against ``plugin_root`` (the catalog's
@@ -65,9 +64,7 @@ def _normalize_source(
     return out
 
 
-def _plugin_entry(
-    catalog_plugin: dict, plugin_root: str | None = None
-) -> dict:
+def _plugin_entry(catalog_plugin: dict, plugin_root: str | None = None) -> dict:
     """Project a catalog plugin entry into the marketplace.json entry shape."""
     # Strip catalog-only fields first. _INTERNAL_FIELDS is the canonical
     # list of fields that must NEVER appear in marketplace.json.
@@ -102,9 +99,7 @@ def generate(catalog_path: Path, output_path: Path) -> dict:
     """Read catalog.yaml, write marketplace.json; return the generated dict."""
     catalog = _safe_load_catalog(catalog_path)
     if not isinstance(catalog, dict) or "marketplace" not in catalog:
-        raise ValueError(
-            f"{catalog_path}: top-level 'marketplace' key missing or not a mapping"
-        )
+        raise ValueError(f"{catalog_path}: top-level 'marketplace' key missing or not a mapping")
     if not isinstance(catalog.get("plugins"), list):
         raise ValueError(f"{catalog_path}: 'plugins' must be a list")
 

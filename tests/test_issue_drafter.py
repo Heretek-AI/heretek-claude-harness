@@ -1,4 +1,5 @@
 """Tests for the issue drafter. GitHub API is mocked at the requests layer."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch

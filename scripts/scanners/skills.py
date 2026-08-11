@@ -5,6 +5,7 @@ CLI: `npx --yes @nvidia/skillspector scan <path> --format json`
 Exit codes: 0 = no findings; 1 = findings present; 2 = scanner error.
 Timeout: 60s (configurable).
 """
+
 from __future__ import annotations
 
 import json

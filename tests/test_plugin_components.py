@@ -1,6 +1,6 @@
 """Verify every plugin's plugin.json declares the components matching its catalog.yaml items[]."""
+
 import json
-import re
 from pathlib import Path
 
 import pytest
@@ -44,9 +44,6 @@ def test_each_plugin_has_consistent_components(catalog: dict) -> None:
     for plugin in catalog["plugins"]:
         name = plugin["name"]
         components = plugin.get("components") or []
-        item_kinds = {item["kind"] for item in plugin.get("items") or []}
-        # Plugin.json is the source of truth for what gets installed.
-        # Items[] is the curated catalog; component must support at least one kind.
         assert components, f"{name}: missing components list"
 
 
@@ -55,9 +52,9 @@ def test_no_plugin_ships_hooks_outside_hooks_plugin(catalog: dict) -> None:
     for plugin in catalog["plugins"]:
         if plugin["name"] == "hooks":
             continue
-        assert "hooks" not in plugin.get("components", []), (
-            f"{plugin['name']}: D15 violation — only 'hooks' plugin may ship hooks"
-        )
+        assert "hooks" not in plugin.get(
+            "components", []
+        ), f"{plugin['name']}: D15 violation — only 'hooks' plugin may ship hooks"
 
 
 def test_each_plugin_has_a_plugin_json(catalog: dict) -> None:
@@ -81,7 +78,6 @@ def test_hooks_plugin_ships_hooks(catalog: dict) -> None:
 def test_all_plugin_jsons_have_dependencies_field() -> None:
     """Every plugin.json declares `dependencies: []` explicitly (consistency, #9)."""
     import json
-    from pathlib import Path
 
     plugins_dir = REPO_ROOT / "plugins"
     for plugin_json in sorted(plugins_dir.glob("*/.claude-plugin/plugin.json")):
@@ -90,6 +86,6 @@ def test_all_plugin_jsons_have_dependencies_field() -> None:
             f"{plugin_json.relative_to(REPO_ROOT)} missing 'dependencies' field "
             f"(should be [] for plugins with no marketplace-wide deps)"
         )
-        assert data["dependencies"] == [], (
-            f"{plugin_json.relative_to(REPO_ROOT)} has non-empty 'dependencies': {data['dependencies']}"
-        )
+        assert (
+            data["dependencies"] == []
+        ), f"{plugin_json.relative_to(REPO_ROOT)} has non-empty 'dependencies': {data['dependencies']}"

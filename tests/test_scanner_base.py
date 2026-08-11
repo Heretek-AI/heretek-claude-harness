@@ -1,4 +1,5 @@
 """Tests for the ScannerReport contract — frozen, fields, defaults."""
+
 from __future__ import annotations
 
 import dataclasses

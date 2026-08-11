@@ -5,30 +5,35 @@ Measures:
 - False-positive rate: #37 stays silent on the good_pyproject fixture
 - Freshness-index coverage: at least 4 of heretek's runtime deps have cache entries
 """
+
 import json
 import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 
 FIXTURES = Path(__file__).parent / "fixtures"
 CACHE_DIR = Path("catalog/freshness")
 
 
 def _run_hook_on_file(path: Path) -> dict:
-    payload = json.dumps({
-        "session_id": "test",
-        "hook_event_name": "PostToolUse",
-        "tool_name": "Edit",
-        "tool_input": {
-            "file_path": str(path),
-            "new_string": path.read_text(),
-        },
-    })
+    payload = json.dumps(
+        {
+            "session_id": "test",
+            "hook_event_name": "PostToolUse",
+            "tool_name": "Edit",
+            "tool_input": {
+                "file_path": str(path),
+                "new_string": path.read_text(),
+            },
+        }
+    )
     result = subprocess.run(
         [sys.executable, "scripts/stale_dep_intercept.py"],
-        input=payload, capture_output=True, text=True, timeout=5,
+        input=payload,
+        capture_output=True,
+        text=True,
+        timeout=5,
     )
     return json.loads(result.stdout) if result.stdout.strip() else {}
 
@@ -64,15 +69,12 @@ def test_eval_false_positive_rate_on_good_fixture(tmp_path):
     dynamic_file.write_text(
         "[project]\n"
         'name = "good-fixture"\n'
-        "version = \"0.1.0\"\n"
-        "dependencies = [\n"
-        + ",\n".join(f"    {p}" for p in pins)
-        + ",\n]\n"
+        'version = "0.1.0"\n'
+        "dependencies = [\n" + ",\n".join(f"    {p}" for p in pins) + ",\n]\n"
     )
 
     output = _run_hook_on_file(dynamic_file)
-    assert "is stale" not in json.dumps(output), \
-        f"false positive on fresh pins: {output}"
+    assert "is stale" not in json.dumps(output), f"false positive on fresh pins: {output}"
 
 
 def test_eval_freshness_index_coverage():

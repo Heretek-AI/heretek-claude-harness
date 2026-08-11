@@ -1,12 +1,12 @@
 {
-  "name": "security",
-  "displayName": "Security",
-  "description": "Security cross-cutting plugin: security-research skill, audit checklists, audit commands.",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "skills": "./skills/",
-  "dependencies": []
+	"name": "security",
+	"displayName": "Security",
+	"description": "Security cross-cutting plugin: security-research skill, audit checklists, audit commands.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"skills": "./skills/",
+	"dependencies": []
 }

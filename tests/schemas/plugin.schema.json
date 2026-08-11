@@ -1,96 +1,90 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://heretek.ai/schemas/plugin.schema.json",
-  "title": "Claude Code plugin.json",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["name"],
-  "properties": {
-    "name": {
-      "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9-]*$",
-      "minLength": 1
-    },
-    "displayName": { "type": "string" },
-    "description": { "type": "string" },
-    "version": {
-      "type": "string",
-      "description": "Omit for first-party (SHA-ride, D11). Required only for npm/3rd-party."
-    },
-    "author": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "name": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "url": { "type": "string", "format": "uri" }
-      }
-    },
-    "homepage": { "type": "string", "format": "uri" },
-    "repository": { "type": "string", "format": "uri" },
-    "license": { "type": "string" },
-    "keywords": { "type": "array", "items": { "type": "string" } },
-    "skills": {
-      "oneOf": [
-        { "type": "string" },
-        { "type": "array", "items": { "type": "string" } }
-      ]
-    },
-    "commands": {
-      "oneOf": [
-        { "type": "string" },
-        { "type": "array", "items": { "type": "string" } }
-      ]
-    },
-    "agents": {
-      "oneOf": [
-        { "type": "string" },
-        { "type": "array", "items": { "type": "string" } }
-      ]
-    },
-    "hooks": {
-      "oneOf": [
-        { "type": "string" },
-        { "type": "object" }
-      ]
-    },
-    "mcpServers": {
-      "oneOf": [
-        { "type": "string" },
-        { "type": "object" }
-      ]
-    },
-    "outputStyles": {
-      "oneOf": [
-        { "type": "string" },
-        { "type": "array", "items": { "type": "string" } }
-      ]
-    },
-    "lspServers": {
-      "oneOf": [
-        { "type": "string" },
-        { "type": "array", "items": { "type": "string" } }
-      ]
-    },
-    "experimental": {
-      "type": "object",
-      "additionalProperties": { "type": "string" }
-    },
-    "dependencies": {
-      "type": "array",
-      "items": {
-        "oneOf": [
-          { "type": "string" },
-          {
-            "type": "object",
-            "required": ["name"],
-            "properties": {
-              "name": { "type": "string" },
-              "version": { "type": "string" }
-            }
-          }
-        ]
-      }
-    }
-  }
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "https://heretek.ai/schemas/plugin.schema.json",
+	"title": "Claude Code plugin.json",
+	"type": "object",
+	"additionalProperties": false,
+	"required": ["name"],
+	"properties": {
+		"name": {
+			"type": "string",
+			"pattern": "^[a-z0-9][a-z0-9-]*$",
+			"minLength": 1
+		},
+		"displayName": { "type": "string" },
+		"description": { "type": "string" },
+		"version": {
+			"type": "string",
+			"description": "Omit for first-party (SHA-ride, D11). Required only for npm/3rd-party."
+		},
+		"author": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"name": { "type": "string" },
+				"email": { "type": "string", "format": "email" },
+				"url": { "type": "string", "format": "uri" }
+			}
+		},
+		"homepage": { "type": "string", "format": "uri" },
+		"repository": { "type": "string", "format": "uri" },
+		"license": { "type": "string" },
+		"keywords": { "type": "array", "items": { "type": "string" } },
+		"skills": {
+			"oneOf": [
+				{ "type": "string" },
+				{ "type": "array", "items": { "type": "string" } }
+			]
+		},
+		"commands": {
+			"oneOf": [
+				{ "type": "string" },
+				{ "type": "array", "items": { "type": "string" } }
+			]
+		},
+		"agents": {
+			"oneOf": [
+				{ "type": "string" },
+				{ "type": "array", "items": { "type": "string" } }
+			]
+		},
+		"hooks": {
+			"oneOf": [{ "type": "string" }, { "type": "object" }]
+		},
+		"mcpServers": {
+			"oneOf": [{ "type": "string" }, { "type": "object" }]
+		},
+		"outputStyles": {
+			"oneOf": [
+				{ "type": "string" },
+				{ "type": "array", "items": { "type": "string" } }
+			]
+		},
+		"lspServers": {
+			"oneOf": [
+				{ "type": "string" },
+				{ "type": "array", "items": { "type": "string" } }
+			]
+		},
+		"experimental": {
+			"type": "object",
+			"additionalProperties": { "type": "string" }
+		},
+		"dependencies": {
+			"type": "array",
+			"items": {
+				"oneOf": [
+					{ "type": "string" },
+					{
+						"type": "object",
+						"required": ["name"],
+						"properties": {
+							"name": { "type": "string" },
+							"version": { "type": "string" }
+						}
+					}
+				]
+			}
+		}
+	}
 }

@@ -1,4 +1,5 @@
 """Tests for model_profile_loader.py and scanner integration."""
+
 import importlib
 from pathlib import Path
 
@@ -89,17 +90,15 @@ def test_apply_profile_raises_on_promote_demote_collision():
 def test_qwen_profile_emits_error_marker_for_py_yaml_load(monkeypatch):
     """#44 integration: HERETEK_ACTIVE_MODEL=qwen3.6-27b promotes py-yaml-load-without-loader to error → 🚫 marker."""
     monkeypatch.setenv("HERETEK_ACTIVE_MODEL", "qwen3.6-27b")
-    scanner_module = importlib.import_module(
-        "scripts.scanners.forbidden_pattern_scanner"
-    )
+    scanner_module = importlib.import_module("scripts.scanners.forbidden_pattern_scanner")
     importlib.reload(scanner_module)
 
-    bad_py = 'import yaml\nyaml.load(data)\n'
+    bad_py = "import yaml\nyaml.load(data)\n"
     warnings = scanner_module._scan("test.py", bad_py)
     assert any("🚫" in w for w in warnings), f"expected 🚫 marker, got: {warnings}"
-    assert all("⚠️" not in w.replace("⚠️  ", "") for w in warnings if "🚫" in w), (
-        f"expected 🚫 (not ⚠️) on a qwen-promoted violation: {warnings}"
-    )
+    assert all(
+        "⚠️" not in w.replace("⚠️  ", "") for w in warnings if "🚫" in w
+    ), f"expected 🚫 (not ⚠️) on a qwen-promoted violation: {warnings}"
 
 
 @pytest.mark.skipif(
@@ -110,14 +109,12 @@ def test_qwen_profile_emits_error_marker_for_py_yaml_load(monkeypatch):
 def test_claude_opus_profile_emits_warn_marker_for_py_yaml_load(monkeypatch):
     """#44 integration: HERETEK_ACTIVE_MODEL=claude-opus-4 demotes py-yaml-load-without-loader to warn → ⚠️ marker."""
     monkeypatch.setenv("HERETEK_ACTIVE_MODEL", "claude-opus-4")
-    scanner_module = importlib.import_module(
-        "scripts.scanners.forbidden_pattern_scanner"
-    )
+    scanner_module = importlib.import_module("scripts.scanners.forbidden_pattern_scanner")
     importlib.reload(scanner_module)
 
-    bad_py = 'import yaml\nyaml.load(data)\n'
+    bad_py = "import yaml\nyaml.load(data)\n"
     warnings = scanner_module._scan("test.py", bad_py)
     assert any("⚠️" in w for w in warnings), f"expected ⚠️ marker, got: {warnings}"
-    assert all("🚫" not in w for w in warnings), (
-        f"expected only ⚠️ marker (no 🚫) on a claude-opus-4-demoted violation: {warnings}"
-    )
+    assert all(
+        "🚫" not in w for w in warnings
+    ), f"expected only ⚠️ marker (no 🚫) on a claude-opus-4-demoted violation: {warnings}"

@@ -1,12 +1,22 @@
 {
-  "name": "lsp-pack",
-  "displayName": "Lsp Pack",
-  "description": "Generic LSP configs: rust-analyzer, basedpyright, gopls, clangd. One plugin covering four major languages for users who want cross-stack LSP coverage without installing per-language plugins.",
-  "author": {
-    "name": "Heretek-AI",
-    "url": "https://github.com/Heretek-AI"
-  },
-  "license": "MIT",
-  "keywords": ["lsp", "rust-analyzer", "basedpyright", "gopls", "clangd", "rust", "python", "go", "cpp"],
-  "dependencies": []
+	"name": "lsp-pack",
+	"displayName": "Lsp Pack",
+	"description": "Generic LSP configs: rust-analyzer, basedpyright, gopls, clangd. One plugin covering four major languages for users who want cross-stack LSP coverage without installing per-language plugins.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"keywords": [
+		"lsp",
+		"rust-analyzer",
+		"basedpyright",
+		"gopls",
+		"clangd",
+		"rust",
+		"python",
+		"go",
+		"cpp"
+	],
+	"dependencies": []
 }

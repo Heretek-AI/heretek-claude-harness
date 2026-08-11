@@ -139,9 +139,7 @@ def test_update_shas_writes_new_release_sha(
     monkeypatch.setattr(refresh_pins, "_github_get", fake_get)
 
     updates = refresh_pins.update_shas(catalog, gh_token="test-token")
-    assert any(
-        item_id == "rust-analyzer" and new_sha == new for item_id, _, new in updates
-    )
+    assert any(item_id == "rust-analyzer" and new_sha == new for item_id, _, new in updates)
 
     # Catalog was modified on disk with the new SHA.
     import yaml as _yaml
@@ -152,9 +150,7 @@ def test_update_shas_writes_new_release_sha(
     assert rust["sha"] == new_sha
 
 
-def test_update_shas_requires_token(
-    tmp_path: Path, capsys: pytest.CaptureFixture
-) -> None:
+def test_update_shas_requires_token(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
     """--update-shas without a GitHub token is refused."""
     fixture = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
     catalog = tmp_path / "catalog.yaml"
@@ -170,9 +166,7 @@ def test_update_shas_requires_token(
     assert "GITHUB_TOKEN" in captured.err or "github-token" in captured.err
 
 
-def test_update_shas_preserves_comments(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_update_shas_preserves_comments(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Round-trip preserves inline `# review` comments (regression for f60cfa2)."""
     fixture = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
     catalog = tmp_path / "catalog.yaml"
@@ -197,9 +191,7 @@ def test_update_shas_preserves_comments(
     assert "# heretek marketplace" in text or "# source of truth" in text
 
 
-def test_update_shas_rejects_non_dict_root(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_update_shas_rejects_non_dict_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Regression for #157: update_shas rejects non-dict catalog.yaml root with ValueError.
 
     ruamel.yaml round-trip loads a YAML list as a Python list. Without the

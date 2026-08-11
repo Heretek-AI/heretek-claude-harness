@@ -16,6 +16,7 @@ Not exhaustive — this is a fast scan for the most common recurring
 defects observed during the roadmap-restructure migration. Plans
 should also be read end-to-end by the controller before dispatch.
 """
+
 from __future__ import annotations
 
 import os
@@ -28,15 +29,63 @@ GH_CLI_RE = re.compile(r"\bgh\s+(issue|pr|repo)\b")
 
 # Fences with a language hint. Catches ```unknown, ```text-but-not-text, etc.
 # Anything in this set is considered a known-good identifier.
-KNOWN_FENCE_LANGS = frozenset({
-    "bash", "sh", "zsh", "fish", "shell", "powershell", "ps1", "console",
-    "python", "py", "python3", "javascript", "js", "typescript", "ts",
-    "json", "jsonc", "yaml", "yml", "markdown", "md", "text", "txt",
-    "plaintext", "html", "css", "scss", "sass", "sql", "go", "rust",
-    "ruby", "rb", "java", "kotlin", "c", "cpp", "c++", "cs", "csharp",
-    "xml", "toml", "ini", "diff", "patch", "log", "dockerfile",
-    "makefile", "dotenv", "gitignore", "http", "graphql", "none",
-})
+KNOWN_FENCE_LANGS = frozenset(
+    {
+        "bash",
+        "sh",
+        "zsh",
+        "fish",
+        "shell",
+        "powershell",
+        "ps1",
+        "console",
+        "python",
+        "py",
+        "python3",
+        "javascript",
+        "js",
+        "typescript",
+        "ts",
+        "json",
+        "jsonc",
+        "yaml",
+        "yml",
+        "markdown",
+        "md",
+        "text",
+        "txt",
+        "plaintext",
+        "html",
+        "css",
+        "scss",
+        "sass",
+        "sql",
+        "go",
+        "rust",
+        "ruby",
+        "rb",
+        "java",
+        "kotlin",
+        "c",
+        "cpp",
+        "c++",
+        "cs",
+        "csharp",
+        "xml",
+        "toml",
+        "ini",
+        "diff",
+        "patch",
+        "log",
+        "dockerfile",
+        "makefile",
+        "dotenv",
+        "gitignore",
+        "http",
+        "graphql",
+        "none",
+    }
+)
 
 # Canonical-item phrases to detect cross-phase duplication.
 # Each maps to a regex that finds mentions in plan text.
@@ -98,9 +147,7 @@ def check_duplicate_canonical_items(text: str) -> list[str]:
                 sections.append(current_section or "<top>")
         if len(set(sections)) > 1:
             sections_str = ", ".join(f"`{s}`" for s in sorted(set(sections)))
-            findings.append(
-                f"{name} appears in multiple sections: {sections_str}"
-            )
+            findings.append(f"{name} appears in multiple sections: {sections_str}")
     return findings
 
 

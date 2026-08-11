@@ -7,10 +7,10 @@ emits a warning via additionalContext. Per spec §2: async-with-warning
 
 D15 compliance: this lives in the hooks plugin only.
 """
+
 from __future__ import annotations
 
 import json
-import os
 import re
 import sys
 import time
@@ -21,7 +21,7 @@ _SCRIPTS_PARENT = str(Path(__file__).resolve().parent.parent)
 if _SCRIPTS_PARENT not in sys.path:
     sys.path.insert(0, _SCRIPTS_PARENT)
 
-from scripts.model_profile_loader import load_profile, resolve_active_model_id
+from scripts.model_profile_loader import load_profile, resolve_active_model_id  # noqa: E402
 
 CACHE_DIR = Path(__file__).resolve().parent.parent / "catalog" / "freshness"
 SENTINEL_FILE = Path.cwd() / ".heretek" / "last_lookup.json"
@@ -86,16 +86,20 @@ def main() -> int:  # nosonar — false positive: hook-script entrypoint always 
         return 0  # recent enough
 
     libs_str = ", ".join(sorted(relevant))
-    print(json.dumps({
-        "hookSpecificOutput": {
-            "hookEventName": "PostToolUse",
-            "additionalContext": (
-                f"⚠️  lookup-gate: edit touches tracked lib(s) {libs_str}, but the "
-                f"freshness index was last consulted {age_hours:.0f}h ago (TTL: {ttl}h). "
-                f"Run `python -m scripts.freshness_index --lib <name>` before continuing."
-            ),
-        }
-    }))
+    print(
+        json.dumps(
+            {
+                "hookSpecificOutput": {
+                    "hookEventName": "PostToolUse",
+                    "additionalContext": (
+                        f"⚠️  lookup-gate: edit touches tracked lib(s) {libs_str}, but the "
+                        f"freshness index was last consulted {age_hours:.0f}h ago (TTL: {ttl}h). "
+                        f"Run `python -m scripts.freshness_index --lib <name>` before continuing."
+                    ),
+                }
+            }
+        )
+    )
     return 0
 
 

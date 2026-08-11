@@ -19,9 +19,7 @@ from plugins.hooks.scripts import telemetry_collector as tc  # noqa: E402
 
 @pytest.fixture
 def schema() -> dict:
-    return json.loads(
-        (PLUGIN_ROOT / "tests" / "fixtures" / "telemetry_schema.json").read_text()
-    )
+    return json.loads((PLUGIN_ROOT / "tests" / "fixtures" / "telemetry_schema.json").read_text())
 
 
 def test_redact_path_strips_home(tmp_path: Path) -> None:
@@ -180,10 +178,7 @@ def test_latency_under_50ms(tmp_path: Path, schema: dict) -> None:
 
 def test_derive_decision_branches() -> None:
     assert tc._derive_decision({"hook_exit_code": 2}) == "block"
-    assert (
-        tc._derive_decision({"hook_exit_code": 0, "hook_stderr": "WARNING: x"})
-        == "warn"
-    )
+    assert tc._derive_decision({"hook_exit_code": 0, "hook_stderr": "WARNING: x"}) == "warn"
     assert tc._derive_decision({"hook_exit_code": 0, "hook_stderr": ""}) == "allow"
 
 
@@ -197,8 +192,9 @@ def test_main_returns_zero_when_build_event_fails(
     capsys: pytest.CaptureFixture,
 ) -> None:
     payload = json.dumps({"tool_name": "Edit"})
-    with patch.object(sys, "stdin") as mock_stdin, patch.object(
-        tc, "_build_event", side_effect=RuntimeError("boom")
+    with (
+        patch.object(sys, "stdin") as mock_stdin,
+        patch.object(tc, "_build_event", side_effect=RuntimeError("boom")),
     ):
         mock_stdin.read.return_value = payload
         assert tc.main() == 0
