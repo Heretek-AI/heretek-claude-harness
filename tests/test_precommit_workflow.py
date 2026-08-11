@@ -3,6 +3,7 @@
 Spec D20: SHA-pin every action. Spec D36: PR + push-to-main + weekly
 schedule triggers. Read-only permissions.
 """
+
 from __future__ import annotations
 
 import re
@@ -30,12 +31,8 @@ def test_workflow_has_required_triggers() -> None:
     assert on is not None, "workflow must declare `on:` triggers"
     assert "pull_request" in on, "must trigger on pull_request"
     assert "push" in on, "must trigger on push"
-    push_branches = (
-        on["push"].get("branches") if isinstance(on["push"], dict) else None
-    )
-    assert push_branches and "main" in push_branches, (
-        "push trigger must include `branches: [main]`"
-    )
+    push_branches = on["push"].get("branches") if isinstance(on["push"], dict) else None
+    assert push_branches and "main" in push_branches, "push trigger must include `branches: [main]`"
     sched = on.get("schedule")
     assert sched, "must include a weekly schedule trigger"
 
@@ -53,6 +50,6 @@ def test_workflow_actions_sha_pinned() -> None:
 def test_workflow_permissions_readonly() -> None:
     data = yaml.safe_load(WORKFLOW.read_text())
     perms = data.get("permissions")
-    assert perms == {"contents": "read"}, (
-        f"workflow must declare read-only permissions; got {perms!r}"
-    )
+    assert perms == {
+        "contents": "read"
+    }, f"workflow must declare read-only permissions; got {perms!r}"

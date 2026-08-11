@@ -109,11 +109,8 @@ def test_install_sh_uses_existing_precommit_config() -> None:
     install without a config.
     """
     config_path = (
-        Path(__file__).resolve().parents[1]
-        / "plugins"
-        / "hooks"
-        / ".pre-commit-config.yaml"
+        Path(__file__).resolve().parents[1] / "plugins" / "hooks" / ".pre-commit-config.yaml"
     )
-    assert config_path.is_file(), (
-        "A0 spec D30 requires plugins/hooks/.pre-commit-config.yaml to exist"
-    )
+    assert (
+        config_path.is_file()
+    ), "A0 spec D30 requires plugins/hooks/.pre-commit-config.yaml to exist"

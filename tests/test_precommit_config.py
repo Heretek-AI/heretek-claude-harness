@@ -44,9 +44,7 @@ def test_precommit_config_is_parsable_yaml() -> None:
     import yaml
 
     data = yaml.safe_load(PRECOMMIT_CONFIG.read_text())
-    assert isinstance(
-        data, dict
-    ), "pre-commit config must be a YAML mapping at the top level"
+    assert isinstance(data, dict), "pre-commit config must be a YAML mapping at the top level"
     assert "repos" in data, "pre-commit config must declare a `repos:` key"
 
 
@@ -72,9 +70,7 @@ def test_precommit_config_repos_sha_pinned() -> None:
             continue  # local hooks have no `rev` (run system command)
         rev = repo.get("rev")
         assert rev, f"repo {repo.get('repo')} missing `rev`"
-        assert sha_re.match(
-            rev
-        ), f"repo {repo.get('repo')} rev={rev!r} is not a 40-char hex SHA"
+        assert sha_re.match(rev), f"repo {repo.get('repo')} rev={rev!r} is not a 40-char hex SHA"
 
 
 def test_precommit_config_repos_in_allowlist() -> None:
@@ -100,9 +96,7 @@ def test_precommit_validate_config_passes() -> None:
         capture_output=True,
     )
     if cli_check.returncode != 0:
-        pytest.skip(
-            "pre-commit CLI not runnable (install with `pip install pre-commit`)"
-        )
+        pytest.skip("pre-commit CLI not runnable (install with `pip install pre-commit`)")
     result = subprocess.run(
         ["python3", "-m", "pre_commit", "validate-config", str(PRECOMMIT_CONFIG)],
         capture_output=True,
