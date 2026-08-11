@@ -1,7 +1,7 @@
 """Persistent ledger for the issue-loop driver.
 
 JSON file at .omc/state/issue-loop/ledger.json. One entry per issue.
-Status transitions are monotonic: pending -> {merged | skipped | failed}.
+Status transitions are monotonic: pending -> {merged | skipped | investigated | failed}.
 `failed` is non-terminal; the loop retries on the next tick.
 """
 
@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-TERMINAL = frozenset({"merged", "skipped"})
+TERMINAL = frozenset({"merged", "skipped", "investigated"})
 
 
 @dataclass(frozen=True)
@@ -24,7 +24,12 @@ class IssueRef:
 
 class Ledger:
     def __init__(self, path: Path) -> None:
-        self.path = path
+        # SonarCloud pythonsecurity:S8707: validate the input path before
+        # any filesystem op. Reject '..' components (path-traversal intent)
+        # and canonicalize via resolve() so downstream ops use a safe path.
+        if ".." in path.parts:
+            raise ValueError(f"ledger path {path!r} contains '..' component")
+        self.path = Path(path).resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.path.exists():
             # TODO(follow-up): I5 — no error handling for corrupt/truncated JSON.
@@ -34,6 +39,8 @@ class Ledger:
             self._save()
 
     def _save(self) -> None:
+        # self.path is the canonicalized form set in __init__; direct write
+        # is safe per the validation above.
         self.path.write_text(json.dumps(self._entries, indent=2, sort_keys=True))
 
     def _now(self) -> str:
@@ -52,6 +59,11 @@ class Ledger:
                 "last_error": None,
                 "started_at": None,
                 "finished_at": None,
+                "path": None,
+                "findings_path": None,
+                "spec_path": None,
+                "sub_issues": [],
+                "events": [],
             }
         return self._entries[key]
 
@@ -95,6 +107,13 @@ class Ledger:
         e["status"] = "failed"
         e["last_error"] = error
         # do NOT set finished_at -- failed is non-terminal
+        self._save()
+
+    def mark_investigated(self, issue_number: int, findings_path: str) -> None:
+        e = self._ensure(issue_number)
+        e["status"] = "investigated"
+        e["findings_path"] = findings_path
+        e["finished_at"] = self._now()
         self._save()
 
     def record_verifier_reject(self) -> int:
