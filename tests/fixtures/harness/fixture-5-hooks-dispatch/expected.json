@@ -1,0 +1,11 @@
+{
+  "auto_grade": {
+    "patch_diff_min_bytes": 80,
+    "patch_diff_max_bytes": 800,
+    "files_changed_required": ["plugins/hooks/scripts/dispatch.py"],
+    "metadata_keys_required": ["fixture", "start_time", "end_time", "model", "plugins"]
+  },
+  "rubric": {
+    "llm_judge_prompt": "Verify plugins/hooks/scripts/dispatch.py now logs 'event: PostToolUse' and 'tool: Bash' when given a PostToolUse event with tool_name=Bash."
+  }
+}

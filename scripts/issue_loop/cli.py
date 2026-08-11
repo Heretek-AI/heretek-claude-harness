@@ -263,27 +263,20 @@ def _cmd_run(args: argparse.Namespace, ledger: Ledger) -> int:
     branch_prefix = args.branch_prefix
     pr_grouping_name = args.pr_grouping
 
-    if args.close_phase is not None:
-        ledger.close_phase(args.close_phase)
-        print(
-            json.dumps({"closed_phase": args.close_phase}),
-            file=sys.stdout,
-        )
-        return 0
-
-    payload: dict = {
+    payload: dict[str, object] = {
         "issues": issues,
         "route_mode": route_mode,
         "branch_prefix": branch_prefix,
         "pr_grouping": pr_grouping_name,
     }
-    if args.group_by_pr:
-        grouping = _load_pr_grouping(args.pr_groupings_path, pr_grouping_name)
-        payload["issues"] = grouping
-        print(json.dumps(payload))
-        return 0
 
-    print(json.dumps(payload))
+    if args.close_phase is not None:
+        ledger.close_phase(args.close_phase)
+        payload = {"closed_phase": args.close_phase}
+    elif args.group_by_pr:
+        payload["issues"] = _load_pr_grouping(args.pr_groupings_path, pr_grouping_name)
+
+    print(json.dumps(payload), file=sys.stdout)
     return 0
 
 

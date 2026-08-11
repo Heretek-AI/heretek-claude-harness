@@ -1,0 +1,23 @@
+--- a/catalog/catalog.yaml
++++ b/catalog/catalog.yaml
+@@ -25,3 +25,24 @@ plugins:
+           cve_scan: 2026-08-01
+           review: reviews/existing-skill.md
++  - name: fixture-demo-plugin
++    category: task
++    tags: [fixture, demo]
++    source: { type: relative, path: fixture-demo-plugin }
++    components: [skills]
++    items:
++      - id: fixture-skill
++        kind: skill
++        upstream: local/fixture-skill
++        sha: "0123456789abcdef0123456789abcdef01234567"
++        license: MIT
++        vetting:
++          status: approved
++          date: 2026-08-11
++          stars: 0
++          last_commit: 2026-08-11
++          cve_scan: 2026-08-11
++          review: reviews/fixture-skill.md
