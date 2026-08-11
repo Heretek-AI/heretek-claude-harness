@@ -44,9 +44,9 @@ repos:
       - id: ruff
         # Don't auto-fix test fixtures — they're inputs to scanner tests.
         args: [--fix, --exit-non-zero-on-fix]
-        exclude: ^tests/fixtures/
+        files: ^(plugins|scripts|tests/test_|tests/enforcement|tests/detection|tests/freshness_eval|tests/vision|tests/conftest\.py|tests/schemas_.*\.py)
       - id: ruff-format
-        exclude: ^tests/fixtures/
+        files: ^(plugins|scripts|tests/test_|tests/enforcement|tests/detection|tests/freshness_eval|tests/vision|tests/conftest\.py|tests/schemas_.*\.py)
 
   # 3. heretek-fast-gate (local). Already enforced by Claude Code's
   # PreToolUse hook (Layer 1); this catches `git commit` invocations that
@@ -69,9 +69,10 @@ repos:
         # biomejs/pre-commit; no extra args needed. additional_dependencies
         # installs biome into the hook venv so the hook works without a
         # system biome install. Pre-commit caches this.
-        # Excludes test fixtures — they're inputs to scanner tests and must
-        # stay byte-identical across runs.
+        # Only runs on JSON/YAML/TS/JS source files, not on test fixtures
+        # (which must stay byte-identical for scanner tests).
         additional_dependencies: ["@biomejs/biome@1.9.4"]
+        files: \.(json|jsonc|yaml|yml|ts|tsx|js|jsx|css)$
         exclude: ^tests/fixtures/
 
   # 5. Shell: shellcheck-py wrapper (MIT). Shellcheck binary itself is GPL
