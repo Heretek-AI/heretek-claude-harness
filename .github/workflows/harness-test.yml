@@ -25,13 +25,13 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
+      # CI runs only `fixture-meta-meta` (the meta-test that mocks subprocess).
+      # Fixtures 1-5 require a real `claude` CLI + heretek plugins; they run
+      # via `workflow_dispatch` with the `integration` input (below) on a
+      # maintainer workstation or a self-hosted runner that has claude.
       matrix:
         fixture: [
-          fixture-1-ruff-lint,
-          fixture-2-pytest-coverage,
-          fixture-3-precommit-config,
-          fixture-4-catalog-yaml,
-          fixture-5-hooks-dispatch,
+          fixture-meta-meta,
         ]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2

@@ -67,13 +67,17 @@ def test_security_scan_pr_workflow_has_emergency_issue_step() -> None:
 
 
 def test_harness_test_workflow_has_weekly_cron_and_label_trigger() -> None:
-    """harness-test.yml: weekly cron + label trigger + matrix per fixture."""
+    """harness-test.yml: weekly cron + label trigger + meta-fixture in CI matrix."""
     text = (WORKFLOW_DIR / "harness-test.yml").read_text()
     assert "cron:" in text
     assert "harness-test" in text  # the label trigger
     assert "matrix:" in text
-    assert "fixture-1-ruff-lint" in text
-    assert "fixture-5-hooks-dispatch" in text
+    # CI matrix contains only fixture-meta-meta (the no-claude-required test).
+    # Integration fixtures 1-5 run via workflow_dispatch on maintainer workstations.
+    assert "fixture-meta-meta" in text
+    # Fixtures 1-5 are documented in the workflow comment for integration runs,
+    # but excluded from the CI matrix to avoid red CI when no claude binary.
+    assert "fixture-1-ruff-lint" not in text.split("matrix:")[1].split("steps:")[0]
 
 
 def test_harness_test_workflow_sha_pins_all_actions() -> None:
