@@ -44,9 +44,6 @@ def test_each_plugin_has_consistent_components(catalog: dict) -> None:
     for plugin in catalog["plugins"]:
         name = plugin["name"]
         components = plugin.get("components") or []
-        _item_kinds = {item["kind"] for item in plugin.get("items") or []}  # noqa: F841 (intentional: documents supported kinds)
-        # Plugin.json is the source of truth for what gets installed.
-        # Items[] is the curated catalog; component must support at least one kind.
         assert components, f"{name}: missing components list"
 
 

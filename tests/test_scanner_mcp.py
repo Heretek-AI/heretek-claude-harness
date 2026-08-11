@@ -9,7 +9,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from scripts.scanners.mcp import scan_mcp
+from scripts.scanners.mcp import (
+    McpScanner,
+    _vt_lookup,
+    _worse,
+    scan_mcp,
+)
 
 
 @pytest.fixture
@@ -25,7 +30,6 @@ def _sha256(path: Path) -> str:
 
 
 def test_scan_mcp_clean_when_skillspector_clean_and_vt_clean(mcp_dir: Path) -> None:
-    _digest = _sha256(mcp_dir / "server.js")  # noqa: F841 (used by `with` setup below)
     with (
         patch("scripts.scanners.mcp.scan_skill") as mock_skill,
         patch("scripts.scanners.mcp._vt_lookup") as mock_vt,
@@ -159,9 +163,6 @@ class TestRealMcpScan:
 # Issue #31 — coverage gap fills for scripts/scanners/mcp.py (target ≥90%).
 # These exercise the _vt_lookup branches and the McpScanner class entry point.
 # ---------------------------------------------------------------------------
-
-
-from scripts.scanners.mcp import McpScanner, _vt_lookup, _worse  # noqa: E402 (intentional placement after sys.path setup)
 
 
 def test_vt_lookup_no_token_returns_info_skipped() -> None:
