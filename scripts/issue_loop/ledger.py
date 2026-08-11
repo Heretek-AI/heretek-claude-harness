@@ -116,6 +116,14 @@ class Ledger:
         e["finished_at"] = self._now()
         self._save()
 
+    def close_phase(self, issue_number: int) -> None:
+        """Record a phase-closed event for an issue. Idempotent."""
+        e = self._ensure(issue_number)
+        if any(ev.get("kind") == "phase-closed" for ev in e.get("events", [])):
+            return
+        e.setdefault("events", []).append({"ts": self._now(), "kind": "phase-closed", "msg": ""})
+        self._save()
+
     def record_verifier_reject(self) -> int:
         self._entries.setdefault("__root__", {})
         self._entries["__root__"].setdefault("verifier_rejects_in_a_row", 0)
