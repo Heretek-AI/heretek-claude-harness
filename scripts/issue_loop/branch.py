@@ -6,6 +6,7 @@ can inspect exit codes (e.g. rebase conflict returns False, not raise).
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -19,8 +20,27 @@ def slug_from_title(title: str, max_len: int = 50) -> str:
     return s[:max_len]
 
 
+def _clean_env() -> dict[str, str]:
+    """Strip GIT_* env vars so subprocess.run targets the cwd repo, not parent.
+
+    Pre-commit framework sets GIT_DIR (and sometimes GIT_INDEX_FILE /
+    GIT_WORK_TREE) in the hook subprocess. Without this filter, `git worktree
+    add` would attach to the main repo instead of the temp one, and any
+    fixture that runs `git init` would re-init the parent repo instead of
+    its own tmp_path.
+    """
+    return {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+
+
 def _run(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
-    return subprocess.run(args, cwd=cwd, capture_output=True, text=True, check=False)
+    return subprocess.run(
+        args,
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=_clean_env(),
+    )
 
 
 class BranchManager:

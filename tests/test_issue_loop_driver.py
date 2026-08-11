@@ -1,3 +1,4 @@
+import os
 import subprocess
 from pathlib import Path
 
@@ -10,25 +11,47 @@ from scripts.issue_loop.merge import Merger
 from scripts.issue_loop.subagents import SubagentRunner
 
 
+def _clean_env() -> dict[str, str]:
+    """Strip GIT_* env so test fixtures target tmp_path, not parent repo.
+
+    Mirrors scripts/issue_loop/branch.py:_clean_env. Pre-commit framework
+    sets GIT_DIR in the hook subprocess; without stripping, `git init`
+    re-initializes the main repo and subsequent git ops hit the wrong
+    gitdir.
+    """
+    return {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+
+
 @pytest.fixture
 def fake_loop(tmp_path: Path) -> IssueLoop:
     # tmp_path is not a git repo by default; BranchManager.create() shells out
     # to `git branch`, so initialize one. Brief fixture uses BranchManager(tmp_path)
     # verbatim but does not init git — this is the minimal deviation required to
     # let the verbatim implementation run.
+    env = _clean_env()
     subprocess.run(
-        ["git", "init", "-q", "-b", "main"], cwd=tmp_path, check=True, capture_output=True
+        ["git", "init", "-q", "-b", "main"], cwd=tmp_path, check=True, capture_output=True, env=env
     )
     subprocess.run(
-        ["git", "config", "user.email", "t@t"], cwd=tmp_path, check=True, capture_output=True
+        ["git", "config", "user.email", "t@t"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        env=env,
     )
     subprocess.run(
-        ["git", "config", "user.name", "t"], cwd=tmp_path, check=True, capture_output=True
+        ["git", "config", "user.name", "t"], cwd=tmp_path, check=True, capture_output=True, env=env
     )
     (tmp_path / "init.txt").write_text("init")
-    subprocess.run(["git", "add", "init.txt"], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(
-        ["git", "commit", "-q", "-m", "init"], cwd=tmp_path, check=True, capture_output=True
+        ["git", "add", "init.txt"], cwd=tmp_path, check=True, capture_output=True, env=env
+    )
+    subprocess.run(
+        ["git", "commit", "-q", "-m", "init"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        env=env,
     )
     prompts = tmp_path / "prompts"
     prompts.mkdir()
