@@ -61,7 +61,17 @@ jobs:
           node-version: "20"
 
       - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
+        # Pin the npm version (SonarCloud S4502: "Using dependencies
+        # without locking resolved versions"). 2.1.227 is the latest
+        # stable from anthropics/claude-code releases.
+        # We deliberately omit --ignore-scripts because the
+        # @anthropic-ai/claude-code postinstall builds the native
+        # binary the runtime needs. SonarCloud S2648
+        # ("Omitting --ignore-scripts allows lifecycle scripts to run")
+        # flags this as a security hotspot — accept in SonarCloud UI
+        # since we trust the pinned version from the official
+        # anthropics org.
+        run: npm install -g @anthropic-ai/claude-code@2.1.227
 
       - name: Install ruff (required for fast-gate trigger below)
         run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
