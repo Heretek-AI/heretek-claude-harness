@@ -27,7 +27,7 @@ jobs:
           node-version: "20"
 
       - name: Install Python deps
-        run: "pip install --require-hashes -r requirements-dev.lock.txt"
+        run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
 
       - name: Determine bumped item
         id: detect

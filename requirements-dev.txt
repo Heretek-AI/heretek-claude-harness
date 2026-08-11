@@ -1,5 +1,6 @@
 -r requirements.txt
 pytest==9.1.1
+pip==26.1.2
 # Standalone tools that some CI workflows install on their own.
 # Pinned here so the dev-deps lock file (requirements-dev.lock.txt)
 # carries hashes for them and CI can install via --require-hashes.

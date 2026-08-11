@@ -40,7 +40,7 @@ jobs:
           cache: pip
 
       - name: Install Python deps
-        run: "pip install --require-hashes -r requirements-dev.lock.txt"
+        run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
 
       - name: Run schema validation
         run: python scripts/validate.py
@@ -64,7 +64,7 @@ jobs:
         run: npm install -g --ignore-scripts @anthropic-ai/claude-code
 
       - name: Install ruff (required for fast-gate trigger below)
-        run: "pip install --require-hashes -r requirements-dev.lock.txt"
+        run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
 
       - name: Add heretek marketplace locally
         run: claude plugin marketplace add ./
@@ -147,7 +147,7 @@ jobs:
           cache: pip
 
       - name: Install runtime + dev deps
-        run: "pip install --require-hashes -r requirements-dev.lock.txt"
+        run: "pip install --require-hashes --only-binary=:all: -r requirements-dev.lock.txt"
 
       - name: Populate freshness cache
         run: python -m scripts.freshness_index --all
