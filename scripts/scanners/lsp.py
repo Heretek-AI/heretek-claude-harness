@@ -128,7 +128,7 @@ def _check_command(
                 path=f"{rel_cfg}:command",
                 line=None,
                 message=(
-                    f"LSP command '{command}' not on allowlist " f"(allowed: {sorted(ALLOWLIST)})"
+                    f"LSP command '{command}' not on allowlist (allowed: {sorted(ALLOWLIST)})"
                 ),
                 rule_id="lsp-command-unknown",
             )

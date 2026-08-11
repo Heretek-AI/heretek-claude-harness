@@ -32,7 +32,8 @@ def test_workflow_has_required_triggers() -> None:
     assert "pull_request" in on, "must trigger on pull_request"
     assert "push" in on, "must trigger on push"
     push_branches = on["push"].get("branches") if isinstance(on["push"], dict) else None
-    assert push_branches and "main" in push_branches, "push trigger must include `branches: [main]`"
+    assert push_branches, "push trigger must declare `branches:`"
+    assert "main" in push_branches, "push trigger must include `branches: [main]`"
     sched = on.get("schedule")
     assert sched, "must include a weekly schedule trigger"
 
