@@ -16,7 +16,8 @@ existing issue-loop autopilot (`scripts/issue_loop/cli.py`).
 - 10 issues: `#115`, `#116`, `#117`, `#118`, `#119`, `#120`, `#121`,
   `#122`, `#123`, `#124`
 - 4 PRs (memory-aligned grouping, see PR Breakdown below)
-- ADR + integration smoke + phase close-out at each sub-spec boundary
+- ADR + integration smoke + phase close-out **only at sub-spec 2 and
+  3 boundaries** (PR3 and PR4); PR1 and PR2 are pre-boundary setup
 - Three follow-up issues filed after the sprint (one per risk-mitigation item)
 
 **Out:**
@@ -53,8 +54,13 @@ scripts/issue_loop/cli.py run \
   --group-by-pr \
   --pr-grouping 4pr-spec-2-3 \
   --branch-prefix fix/observability- \
-  --close-phase #126
+  --close-phase '#126'
 ```
+
+Flags `--pr-grouping` and `--close-phase` may not exist on the current
+autopilot CLI; the implementation plan should verify and add them if
+needed. If the autopilot cannot stage 4-PR groups directly, fall back
+to `scripts/issue_loop/ledger.py` driving 4 sequential drivers.
 
 **Per-PR cycle:**
 
