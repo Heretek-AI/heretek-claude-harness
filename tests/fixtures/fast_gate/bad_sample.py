@@ -1,2 +1,5 @@
-def f():pass
+def f():
+    pass
+
+
 undefined_var_xyz
