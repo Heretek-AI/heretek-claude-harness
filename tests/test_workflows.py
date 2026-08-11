@@ -64,3 +64,24 @@ def test_security_scan_pr_workflow_has_emergency_issue_step() -> None:
     text = (WORKFLOW_DIR / "security-scan-pr.yml").read_text()
     assert "if: failure()" in text
     assert "emergency" in text.lower()
+
+
+def test_harness_test_workflow_has_weekly_cron_and_label_trigger() -> None:
+    """harness-test.yml: weekly cron + label trigger + matrix per fixture."""
+    text = (WORKFLOW_DIR / "harness-test.yml").read_text()
+    assert "cron:" in text
+    assert "harness-test" in text  # the label trigger
+    assert "matrix:" in text
+    assert "fixture-1-ruff-lint" in text
+    assert "fixture-5-hooks-dispatch" in text
+
+
+def test_harness_test_workflow_sha_pins_all_actions() -> None:
+    """D20: every action pinned to 40-char hex SHA, not tag."""
+    import re
+
+    text = (WORKFLOW_DIR / "harness-test.yml").read_text()
+    sha_pattern = re.compile(r"uses:\s+[\w-]+/[a-zA-Z0-9_-]+@[a-f0-9]{40}")
+    for line in text.splitlines():
+        if "uses:" in line and "actions/" in line:
+            assert sha_pattern.search(line), f"action not SHA-pinned: {line.strip()}"
