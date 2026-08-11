@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
-SCANNER = Path("scripts/scanners/forbidden_pattern_scanner.py")
+SCANNER = Path("plugins/hooks/scripts/forbidden_pattern_scanner.py")
 
 
 def _run_scanner(file_path: str, content: str) -> dict:

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-LOOKUP_GATE = Path("scripts/lookup_gate.py")
+LOOKUP_GATE = Path("plugins/hooks/scripts/lookup_gate.py")
 CACHE_DIR = Path("catalog/freshness")
 SENTINEL_FILE = Path(".heretek/last_lookup.json")
 

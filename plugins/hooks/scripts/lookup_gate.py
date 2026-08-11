@@ -16,14 +16,15 @@ import sys
 import time
 from pathlib import Path
 
-# Allow `python scripts/lookup_gate.py` to find the sibling `scripts` package.
-_SCRIPTS_PARENT = str(Path(__file__).resolve().parent.parent)
-if _SCRIPTS_PARENT not in sys.path:
-    sys.path.insert(0, _SCRIPTS_PARENT)
+# Allow `python plugins/hooks/scripts/lookup_gate.py` to find the `scripts`
+# package from the repo root (parents[3] = repo root).
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from scripts.model_profile_loader import load_profile, resolve_active_model_id  # noqa: E402
 
-CACHE_DIR = Path(__file__).resolve().parent.parent / "catalog" / "freshness"
+CACHE_DIR = _REPO_ROOT / "catalog" / "freshness"
 SENTINEL_FILE = Path.cwd() / ".heretek" / "last_lookup.json"
 # Default freshness TTL if not in profile
 DEFAULT_TTL_HOURS = 24

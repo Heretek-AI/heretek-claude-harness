@@ -16,7 +16,7 @@ import re
 import sys
 from pathlib import Path
 
-CACHE_DIR = Path(__file__).resolve().parent.parent / "catalog" / "freshness"
+CACHE_DIR = Path(__file__).resolve().parents[3] / "catalog" / "freshness"
 DEP_FILE_PATTERNS = (
     re.compile(r"requirements.*\.txt$"),
     re.compile(r"pyproject\.toml$"),

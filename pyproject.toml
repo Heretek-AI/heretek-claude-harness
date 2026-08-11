@@ -36,6 +36,7 @@ ignore = ["E741"]
 [tool.ruff.lint.per-file-ignores]
 # Test fixtures intentionally contain bad code that scanners must detect.
 "tests/fixtures/**" = ["F821", "F841", "E402"]
-# Scripts in scripts/scanners/ manipulate sys.path before importing scanner
-# modules; the late imports are intentional.
-"scripts/scanners/**" = ["E402"]
+# Hook scripts in plugins/hooks/scripts/ manipulate sys.path before importing
+# scanner modules (sys.path.insert + from scripts.xxx); the late imports
+# are intentional (per D15, scanners/hooks live in plugins/hooks/scripts/).
+"plugins/hooks/scripts/**" = ["E402"]
