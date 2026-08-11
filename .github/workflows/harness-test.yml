@@ -19,19 +19,42 @@ permissions:
   contents: read
 
 jobs:
-  fixtures:
-    name: Run harness fixture
+  ci-pytest:
+    name: Harness pytest (no claude)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v5.3.0
+        with:
+          python-version: "3.14"
+
+      - name: Run harness pytest tests
+        # Validates harness_test.py + fixture layout via mocked subprocess.
+        # No real claude CLI required; safe in CI.
+        run: |
+          pytest tests/test_harness_test.py tests/test_harness_fixtures.py -v
+
+  integration-fixtures:
+    name: Run real harness fixtures (needs claude)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Only on manual dispatch (maintainer workstation or self-hosted runner
+    # with claude CLI installed). Not on CI label trigger, not on weekly cron
+    # (which would also fail without claude).
+    if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
-      # CI runs only `fixture-meta-meta` (the meta-test that mocks subprocess).
-      # Fixtures 1-5 require a real `claude` CLI + heretek plugins; they run
-      # via `workflow_dispatch` with the `integration` input (below) on a
-      # maintainer workstation or a self-hosted runner that has claude.
       matrix:
         fixture: [
-          fixture-meta-meta,
+          fixture-1-ruff-lint,
+          fixture-2-pytest-coverage,
+          fixture-3-precommit-config,
+          fixture-4-catalog-yaml,
+          fixture-5-hooks-dispatch,
         ]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
@@ -56,5 +79,5 @@ jobs:
       - name: Alert on failure
         if: failure()
         run: |
-          echo "::error::harness-test failed for ${{ matrix.fixture }}"
+          echo "::error::harness integration failed for ${{ matrix.fixture }}"
           echo "::error::see uploaded artifact or workflow logs"

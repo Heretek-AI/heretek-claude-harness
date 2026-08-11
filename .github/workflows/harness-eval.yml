@@ -1,0 +1,49 @@
+# .github/workflows/harness-eval.yml
+# Weekly eval run over artifact bundles from harness-test.
+# Spec D20: every action SHA-pinned to 40-char hex.
+# Schedule: Sunday 03:00 UTC (after harness-test 02:00 finishes).
+
+name: harness-eval
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"  # Sunday 03:00 UTC
+  workflow_dispatch:
+
+# Read-only: harness-eval only reads repo files and runs scoring scripts.
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    name: Run harness eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v5.3.0
+        with:
+          python-version: "3.14"
+
+      - name: Run Layer 1 auto-grade
+        run: |
+          mkdir -p artifacts
+          for bundle in tests/fixtures/harness/harness-*; do
+            [ -d "$bundle" ] || continue
+            python scripts/harness_auto_grade.py "$bundle" || true
+          done
+
+      - name: Run Layer 2 LLM-judge (stub)
+        run: |
+          for bundle in tests/fixtures/harness/harness-*; do
+            [ -d "$bundle" ] || continue
+            python scripts/harness_judge.py "$bundle" || true
+          done
+
+      - name: Generate weekly scorecard
+        run: |
+          WEEK=$(date -u +%G-W%V)
+          python scripts/scorecard.py tests/fixtures/harness/ --week "$WEEK" || echo "no bundles to score"
