@@ -1,0 +1,11 @@
+{
+  "auto_grade": {
+    "patch_diff_min_bytes": 30,
+    "patch_diff_max_bytes": 200,
+    "files_changed_required": ["src/app.py"],
+    "metadata_keys_required": ["fixture", "start_time", "end_time", "model", "plugins"]
+  },
+  "rubric": {
+    "llm_judge_prompt": "Verify pathlib is used instead of os.path.join in src/app.py."
+  }
+}

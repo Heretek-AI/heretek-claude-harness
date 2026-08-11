@@ -1,0 +1,9 @@
+--- a/src/app.py
++++ b/src/app.py
+@@ -1,4 +1,4 @@
+-import os
++from pathlib import Path
+
+ def main():
+-    return os.path.join("a", "b")
++    return Path("a") / "b"

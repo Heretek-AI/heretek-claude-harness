@@ -1,0 +1,28 @@
+--- a/plugins/hooks/scripts/dispatch.py
++++ b/plugins/hooks/scripts/dispatch.py
+@@ -1,12 +1,19 @@
+ """Minimal dispatcher for the fixture — handles only SessionStart."""
+ from __future__ import annotations
+
+ import sys
+
+
+ def main() -> int:
++    import json
+     for line in sys.stdin:
+-        event = line.strip()
+-        if event == "SessionStart":
+-            print(f"event: {event}")
++        event = line.strip()
++        if event == "SessionStart":
++            print(f"event: {event}")
++            continue
++        if event.startswith("PostToolUse"):
++            payload = json.loads(event)
++            print(f"event: PostToolUse")
++            print(f"tool: {payload.get('tool_name', 'unknown')}")
+     return 0
+
+
+ if __name__ == "__main__":
+     raise SystemExit(main())
