@@ -3,6 +3,12 @@
 Catalog entries flow into URL paths, branch names, and session-state filenames.
 Validate against these regexes before any interpolation. Grow this module as
 new call sites need new patterns; do not invent one-off regexes at the call site.
+
+Note: `require_session_id` was inlined into `scripts/drift_detector.py` (its
+only caller) as part of audit R2. Keep this module in place for the remaining
+shared helpers (`require_upstream`, `require_ref_segment`, `require_id_segment`,
+`require_sha`) which have multiple callers in `security_scan.py` /
+`refresh_pins.py` — inlining those would duplicate the regex patterns.
 """
 
 from __future__ import annotations
@@ -22,10 +28,6 @@ ID_SEGMENT_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 
 # 40-char lowercase hex SHA.
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-
-# Session id — opaque token from stdin JSON. Letters, digits, underscore, dash.
-# Bounded length so a multi-MB payload can't blow up the filesystem.
-SESSION_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
 
 def require_upstream(value: str) -> None:
@@ -50,8 +52,3 @@ def require_id_segment(label: str, value: str) -> None:
 def require_sha(value: str) -> None:
     if not SHA_RE.match(value or ""):
         raise ValueError(f"sha {value!r} failed 40-hex allowlist")
-
-
-def require_session_id(value: str) -> None:
-    if not SESSION_ID_RE.match(value or ""):
-        raise ValueError(f"session_id {value!r} failed allowlist")
