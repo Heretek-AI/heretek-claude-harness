@@ -3,7 +3,12 @@
 # Creates a file with a known lint error and asserts the dispatcher exits non-zero.
 set -euo pipefail
 
-TMPDIR="$(mktemp -d)"
+# Create the temp file INSIDE the repo so fast_gate can lint it.
+# The dispatcher's _validate_file_path fails-open (exit 0) when the
+# target file is outside REPO_ROOT — that fail-open path was breaking
+# this smoke test when the file landed in /tmp/.
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+TMPDIR="$(mktemp -d "$REPO_ROOT/.fast_gate_smoke.XXXX")"
 trap 'rm -rf "$TMPDIR"' EXIT
 
 BAD_FILE="$TMPDIR/bad.py"
