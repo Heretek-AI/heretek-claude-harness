@@ -30,9 +30,7 @@ class Ledger:
         # analyzer traces the data flow.
         for part in path.parts:
             if part == "..":
-                raise ValueError(
-                    f"ledger path {path!r} contains '..' component"
-                )
+                raise ValueError(f"ledger path {path!r} contains '..' component")
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if self.path.exists():
@@ -47,9 +45,7 @@ class Ledger:
         # was reassigned. Addresses SonarCloud S8707 at the write site.
         for part in self.path.parts:
             if part == "..":
-                raise ValueError(
-                    f"ledger path {self.path!r} contains '..' component"
-                )
+                raise ValueError(f"ledger path {self.path!r} contains '..' component")
         self.path.write_text(json.dumps(self._entries, indent=2, sort_keys=True))
 
     def _now(self) -> str:
