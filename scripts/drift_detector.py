@@ -13,12 +13,10 @@ from __future__ import annotations
 import ast
 import json
 import os
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scripts._allowlist import require_session_id  # noqa: E402
 
 
 def _resolve_session_state_dir() -> Path:
@@ -39,6 +37,16 @@ def _resolve_session_state_dir() -> Path:
 SESSION_STATE_DIR = _resolve_session_state_dir()
 REPEATED_EDIT_THRESHOLD = 3
 MONOTONIC_DIFF_THRESHOLD = 3
+
+# Inlined from scripts._allowlist (audit R2; single-caller, single-purpose
+# session-id guard). Bounded length so multi-MB payloads can't blow up
+# the session-state filesystem.
+_SESSION_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
+
+
+def require_session_id(value: str) -> None:
+    if not _SESSION_ID_RE.match(value or ""):
+        raise ValueError(f"session_id {value!r} failed allowlist")
 
 
 def _session_state_path(session_id: str) -> Path:
