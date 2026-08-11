@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -210,6 +211,39 @@ def render_markdown(
     return "\n".join(lines)
 
 
+_SECRET_PATTERNS = (
+    re.compile(r"sk-[A-Za-z0-9_-]{20,}"),  # sk-... (Anthropic-style)
+    re.compile(r"sk-cp-[A-Za-z0-9_-]{20,}"),  # sk-cp-... (MiniMax-style)
+    re.compile(r"ghp_[A-Za-z0-9]{20,}"),  # GitHub PAT
+    re.compile(r"gho_[A-Za-z0-9]{20,}"),  # GitHub OAuth
+    re.compile(r"xox[abprs]-[A-Za-z0-9-]{10,}"),  # Slack
+)
+
+
+def scan_for_secrets(markdown: str) -> list[str]:
+    """Return list of token-shaped strings found in `markdown`."""
+    hits: list[str] = []
+    for pattern in _SECRET_PATTERNS:
+        hits.extend(pattern.findall(markdown))
+    return hits
+
+
+def render_with_secret_check(markdown: str) -> str:
+    """Raise RuntimeError if `markdown` contains token-shaped strings.
+
+    Called by the main() flow after render_markdown. The wrapper passes
+    Markdown through unchanged; the only behavior is the abort.
+    """
+    hits = scan_for_secrets(markdown)
+    if hits:
+        redacted = [h[:6] + "..." + h[-4:] for h in hits]
+        raise RuntimeError(
+            f"refusing to write issue body — {len(hits)} secret-shaped "
+            f"string(s) detected: {redacted}"
+        )
+    return markdown
+
+
 if __name__ == "__main__":
     args = build_arg_parser().parse_args()
     a = load_summary(args.results_dir / "agent-a" / "summary.json")
@@ -228,4 +262,5 @@ if __name__ == "__main__":
             "base_url": args.base_url,
         },
     )
+    render_with_secret_check(md)
     args.output.write_text(md)

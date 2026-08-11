@@ -1,0 +1,16 @@
+{
+  "agent": "agent-a-with-heretek",
+  "model": "claude-test",
+  "commit_sha": "0000000",
+  "heretek_harness": true,
+  "n_tasks": 1,
+  "passed": 1,
+  "failed": 0,
+  "pass_rate": 1.0,
+  "wall_clock_sec_total": 60,
+  "wall_clock_sec_p50": 60,
+  "tokens_total": 10000,
+  "per_task": [
+    {"task_id": "tb-leak-sk-cp-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "verdict": "pass", "wall_clock_sec": 60, "tokens": 10000}
+  ]
+}
