@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 
-from comparison_report import Summary, PerTaskResult, compute_diff
+import pytest
+
+from comparison_report import Summary, PerTaskResult, compute_diff, load_summary
 
 
 def _summary(passed_ids: list[str], failed_ids: list[str]) -> Summary:
@@ -71,3 +74,35 @@ def test_diff_wall_clock_and_tokens() -> None:
     d = compute_diff(a, b)
     assert d["wall_clock_delta_sec"] == -50
     assert d["tokens_delta"] == -1000
+
+
+def _fixture_root(name: str) -> Path:
+    return Path(__file__).resolve().parent / "fixtures" / "terminal_bench_ab" / name
+
+
+def test_all_fail_renders_with_zero_delta() -> None:
+    a = load_summary(_fixture_root("case-all-fail") / "agent-a" / "summary.json")
+    b = load_summary(_fixture_root("case-all-fail") / "agent-b" / "summary.json")
+    d = compute_diff(a, b)
+    assert d["delta_pass_rate"] == 0.0
+    assert d["delta_passed"] == 0
+    assert d["tasks_both_passed"] == []
+    assert sorted(d["tasks_both_failed"]) == ["tb-A", "tb-B", "tb-C", "tb-D"]
+
+
+def test_identical_results_yield_zero_deltas() -> None:
+    a = load_summary(_fixture_root("case-identical-results") / "agent-a" / "summary.json")
+    b = load_summary(_fixture_root("case-identical-results") / "agent-b" / "summary.json")
+    d = compute_diff(a, b)
+    assert d["delta_pass_rate"] == 0.0
+    assert d["delta_passed"] == 0
+    assert d["tasks_agent_a_passed_b_failed"] == []
+    assert d["tasks_agent_b_passed_a_failed"] == []
+    assert d["wall_clock_delta_sec"] == 0
+    assert d["tokens_delta"] == 0
+
+
+def test_missing_agent_b_raises_file_not_found() -> None:
+    """If agent-b/summary.json is missing, load_summary must raise."""
+    with pytest.raises(FileNotFoundError):
+        load_summary(_fixture_root("case-agent-b-missing") / "agent-b" / "summary.json")

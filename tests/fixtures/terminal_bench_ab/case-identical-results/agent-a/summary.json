@@ -1,0 +1,18 @@
+{
+  "agent": "agent-a-with-heretek",
+  "model": "claude-test",
+  "commit_sha": "1234567",
+  "heretek_harness": true,
+  "n_tasks": 3,
+  "passed": 2,
+  "failed": 1,
+  "pass_rate": 0.6667,
+  "wall_clock_sec_total": 300,
+  "wall_clock_sec_p50": 100,
+  "tokens_total": 60000,
+  "per_task": [
+    {"task_id": "tb-X", "verdict": "pass", "wall_clock_sec": 100, "tokens": 20000},
+    {"task_id": "tb-Y", "verdict": "pass", "wall_clock_sec": 100, "tokens": 20000},
+    {"task_id": "tb-Z", "verdict": "fail", "wall_clock_sec": 100, "tokens": 20000}
+  ]
+}
