@@ -429,6 +429,83 @@ def test_classify_subcommand_investigate_for_enhancement(
 
 
 # ---------------------------------------------------------------------------
+# run (autopilot-loop flags)
+# ---------------------------------------------------------------------------
+
+
+def test_run_parses_issues_csv(ledger_path: Path) -> None:
+    captured = _capture_main(["--ledger-path", str(ledger_path), "run", "--issues", "115,116,117"])
+    assert captured.returncode == 0
+    data = json.loads(captured.stdout)
+    assert data["issues"] == [115, 116, 117]
+    assert data["route_mode"] == "fix"
+    assert data["branch_prefix"] == "sprint/v3.5-"
+    assert data["pr_grouping"] == "v3.5-observability"
+
+
+def test_run_group_by_pr_loads_grouping(ledger_path: Path, tmp_path: Path) -> None:
+    groupings = tmp_path / "pr-groupings.json"
+    groupings.write_text(json.dumps({"foo": [201, 202, 203, 204]}))
+    captured = _capture_main(
+        [
+            "--ledger-path",
+            str(ledger_path),
+            "run",
+            "--group-by-pr",
+            "--pr-grouping",
+            "foo",
+            "--pr-groupings-path",
+            str(groupings),
+        ]
+    )
+    assert captured.returncode == 0
+    data = json.loads(captured.stdout)
+    assert data["issues"] == [201, 202, 203, 204]
+    assert data["pr_grouping"] == "foo"
+
+
+def test_run_close_phase_records_event(ledger_path: Path) -> None:
+    captured = _capture_main(["--ledger-path", str(ledger_path), "run", "--close-phase", "124"])
+    assert captured.returncode == 0
+    assert json.loads(captured.stdout) == {"closed_phase": 124}
+    from scripts.issue_loop.ledger import Ledger
+
+    events = Ledger(ledger_path)._entries["124"]["events"]
+    assert any(e["kind"] == "phase-closed" for e in events)
+
+
+def test_run_close_phase_is_idempotent(ledger_path: Path) -> None:
+    _capture_main(["--ledger-path", str(ledger_path), "run", "--close-phase", "124"])
+    captured = _capture_main(["--ledger-path", str(ledger_path), "run", "--close-phase", "124"])
+    assert captured.returncode == 0
+    from scripts.issue_loop.ledger import Ledger
+
+    events = Ledger(ledger_path)._entries["124"]["events"]
+    phase_closed = [e for e in events if e["kind"] == "phase-closed"]
+    assert len(phase_closed) == 1
+
+
+def test_run_branch_prefix_override(ledger_path: Path) -> None:
+    captured = _capture_main(
+        [
+            "--ledger-path",
+            str(ledger_path),
+            "run",
+            "--issues",
+            "1",
+            "--branch-prefix",
+            "custom/branch-",
+            "--route-mode",
+            "investigate",
+        ]
+    )
+    data = json.loads(captured.stdout)
+    assert data["branch_prefix"] == "custom/branch-"
+    assert data["route_mode"] == "investigate"
+    assert data["issues"] == [1]
+
+
+# ---------------------------------------------------------------------------
 # Misc
 # ---------------------------------------------------------------------------
 
