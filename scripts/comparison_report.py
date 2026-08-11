@@ -211,5 +211,21 @@ def render_markdown(
 
 
 if __name__ == "__main__":
-    # Surface the CLI surface for `python -m scripts.comparison_report --help`.
-    build_arg_parser().parse_args()
+    args = build_arg_parser().parse_args()
+    a = load_summary(args.results_dir / "agent-a" / "summary.json")
+    b = load_summary(args.results_dir / "agent-b" / "summary.json")
+    diff = compute_diff(a, b)
+    md = render_markdown(
+        a,
+        b,
+        diff,
+        {
+            "commit_sha_short": args.commit_sha[:7],
+            "trigger": args.trigger,
+            "actor": args.actor,
+            "tier": args.tier,
+            "model": args.model,
+            "base_url": args.base_url,
+        },
+    )
+    args.output.write_text(md)

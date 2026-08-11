@@ -161,3 +161,28 @@ def test_render_markdown_no_help_section_when_empty() -> None:
     diff = compute_diff(a, b)
     md = render_markdown(a, b, diff, _meta())
     assert "(none)" in md
+
+
+def test_golden_case_quick_8_pass_5() -> None:
+    """Regression test: rendering the case-quick-8-pass-5 fixture matches expected."""
+    fixture_root = (
+        Path(__file__).resolve().parent / "fixtures" / "terminal_bench_ab" / "case-quick-8-pass-5"
+    )
+    a = load_summary(fixture_root / "agent-a" / "summary.json")
+    b = load_summary(fixture_root / "agent-b" / "summary.json")
+    diff = compute_diff(a, b)
+    md = render_markdown(
+        a,
+        b,
+        diff,
+        {
+            "commit_sha_short": "abc1234",
+            "trigger": "push",
+            "actor": "test-runner",
+            "tier": "quick",
+            "model": "claude-test",
+            "base_url": "http://localhost",
+        },
+    )
+    expected = (fixture_root / "expected-comparison.md").read_text()
+    assert md == expected, f"golden mismatch; got:\n{md}\nexpected:\n{expected}"
