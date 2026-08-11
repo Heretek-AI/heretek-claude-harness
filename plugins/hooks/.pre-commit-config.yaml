@@ -100,6 +100,18 @@ repos:
     hooks:
       - id: gitleaks
 
+  # 7. heretek local-CI (scripts/ci.sh). Mirrors the GitHub Actions
+  # validate.yml steps at commit time so devs catch marketplace drift,
+  # schema failures, and test regressions before pushing. pass_filenames:
+  # false because ci.sh inspects the full repo, not the staged files.
+  - repo: local
+    hooks:
+      - id: heretek-ci
+        name: heretek local-CI (scripts/ci.sh)
+        entry: bash scripts/ci.sh
+        language: system
+        pass_filenames: false
+
 # Rust fmt/clippy (doublify/pre-commit-rust) is intentionally NOT included
 # in A0: that repo's latest release is v1.0 from 2020, which fails D7
 # (last_commit ≤ 12 months). A maintained Rust wrapper will be vetted in

@@ -29,7 +29,7 @@ def _run_hook_on_file(path: Path) -> dict:
         }
     )
     result = subprocess.run(
-        [sys.executable, "scripts/stale_dep_intercept.py"],
+        [sys.executable, "plugins/hooks/scripts/stale_dep_intercept.py"],
         input=payload,
         capture_output=True,
         text=True,

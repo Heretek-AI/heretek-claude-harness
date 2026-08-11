@@ -14,7 +14,8 @@ from pathlib import Path
 
 import pytest
 
-import scripts.drift_detector as hook
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+import plugins.hooks.scripts.drift_detector as hook  # noqa: E402
 
 
 def _build_payload(
@@ -326,7 +327,7 @@ def test_drift_detector_rejects_session_state_env_var_traversal(monkeypatch):
     """#160: HERETEK_SESSION_STATE_DIR pointing outside safe root must raise."""
     monkeypatch.setenv("HERETEK_SESSION_STATE_DIR", "/tmp/evil")
     import importlib
-    import scripts.drift_detector as hook
+    import plugins.hooks.scripts.drift_detector as hook
 
     with pytest.raises(ValueError, match="escapes safe root"):
         importlib.reload(hook)
@@ -335,7 +336,7 @@ def test_drift_detector_rejects_session_state_env_var_traversal(monkeypatch):
 def test_drift_detector_accepts_session_state_env_var_inside_safe_root(monkeypatch):
     """#160: env var pointing inside Path.cwd() / '.heretek' must be accepted."""
     import importlib
-    import scripts.drift_detector as hook
+    import plugins.hooks.scripts.drift_detector as hook
 
     safe_child = (Path.cwd() / ".heretek" / "sub").resolve()
     monkeypatch.setenv("HERETEK_SESSION_STATE_DIR", str(safe_child))
@@ -346,7 +347,7 @@ def test_drift_detector_accepts_session_state_env_var_inside_safe_root(monkeypat
 def test_drift_detector_default_session_state_dir_when_env_unset(monkeypatch):
     """#160 (happy path): unset env var falls back to Path.cwd() / '.heretek' / 'session_state'."""
     import importlib
-    import scripts.drift_detector as hook
+    import plugins.hooks.scripts.drift_detector as hook
 
     monkeypatch.delenv("HERETEK_SESSION_STATE_DIR", raising=False)
     importlib.reload(hook)  # must NOT raise

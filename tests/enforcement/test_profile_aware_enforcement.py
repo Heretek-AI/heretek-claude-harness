@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 FIXTURES = Path("tests/detection/fixtures")
-SCANNER = Path("scripts/scanners/forbidden_pattern_scanner.py")
+SCANNER = Path("plugins/hooks/scripts/forbidden_pattern_scanner.py")
 
 
 def _scan_as(model_id: str, content: str) -> dict:

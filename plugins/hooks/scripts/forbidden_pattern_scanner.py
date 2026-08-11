@@ -18,9 +18,9 @@ from pathlib import Path
 
 import yaml
 
-# Allow `python scripts/scanners/forbidden_pattern_scanner.py` (subprocess run
-# by the scanner test) to resolve the `scripts` package from the repo root.
-_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+# Allow `python plugins/hooks/scripts/forbidden_pattern_scanner.py` to resolve
+# the `scripts` package from the repo root (parents[3] = repo root).
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
@@ -30,7 +30,7 @@ from scripts.model_profile_loader import (
     resolve_active_model_id,
 )
 
-CATALOG = Path(__file__).resolve().parent.parent.parent / "catalog" / "forbidden_patterns.yaml"
+CATALOG = _REPO_ROOT / "catalog" / "forbidden_patterns.yaml"
 EXT_TO_LANG = {
     ".py": "python",
     ".js": "javascript",

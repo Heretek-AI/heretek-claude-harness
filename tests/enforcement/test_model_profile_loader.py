@@ -90,7 +90,7 @@ def test_apply_profile_raises_on_promote_demote_collision():
 def test_qwen_profile_emits_error_marker_for_py_yaml_load(monkeypatch):
     """#44 integration: HERETEK_ACTIVE_MODEL=qwen3.6-27b promotes py-yaml-load-without-loader to error → 🚫 marker."""
     monkeypatch.setenv("HERETEK_ACTIVE_MODEL", "qwen3.6-27b")
-    scanner_module = importlib.import_module("scripts.scanners.forbidden_pattern_scanner")
+    scanner_module = importlib.import_module("plugins.hooks.scripts.forbidden_pattern_scanner")
     importlib.reload(scanner_module)
 
     bad_py = "import yaml\nyaml.load(data)\n"
@@ -109,7 +109,7 @@ def test_qwen_profile_emits_error_marker_for_py_yaml_load(monkeypatch):
 def test_claude_opus_profile_emits_warn_marker_for_py_yaml_load(monkeypatch):
     """#44 integration: HERETEK_ACTIVE_MODEL=claude-opus-4 demotes py-yaml-load-without-loader to warn → ⚠️ marker."""
     monkeypatch.setenv("HERETEK_ACTIVE_MODEL", "claude-opus-4")
-    scanner_module = importlib.import_module("scripts.scanners.forbidden_pattern_scanner")
+    scanner_module = importlib.import_module("plugins.hooks.scripts.forbidden_pattern_scanner")
     importlib.reload(scanner_module)
 
     bad_py = "import yaml\nyaml.load(data)\n"

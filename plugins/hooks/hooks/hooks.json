@@ -11,8 +11,8 @@
 					},
 					{
 						"type": "command",
-						"command": "python ${CLAUDE_PROJECT_DIR}/scripts/scanners/ast_grep_scanner.py",
-						"timeout": 1000
+						"command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/secrets_pre_tool.py",
+						"timeout": 200
 					}
 				]
 			},
@@ -30,57 +30,13 @@
 		],
 		"PostToolUse": [
 			{
-				"matcher": "Edit|Write|MultiEdit",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "python ${CLAUDE_PROJECT_DIR}/scripts/stale_dep_intercept.py",
-						"async": true,
-						"timeout": 2000
-					}
-				]
-			},
-			{
-				"matcher": "Edit|Write|MultiEdit",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "python ${CLAUDE_PROJECT_DIR}/scripts/scanners/forbidden_pattern_scanner.py",
-						"async": true,
-						"timeout": 2000
-					}
-				]
-			},
-			{
-				"matcher": "Edit|Write|MultiEdit",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "python ${CLAUDE_PROJECT_DIR}/scripts/drift_detector.py",
-						"async": true,
-						"timeout": 500
-					}
-				]
-			},
-			{
-				"matcher": "Edit|Write|MultiEdit",
-				"hooks": [
-					{
-						"type": "command",
-						"command": "python ${CLAUDE_PROJECT_DIR}/scripts/lookup_gate.py",
-						"async": true,
-						"timeout": 500
-					}
-				]
-			},
-			{
 				"matcher": "Edit|Write|MultiEdit|Read|Bash",
 				"hooks": [
 					{
 						"type": "command",
-						"command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/telemetry_collector.py",
+						"command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/post_tool_dispatcher.py",
 						"async": true,
-						"timeout": 200
+						"timeout": 2000
 					}
 				]
 			}

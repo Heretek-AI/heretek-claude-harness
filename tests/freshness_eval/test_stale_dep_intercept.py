@@ -10,9 +10,11 @@ real `catalog/freshness/` tree or relies on which libs the cron has run.
 import io
 import json
 import sys
+from pathlib import Path
 
 
-import scripts.stale_dep_intercept as hook
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+import plugins.hooks.scripts.stale_dep_intercept as hook  # noqa: E402
 
 
 def _build_payload(tool_name: str, file_path: str, content: str) -> dict:

@@ -14,7 +14,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from scripts import drift_detector  # noqa: E402
+from plugins.hooks.scripts import drift_detector  # noqa: E402
 
 
 def test_session_state_path_rejects_traversal(

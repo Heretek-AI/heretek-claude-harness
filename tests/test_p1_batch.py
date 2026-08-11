@@ -96,14 +96,14 @@ def test_check_item_license_missing_is_not_drift(monkeypatch: pytest.MonkeyPatch
 
 def test_is_stale_one_minor_behind_is_fresh() -> None:
     """Pinned 1.0.0 vs latest 1.1.0 is NOT stale (must be ≥2 minor behind)."""
-    from scripts.stale_dep_intercept import _is_stale
+    from plugins.hooks.scripts.stale_dep_intercept import _is_stale
 
     assert _is_stale("1.0.0", "1.1.0") is False
 
 
 def test_is_stale_two_minor_behind_is_stale() -> None:
     """Pinned 1.0.0 vs latest 1.2.0 IS stale."""
-    from scripts.stale_dep_intercept import _is_stale
+    from plugins.hooks.scripts.stale_dep_intercept import _is_stale
 
     assert _is_stale("1.0.0", "1.2.0") is True
 
