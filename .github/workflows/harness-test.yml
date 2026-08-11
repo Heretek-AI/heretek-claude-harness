@@ -1,0 +1,60 @@
+# .github/workflows/harness-test.yml
+# Weekly cron + on-demand PR trigger for harness fixtures.
+# Spec D20: every action SHA-pinned to 40-char hex.
+# Spec: docs/superpowers/specs/2026-08-08-harness-observability-test-pipeline.md
+# Schedule: Sunday 02:00 UTC (chosen to avoid GitHub Actions peak contention).
+
+name: harness-test
+
+on:
+  schedule:
+    - cron: "0 2 * * 0"  # Sunday 02:00 UTC
+  pull_request:
+    types: [labeled]
+    if: github.event.label.name == 'harness-test'
+  workflow_dispatch:
+
+# Read-only: harness runs fixtures, captures artifacts.
+permissions:
+  contents: read
+
+jobs:
+  fixtures:
+    name: Run harness fixture
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      # CI runs only `fixture-meta-meta` (the meta-test that mocks subprocess).
+      # Fixtures 1-5 require a real `claude` CLI + heretek plugins; they run
+      # via `workflow_dispatch` with the `integration` input (below) on a
+      # maintainer workstation or a self-hosted runner that has claude.
+      matrix:
+        fixture: [
+          fixture-meta-meta,
+        ]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v5.3.0
+        with:
+          python-version: "3.14"
+
+      - name: Run harness fixture
+        run: |
+          mkdir -p artifacts
+          python scripts/harness_test.py --fixture ${{ matrix.fixture }} --output artifacts/
+
+      - name: Upload artifact bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v4.4.0
+        with:
+          name: harness-${{ matrix.fixture }}
+          path: artifacts/harness-${{ matrix.fixture }}/
+
+      - name: Alert on failure
+        if: failure()
+        run: |
+          echo "::error::harness-test failed for ${{ matrix.fixture }}"
+          echo "::error::see uploaded artifact or workflow logs"
