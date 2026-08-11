@@ -1,0 +1,10 @@
+{
+  "auto_grade": {
+    "patch_diff_max_bytes": 0,
+    "telemetry_jsonl_required": false,
+    "metadata_keys_required": ["fixture", "start_time", "end_time", "model", "plugins"]
+  },
+  "rubric": {
+    "llm_judge_prompt": "Verify the harness runner captured an empty diff and produced all 6 artifact files."
+  }
+}

@@ -64,3 +64,35 @@ def test_security_scan_pr_workflow_has_emergency_issue_step() -> None:
     text = (WORKFLOW_DIR / "security-scan-pr.yml").read_text()
     assert "if: failure()" in text
     assert "emergency" in text.lower()
+
+
+def test_harness_test_workflow_has_weekly_cron_and_label_trigger() -> None:
+    """harness-test.yml: weekly cron + label trigger + separate integration job."""
+    text = (WORKFLOW_DIR / "harness-test.yml").read_text()
+    assert "cron:" in text
+    assert "harness-test" in text  # the label trigger
+    # Two jobs: CI pytest (safe) and integration fixtures (manual dispatch).
+    assert "ci-pytest:" in text
+    assert "integration-fixtures:" in text
+    # Integration fixtures are gated to workflow_dispatch only (no claude in CI).
+    assert "github.event_name == 'workflow_dispatch'" in text
+
+
+def test_harness_test_workflow_ci_pytest_runs_without_claude() -> None:
+    """CI runs pytest tests with mocked subprocess; no claude CLI required."""
+    text = (WORKFLOW_DIR / "harness-test.yml").read_text()
+    # ci-pytest runs the harness pytest tests, not scripts/harness_test.py
+    pytest_block = text.split("ci-pytest:")[1].split("integration-fixtures:")[0]
+    assert "pytest tests/test_harness_test.py" in pytest_block
+    assert "python scripts/harness_test.py" not in pytest_block
+
+
+def test_harness_test_workflow_sha_pins_all_actions() -> None:
+    """D20: every action pinned to 40-char hex SHA, not tag."""
+    import re
+
+    text = (WORKFLOW_DIR / "harness-test.yml").read_text()
+    sha_pattern = re.compile(r"uses:\s+[\w-]+/[a-zA-Z0-9_-]+@[a-f0-9]{40}")
+    for line in text.splitlines():
+        if "uses:" in line and "actions/" in line:
+            assert sha_pattern.search(line), f"action not SHA-pinned: {line.strip()}"

@@ -1,0 +1,13 @@
+--- a/.pre-commit-config.yaml
++++ b/.pre-commit-config.yaml
+@@ -8,3 +8,9 @@ repos:
+         types: [text]
+         args: []
+       - id: check-json
++        name: Format JSON files with prettier
++        entry: npx --no-install prettier --write
++        language: system
++        types: [json]
++        files: \.json$
++        args: []
++

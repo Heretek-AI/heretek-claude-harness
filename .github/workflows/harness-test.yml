@@ -1,0 +1,83 @@
+# .github/workflows/harness-test.yml
+# Weekly cron + on-demand PR trigger for harness fixtures.
+# Spec D20: every action SHA-pinned to 40-char hex.
+# Spec: docs/superpowers/specs/2026-08-08-harness-observability-test-pipeline.md
+# Schedule: Sunday 02:00 UTC (chosen to avoid GitHub Actions peak contention).
+
+name: harness-test
+
+on:
+  schedule:
+    - cron: "0 2 * * 0"  # Sunday 02:00 UTC
+  pull_request:
+    types: [labeled]
+    if: github.event.label.name == 'harness-test'
+  workflow_dispatch:
+
+# Read-only: harness runs fixtures, captures artifacts.
+permissions:
+  contents: read
+
+jobs:
+  ci-pytest:
+    name: Harness pytest (no claude)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v5.3.0
+        with:
+          python-version: "3.14"
+
+      - name: Run harness pytest tests
+        # Validates harness_test.py + fixture layout via mocked subprocess.
+        # No real claude CLI required; safe in CI.
+        run: |
+          pytest tests/test_harness_test.py tests/test_harness_fixtures.py -v
+
+  integration-fixtures:
+    name: Run real harness fixtures (needs claude)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Only on manual dispatch (maintainer workstation or self-hosted runner
+    # with claude CLI installed). Not on CI label trigger, not on weekly cron
+    # (which would also fail without claude).
+    if: github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        fixture: [
+          fixture-1-ruff-lint,
+          fixture-2-pytest-coverage,
+          fixture-3-precommit-config,
+          fixture-4-catalog-yaml,
+          fixture-5-hooks-dispatch,
+        ]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v5.3.0
+        with:
+          python-version: "3.14"
+
+      - name: Run harness fixture
+        run: |
+          mkdir -p artifacts
+          python scripts/harness_test.py --fixture ${{ matrix.fixture }} --output artifacts/
+
+      - name: Upload artifact bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v4.4.0
+        with:
+          name: harness-${{ matrix.fixture }}
+          path: artifacts/harness-${{ matrix.fixture }}/
+
+      - name: Alert on failure
+        if: failure()
+        run: |
+          echo "::error::harness integration failed for ${{ matrix.fixture }}"
+          echo "::error::see uploaded artifact or workflow logs"

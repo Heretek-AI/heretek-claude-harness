@@ -228,6 +228,59 @@ def _cmd_classify(args: argparse.Namespace, ledger: Ledger) -> int:
 
 
 # ---------------------------------------------------------------------------
+# run (autopilot-loop flags — plumbing for tasks 2-6)
+# ---------------------------------------------------------------------------
+
+
+DEFAULT_PR_GROUPINGS_PATH = Path.home() / ".heretek" / "pr-groupings.json"
+DEFAULT_ROUTE_MODE = "fix"
+DEFAULT_PR_GROUPING = "v3.5-observability"
+DEFAULT_BRANCH_PREFIX = "sprint/v3.5-"
+
+
+def _parse_issues_csv(raw: str) -> list[int]:
+    """Parse a comma-separated issue-number list. Raises ValueError on bad input."""
+    out: list[int] = []
+    for chunk in raw.split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        out.append(int(chunk))
+    return out
+
+
+def _load_pr_grouping(path: Path, name: str, *, default_path: Path | None = None) -> list[int]:
+    """Load `~/.heretek/pr-groupings.json` and return the named grouping."""
+    target = path if path else (default_path or DEFAULT_PR_GROUPINGS_PATH)
+    data = json.loads(Path(target).read_text())
+    grouping = data[name]
+    return [int(x) for x in grouping]
+
+
+def _cmd_run(args: argparse.Namespace, ledger: Ledger) -> int:
+    issues = _parse_issues_csv(args.issues) if args.issues else []
+    route_mode = args.route_mode
+    branch_prefix = args.branch_prefix
+    pr_grouping_name = args.pr_grouping
+
+    payload: dict[str, object] = {
+        "issues": issues,
+        "route_mode": route_mode,
+        "branch_prefix": branch_prefix,
+        "pr_grouping": pr_grouping_name,
+    }
+
+    if args.close_phase is not None:
+        ledger.close_phase(args.close_phase)
+        payload = {"closed_phase": args.close_phase}
+    elif args.group_by_pr:
+        payload["issues"] = _load_pr_grouping(args.pr_groupings_path, pr_grouping_name)
+
+    print(json.dumps(payload), file=sys.stdout)
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # argparse
 # ---------------------------------------------------------------------------
 
@@ -301,6 +354,44 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     pc.add_argument("issue_number", type=int)
 
+    prun = sub.add_parser(
+        "run",
+        help="Autopilot-loop driver: print runner config (or close-phase).",
+    )
+    prun.add_argument("--issues", default="", help="Comma-separated issue numbers.")
+    prun.add_argument(
+        "--route-mode",
+        default=DEFAULT_ROUTE_MODE,
+        choices=["fix", "investigate", "spec", "break-down", "skip"],
+    )
+    prun.add_argument(
+        "--group-by-pr",
+        action="store_true",
+        help="Override --issues with the named --pr-grouping from the groupings file.",
+    )
+    prun.add_argument(
+        "--pr-grouping",
+        default=DEFAULT_PR_GROUPING,
+        help="Grouping name to look up when --group-by-pr is set.",
+    )
+    prun.add_argument(
+        "--pr-groupings-path",
+        type=Path,
+        default=DEFAULT_PR_GROUPINGS_PATH,
+        help="Path to pr-groupings.json (default: ~/.heretek/pr-groupings.json).",
+    )
+    prun.add_argument(
+        "--branch-prefix",
+        default=DEFAULT_BRANCH_PREFIX,
+        help="Branch prefix for new sprint branches.",
+    )
+    prun.add_argument(
+        "--close-phase",
+        type=int,
+        default=None,
+        help="Issue number whose phase to close (records phase-closed event).",
+    )
+
     return p
 
 
@@ -334,6 +425,7 @@ def main(
         "log-event": _cmd_log_event,
         "register-sub-issue": _cmd_register_sub_issue,
         "classify": _cmd_classify,
+        "run": _cmd_run,
     }
     handler = dispatch.get(args.subcommand)
     if handler is None:
