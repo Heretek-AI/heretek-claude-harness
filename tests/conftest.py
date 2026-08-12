@@ -9,10 +9,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 SCHEMAS_DIR = REPO_ROOT / "tests" / "schemas"
 FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures"
+TESTS_DIR = REPO_ROOT / "tests"
 
 # Make scripts/ importable so tests can do `from harness_auto_grade import ...`
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
+
+# Make tests/ importable so test files can do `from _factories import ...`
+if str(TESTS_DIR) not in sys.path:
+    sys.path.insert(0, str(TESTS_DIR))
 
 
 @pytest.fixture(scope="session")
