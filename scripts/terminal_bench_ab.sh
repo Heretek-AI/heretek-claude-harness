@@ -31,11 +31,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HERETEK_QUICK_SUBSET="${HERETEK_QUICK_SUBSET:-${SCRIPT_DIR}/tb_subset_quick.txt}"
 
 # Build --include-task-name flags from subset file (one ID per line; blank lines ignored).
-# `|| [ -n "$task_id" ]` handles files that lack a trailing newline on the last line.
+# `|| [[ -n "$task_id" ]]` handles files that lack a trailing newline on the last line.
 TASK_ARGS=()
-if [ -f "$HERETEK_QUICK_SUBSET" ]; then
-  while IFS= read -r task_id || [ -n "$task_id" ]; do
-    [ -n "$task_id" ] && TASK_ARGS+=(--include-task-name "$task_id")
+if [[ -f "$HERETEK_QUICK_SUBSET" ]]; then
+  while IFS= read -r task_id || [[ -n "$task_id" ]]; do
+    [[ -n "$task_id" ]] && TASK_ARGS+=(--include-task-name "$task_id")
   done < "$HERETEK_QUICK_SUBSET"
 fi
 
