@@ -42,33 +42,39 @@ full list.
 - Default provider: `anthropic`
 - Settings file generated at `/tmp/claude-code-settings/settings.json`
 
-## Output directory structure
+## Output directory structure (harbor 0.21.0, verified 2026-08-12)
 
-Harbor writes per-job output to `<jobs-dir>/<job-name>/`. Each job dir contains:
+Harbor writes per-job output to `<jobs-dir>/<job-name>/`. Each trial
+directory contains:
 
 ```
-<jobs-dir>/<job-name>/
-├── config.json                 # Resolved JobConfig
-├── trials/                     # Per-trial subdirs
-│   └── <trial-id>/
-│       ├── trial.log
-│       ├── trajectory.json
-│       ├── agent.log
-│       ├── env.log
-│       ├── verifier.log
-│       └── result.json         # {"verdict": "pass"|"fail", ...}
-└── job.log
+<jobs-dir>/<job-name>/<trial-name>/
+├── agent/         # Subdirectory; harbor's claude-code adapter writes here.
+├── verifier/      # Subdirectory; contains reward.txt + reward.json.
+├── artifacts/     # Collected artifacts from the environment.
+├── config.json    # Resolved trial config.
+├── lock.json      # Resolved trial inputs.
+├── result.json    # TrialResult (pydantic model, JSON-encoded).
+└── trial.log      # Logs from the trial.
 ```
 
-The `summary.json` referenced by `comparison_report.py` is **NOT produced
-by harbor directly** — it's our own roll-up. `comparison_report.py` will
-need to read the trial results and aggregate them.
+The per-trial `result.json` is a `TrialResult` pydantic model. Fields
+relevant to aggregation:
 
-**Action item (deferred):** Task 2 of the implementation plan adds a
-post-processing step in `terminal_bench_ab.sh` (or a separate script) that
-walks `<jobs-dir>/<job-name>/trials/` and produces a `summary.json` per
-agent. This was overlooked when the plan was written; updating the plan in
-a follow-up commit.
+- `task_name` — task ID (e.g. `tb-001-fix-permissions`).
+- `verifier_result.rewards` (`dict[str, float|int]`) — pass iff any value == 1.0.
+- `agent_result.n_input_tokens` / `n_output_tokens` / `n_cache_tokens` / `cost_usd`.
+- `started_at` / `finished_at` (ISO 8601) — wall-clock = `finished_at - started_at`.
+- `agent_info.model_info.name` — model name.
+
+**No** `trials/` subdir, **no** `trajectory.json`, **no** `agent.log`,
+**no** `env.log`, **no** `verifier.log` files — those were recorded
+from an older harbor version and are stale for 0.21.0.
+
+Harbor ALSO writes a job-level `<jobs-dir>/<job-name>/result.json`
+(`JobResult` with aggregated `JobStats` and the same `trial_results`
+list). The aggregator does not consume this — it walks per-trial
+files directly (robust to partial runs).
 
 ## Task filtering
 
@@ -120,18 +126,10 @@ The fake harbor records each invocation to a log and writes a single
 A live run on `main` is gated on repo secrets being configured by a
 maintainer (`ANTHROPIC_BASE_URL`, `ANTHROPIC_MODEL`, `ANTHROPIC_AUTH_TOKEN`).
 
-## Follow-up: `summary.json` aggregation
+## Per-agent `summary.json`
 
-The current smoke uses stub `summary.json` files because **harbor does
-not produce `summary.json` directly** — it writes per-trial
-`result.json` files under `<jobs-dir>/<job-name>/trials/<trial-id>/`.
-
-A future task must add a post-processing step (in
-`terminal_bench_ab.sh` or a separate script) that walks
-`<results_dir>/agent-{a,b}/jobs/*/trials/*/result.json` and emits a
-`summary.json` per agent. Until that step ships, real harbor runs will
-not produce the inputs `comparison_report.py` expects.
-
-Captured here rather than as a plan amendment so the T8 plan stays
-frozen at the design boundary; the aggregation step is the natural
-follow-up spec.
+Per-agent `summary.json` is aggregated from per-trial `result.json`
+files by `scripts/aggregate_results.py`, invoked after each `harbor run`
+in `terminal_bench_ab.sh`. See
+`docs/superpowers/specs/2026-08-12-aggregate-results-design.md` for
+the schema and edge-case handling.
