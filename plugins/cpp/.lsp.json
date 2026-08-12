@@ -1,0 +1,15 @@
+{
+	"lspServers": {
+		"cpp": {
+			"command": "clangd",
+			"args": ["--background-index", "--clang-tidy"],
+			"extensionToLanguage": {
+				".c": "c",
+				".cpp": "cpp",
+				".cc": "cpp",
+				".h": "c",
+				".hpp": "cpp"
+			}
+		}
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"name": "pre-commit",
+	"displayName": "Pre-Commit Pack",
+	"description": "Pre-configured pre-commit git hooks: ruff, biome, cargo clippy, fallow, semgrep, gitleaks, and hygiene checks.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"dependencies": []
+}

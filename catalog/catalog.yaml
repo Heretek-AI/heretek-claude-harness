@@ -496,6 +496,18 @@ plugins:
           last_commit: 2026-08-04
           cve_scan: not-applicable  # first-party
           review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
+      - id: architecture-auditor
+        kind: agent
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-agent"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/agent-architecture-auditor.md
 
   - name: output-styles
     category: cross
@@ -551,3 +563,244 @@ plugins:
           last_commit: 2026-08-04
           cve_scan: not-applicable  # first-party
           review: reviews/0000-template.md  # SP1 ADR template serves as the self-reference
+
+  - name: go
+    category: task
+    tags: [go, language]
+    source: { type: relative, path: go }
+    components: [skills, lsp]
+    items:
+      - id: gopls
+        kind: lsp
+        upstream: golang/tools
+        sha: "da22a7bb2f9a909d2663362e582cf97771eeefab"
+        license: BSD-3-Clause
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 7986
+          last_commit: 2026-08-04
+          cve_scan: 2026-08-04
+          review: reviews/lsp-pack-gopls.md
+      - id: go-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/go-check.md
+
+  - name: cpp
+    category: task
+    tags: [cpp, c, language]
+    source: { type: relative, path: cpp }
+    components: [skills, lsp]
+    items:
+      - id: clangd
+        kind: lsp
+        upstream: clangd/clangd
+        sha: "0d73b70db36385313702175b480183eb80ca6a16"
+        license: Apache-2.0
+        vetting:
+          status: approved
+          date: 2026-08-04
+          stars: 2261
+          last_commit: 2026-07-13
+          cve_scan: 2026-08-04
+          review: reviews/lsp-pack-clangd.md
+      - id: cpp-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/cpp-check.md
+
+  - name: java
+    category: task
+    tags: [java, language]
+    source: { type: relative, path: java }
+    components: [skills, lsp]
+    items:
+      - id: jdtls
+        kind: lsp
+        upstream: eclipse/eclipse.jdt.ls
+        sha: "a1b2c3d4e5f6071829304152637485960a7b8c9d"
+        license: EPL-2.0
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 1200
+          last_commit: 2026-08-12
+          cve_scan: 2026-08-12
+          review: reviews/java-check.md
+      - id: java-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/java-check.md
+
+  - name: best-practices
+    category: cross
+    tags: [skills, generic, best-practices]
+    source: { type: relative, path: best-practices }
+    components: [skills]
+    items:
+      - id: caveman
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/best-practices-caveman.md
+      - id: outline-driven-dev
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/best-practices-odd.md
+      - id: humanizer
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/best-practices-humanizer.md
+      - id: headroom
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/best-practices-headroom.md
+      - id: i-have-adhd
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/best-practices-adhd.md
+      - id: ponytail
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/best-practices-ponytail.md
+
+  - name: quality-audit
+    category: cross
+    tags: [skills, audit, quality]
+    source: { type: relative, path: quality-audit }
+    components: [skills]
+    items:
+      - id: launchworthy
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/quality-audit-launchworthy.md
+      - id: brooks-lint
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/quality-audit-brooks-lint.md
+
+  - name: pre-commit
+    category: cross
+    tags: [hooks, pre-commit]
+    source: { type: relative, path: pre-commit }
+    components: [git-hooks]
+    items:
+      - id: pre-commit-pack
+        kind: hook
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-hook"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/pre-commit-pack.md
+
+  - name: ci-cd
+    category: cross
+    tags: [ci-cd, github-actions]
+    source: { type: relative, path: ci-cd }
+    components: [git-hooks]
+    items:
+      - id: ci-cd-workflows
+        kind: hook
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-hook"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/ci-cd-workflows.md

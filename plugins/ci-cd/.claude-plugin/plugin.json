@@ -1,0 +1,11 @@
+{
+	"name": "ci-cd",
+	"displayName": "CI/CD Workflows Pack",
+	"description": "GitHub Actions CI/CD workflows for pre-commit enforcement, security scanning, shellcheck, and marketplace validation.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"dependencies": []
+}

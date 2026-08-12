@@ -1,0 +1,36 @@
+# heretek pre-commit pack — preconfigured git hooks
+minimum_pre_commit_version: "3.5.0"
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit, pre-push]
+fail_fast: true
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 75b98813cfb7e663870a28c74366a1e99d7bfe79
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  - repo: https://github.com/biomejs/pre-commit
+    rev: 19865851e014cbe6138e295365f95ca51bf953f8
+    hooks:
+      - id: biome-check
+        additional_dependencies: ["@biomejs/biome@1.9.4"]
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e
+    hooks:
+      - id: gitleaks

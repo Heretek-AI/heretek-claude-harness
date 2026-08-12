@@ -1,0 +1,12 @@
+{
+	"name": "best-practices",
+	"displayName": "Best Practices",
+	"description": "Generic best practices pack: humanizer anti-slop, i-have-adhd action-first formatting, ponytail 7-rung lazy ladder, caveman terse mode, and outline-driven development.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"skills": "./skills/",
+	"dependencies": []
+}

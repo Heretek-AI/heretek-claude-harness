@@ -1,0 +1,13 @@
+{
+	"name": "cpp",
+	"displayName": "C/C++",
+	"description": "C/C++ task plugin: clangd LSP, cpp-check skill.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"lspServers": "./.lsp.json",
+	"skills": "./skills/",
+	"dependencies": []
+}

@@ -110,6 +110,72 @@
       "tags": [
         "output-styles"
       ]
+    },
+    {
+      "category": "task",
+      "name": "go",
+      "source": "./plugins/go",
+      "tags": [
+        "go",
+        "language"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "cpp",
+      "source": "./plugins/cpp",
+      "tags": [
+        "cpp",
+        "c",
+        "language"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "java",
+      "source": "./plugins/java",
+      "tags": [
+        "java",
+        "language"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "best-practices",
+      "source": "./plugins/best-practices",
+      "tags": [
+        "skills",
+        "generic",
+        "best-practices"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "quality-audit",
+      "source": "./plugins/quality-audit",
+      "tags": [
+        "skills",
+        "audit",
+        "quality"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "pre-commit",
+      "source": "./plugins/pre-commit",
+      "tags": [
+        "hooks",
+        "pre-commit"
+      ]
+    },
+    {
+      "category": "cross",
+      "name": "ci-cd",
+      "source": "./plugins/ci-cd",
+      "tags": [
+        "ci-cd",
+        "github-actions"
+      ]
     }
   ]
 }

@@ -47,6 +47,9 @@ catalog/freshness/*.yaml
 # Benchmark results
 terminal-bench-ab-results/
 
+# Temporary / audit clone dir
+review/
+
 # Editor / OS
 .DS_Store
 *.swp

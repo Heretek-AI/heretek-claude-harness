@@ -1,0 +1,12 @@
+{
+	"name": "quality-audit",
+	"displayName": "Quality Audit Pack",
+	"description": "Production readiness and code quality audit pack: launchworthy 5-domain production audit and brooks-lint code decay risk analysis.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"skills": "./skills/",
+	"dependencies": []
+}
