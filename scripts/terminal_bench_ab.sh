@@ -58,13 +58,18 @@ mkdir -p "$RESULTS_DIR/agent-a" "$RESULTS_DIR/agent-b"
 AGENT_A_JOBS="${RESULTS_DIR}/agent-a/jobs"
 AGENT_B_JOBS="${RESULTS_DIR}/agent-b/jobs"
 
+# Container destination for heretek plugins directory.
+CONTAINER_PLUGIN_DIR="/tmp/heretek-plugins"
+MOUNTS_JSON="[{\"type\":\"bind\",\"source\":\"${HERETEK_PLUGIN_DIR}\",\"target\":\"${CONTAINER_PLUGIN_DIR}\",\"read_only\":true}]"
+
 echo "[terminal_bench_ab] agent A (with heretek) -> ${AGENT_A_JOBS}"
 harbor run \
   --dataset "$HERETEK_DATASET" \
   --agent claude-code \
   --model "$ANTHROPIC_MODEL" \
   --n-concurrent "$HERETEK_N_CONCURRENT" \
-  --ak "config={\"plugin_dir\":\"${HERETEK_PLUGIN_DIR}\"}" \
+  --mounts "$MOUNTS_JSON" \
+  --ak "config={\"plugin_dir\":\"${CONTAINER_PLUGIN_DIR}\"}" \
   --jobs-dir "$AGENT_A_JOBS" \
   --debug \
   "${TASK_ARGS[@]}"

@@ -71,7 +71,7 @@ def test_invokes_harbor_twice(fake_harbor_dir: Path, tmp_path: Path) -> None:
 
 
 def test_agent_a_uses_heretek_plugin_dir(fake_harbor_dir: Path, tmp_path: Path) -> None:
-    """Agent A's harbor invocation must include the heretek plugin_dir."""
+    """Agent A's harbor invocation must include the heretek plugin_dir and mounts."""
     proc = _run_script(
         fake_harbor_dir,
         tmp_path,
@@ -81,10 +81,11 @@ def test_agent_a_uses_heretek_plugin_dir(fake_harbor_dir: Path, tmp_path: Path) 
     call_log = (tmp_path / "harbor-calls.log").read_text()
     assert "--ak" in call_log, "agent A must pass --ak"
     assert "plugin_dir" in call_log, "agent A --ak must include plugin_dir"
+    assert "--mounts" in call_log, "agent A must pass --mounts"
 
 
 def test_agent_b_has_no_plugin_dir(fake_harbor_dir: Path, tmp_path: Path) -> None:
-    """Agent B's harbor invocation must NOT include the --ak plugin_dir kwarg."""
+    """Agent B's harbor invocation must NOT include --ak plugin_dir or --mounts."""
     proc = _run_script(
         fake_harbor_dir,
         tmp_path,
@@ -92,8 +93,9 @@ def test_agent_b_has_no_plugin_dir(fake_harbor_dir: Path, tmp_path: Path) -> Non
     )
     assert proc.returncode == 0, proc.stderr
     calls = (tmp_path / "harbor-calls.log").read_text().splitlines()
-    # Second call is agent B; it must not include --ak at all.
+    # Second call is agent B; it must not include --ak or --mounts at all.
     assert "--ak" not in calls[1], f"agent B must not pass --ak; got: {calls[1]}"
+    assert "--mounts" not in calls[1], f"agent B must not pass --mounts; got: {calls[1]}"
 
 
 def test_uses_model_from_env(fake_harbor_dir: Path, tmp_path: Path) -> None:
