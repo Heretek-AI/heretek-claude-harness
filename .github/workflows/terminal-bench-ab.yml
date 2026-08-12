@@ -43,11 +43,10 @@ jobs:
         run: "pip install uv==0.5.9 --only-binary :all:"
 
       - name: Install Harbor
-        # harbor 0.21.0 ships as a pure-Python wheel on PyPI; no source build,
-        # so no setup.py ever runs. Pin is exact. uv has no --no-build
-        # equivalent for `uv tool install`; suppress the S2648 warning
-        # locally with # nosonar.
-        run: "uv tool install harbor==0.21.0"  # nosonar — see comment above
+        # --no-build prevents uv from building source distributions if no
+        # wheel is available. harbor 0.21.0 ships as a wheel on PyPI;
+        # --no-build is the belt-and-suspenders safeguard.
+        run: "uv tool install harbor==0.21.0 --no-build"
 
       - name: Docker info (fail-fast if missing)
         run: docker info
