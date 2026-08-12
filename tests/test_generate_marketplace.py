@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-import generate_marketplace  # noqa: E402
+import generate_marketplace
 
 
 def _write(p: Path, content: str) -> None:

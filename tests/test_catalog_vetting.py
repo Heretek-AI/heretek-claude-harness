@@ -52,7 +52,6 @@ def test_rejected_items_have_no_plugin_components(catalog: dict) -> None:
     """Rejected items shouldn't pollute plugin manifests. They live in catalog.yaml items[] for audit but are not used."""
     # No-op for now: catalog.yaml items[] entries don't generate marketplace.json entries.
     # This is a structural assertion — re-evaluate when generator logic is extended.
-    pass
 
 
 def test_hooks_plugin_has_at_least_one_item(catalog: dict) -> None:

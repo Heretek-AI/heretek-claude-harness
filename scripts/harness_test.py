@@ -92,7 +92,7 @@ def _capture_git_diff(cwd: Path) -> str:
             check=False,
         )
         return diff_proc.stdout
-    except Exception as exc:  # noqa: BLE001 — best-effort capture
+    except Exception as exc:
         return f"--- git diff failed: {exc} ---\n"
 
 

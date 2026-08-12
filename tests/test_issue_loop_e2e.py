@@ -15,7 +15,6 @@ import pytest
 
 from scripts.issue_loop.branch import BranchManager
 
-
 pytestmark = pytest.mark.integration
 
 

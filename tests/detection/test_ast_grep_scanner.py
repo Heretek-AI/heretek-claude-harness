@@ -11,7 +11,6 @@ import sys
 import time
 from pathlib import Path
 
-
 import scripts.scanners.ast_grep_scanner as hook
 
 FIXTURES = Path(__file__).parent / "fixtures"

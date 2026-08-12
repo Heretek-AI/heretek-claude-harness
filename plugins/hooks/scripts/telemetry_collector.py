@@ -236,7 +236,7 @@ def main() -> int:
         return 0  # fail-open
     try:
         event = _build_event(payload)
-    except Exception as exc:  # noqa: BLE001 — fail-open
+    except Exception as exc:
         print(f"telemetry_collector: build_event failed: {exc}", file=sys.stderr)
         return 0
     emit_event(TELEMETRY_ROOT / "sessions", event)

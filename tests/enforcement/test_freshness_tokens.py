@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.freshness_tokens import render, _format_token_line
+from scripts.freshness_tokens import _format_token_line, render
 
 
 def test_render_includes_tracked_libs():

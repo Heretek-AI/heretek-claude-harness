@@ -14,7 +14,7 @@ PLUGIN_ROOT = Path(__file__).parent.parent
 SCRIPTS_DIR = PLUGIN_ROOT / "plugins" / "hooks" / "scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-import telemetry_collector  # noqa: E402
+import telemetry_collector
 
 
 def _touch_session(root: Path, day: str, session_id: str, body: str = "{}\n") -> Path:
@@ -58,7 +58,9 @@ def test_retention_sweep_archives_old_sessions(
     decompressed = zstd.ZstdDecompressor().decompress(raw)
     with tarfile.open(fileobj=io.BytesIO(decompressed), mode="r") as tar:
         names = tar.getnames()
-        extracted = tar.extractfile("session-old.jsonl").read()
+        ef = tar.extractfile("session-old.jsonl")
+        assert ef is not None
+        extracted = ef.read()
     assert "session-old.jsonl" in names
     assert extracted == b"{}\n"
 

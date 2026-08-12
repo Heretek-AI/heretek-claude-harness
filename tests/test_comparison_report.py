@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from _factories import fixture_root as fx_root
 from _factories import make_summary
 from comparison_report import (

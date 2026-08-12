@@ -6,7 +6,6 @@ from pathlib import Path
 
 import yaml
 
-
 WORKFLOW_PATH = (
     Path(__file__).resolve().parent.parent / ".github" / "workflows" / "terminal-bench-ab.yml"
 )

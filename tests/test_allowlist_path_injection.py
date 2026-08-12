@@ -16,7 +16,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-import refresh_pins  # noqa: E402
+import refresh_pins
 
 
 def test_update_shas_rejects_evil_upstream(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

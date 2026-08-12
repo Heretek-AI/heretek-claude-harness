@@ -16,8 +16,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from scripts import refresh_pins, security_scan  # noqa: E402
-
+from scripts import refresh_pins, security_scan
 
 # ── Item 1: refresh_pins uses HEAD, not release SHA ─────────────────────────
 

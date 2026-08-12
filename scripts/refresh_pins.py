@@ -23,7 +23,7 @@ import datetime as dt
 import os
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -50,7 +50,7 @@ def _days_since(date_val) -> int:
     return (dt.date.today() - d).days
 
 
-def _github_get(path: str, gh_token: Optional[str]) -> dict:
+def _github_get(path: str, gh_token: str | None) -> dict:
     """Single GET against the GitHub API. Returns {} on any error (network, 404, rate limit).
 
     Override this in tests for hermetic execution.
@@ -71,8 +71,8 @@ def _github_get(path: str, gh_token: Optional[str]) -> dict:
 
 
 def _get_latest_release_sha(
-    upstream: str, *, gh_token: Optional[str]
-) -> tuple[Optional[str], Optional[str]]:
+    upstream: str, *, gh_token: str | None
+) -> tuple[str | None, str | None]:
     """Return (sha, tag) of upstream's latest release, or (None, None)."""
     data = _github_get(f"/repos/{upstream}/releases/latest", gh_token)
     if not data:
@@ -80,7 +80,7 @@ def _get_latest_release_sha(
     return data.get("target_commitish"), data.get("tag_name")
 
 
-def _check_vetting_date(item: dict, details: dict) -> Optional[str]:
+def _check_vetting_date(item: dict, details: dict) -> str | None:
     """Return 'stale_commit' if vetting.date is older than the window."""
     vetting = item.get("vetting") or {}
     vetting_date = vetting.get("date")
@@ -92,7 +92,7 @@ def _check_vetting_date(item: dict, details: dict) -> Optional[str]:
     return None
 
 
-def _check_stars(repo_data: dict, details: dict) -> Optional[str]:
+def _check_stars(repo_data: dict, details: dict) -> str | None:
     """Return 'stale_stars' if stars < 500."""
     stars = repo_data.get("stargazers_count", 0)
     if stars < 500:
@@ -101,7 +101,7 @@ def _check_stars(repo_data: dict, details: dict) -> Optional[str]:
     return None
 
 
-def _check_license(item: dict, repo_data: dict, details: dict) -> Optional[str]:
+def _check_license(item: dict, repo_data: dict, details: dict) -> str | None:
     """Return 'license_drift' if upstream SPDX doesn't match catalog license."""
     spdx = (repo_data.get("license") or {}).get("spdx_id") or "NOASSERTION"
     catalog_license = (item.get("license") or "").upper()
@@ -113,7 +113,7 @@ def _check_license(item: dict, repo_data: dict, details: dict) -> Optional[str]:
     return None
 
 
-def _check_cves(upstream: str, gh_token: Optional[str], details: dict) -> Optional[str]:
+def _check_cves(upstream: str, gh_token: str | None, details: dict) -> str | None:
     """Return 'cve_alert' if any CRITICAL-severity advisory exists upstream."""
     advisories = _github_get(f"/repos/{upstream}/security-advisories", gh_token)
     critical = [a for a in advisories if (a.get("severity") or "").upper() == "CRITICAL"]
@@ -123,7 +123,7 @@ def _check_cves(upstream: str, gh_token: Optional[str], details: dict) -> Option
     return None
 
 
-def check_item(item: dict, *, gh_token: Optional[str]) -> tuple[str, dict]:
+def check_item(item: dict, *, gh_token: str | None) -> tuple[str, dict]:
     """Return (status, details). status in {ok, skipped, stale_stars, stale_commit, license_drift, cve_alert}."""
     details: dict[str, Any] = {"id": item.get("id"), "upstream": item.get("upstream")}
 
@@ -167,9 +167,7 @@ def _safe_load_catalog(catalog_path: Path) -> dict:
     return yaml.safe_load(catalog_path.resolve().read_text())
 
 
-def check_catalog(
-    catalog_path: Path, *, gh_token: Optional[str]
-) -> list[tuple[str, Path, str, dict]]:
+def check_catalog(catalog_path: Path, *, gh_token: str | None) -> list[tuple[str, Path, str, dict]]:
     catalog = _safe_load_catalog(catalog_path)
     results: list[tuple[str, Path, str, dict]] = []
     for plugin in catalog.get("plugins", []):
@@ -190,7 +188,7 @@ def bump_sha(item: dict, new_sha: str) -> dict:
     return out
 
 
-def _resolve_new_sha(item: dict, gh_token: Optional[str]) -> Optional[str]:
+def _resolve_new_sha(item: dict, gh_token: str | None) -> str | None:
     """Return the latest upstream release SHA, or None if this item should be skipped.
 
     Skips items with missing upstream, missing sha, or first-party sha.
@@ -212,7 +210,7 @@ def _resolve_new_sha(item: dict, gh_token: Optional[str]) -> Optional[str]:
     return new_sha
 
 
-def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[str, str, str]]:
+def update_shas(catalog_path: Path, *, gh_token: str | None) -> list[tuple[str, str, str]]:
     """Re-fetch upstream HEAD SHA per item and write it back to catalog_path.
 
     Round-trips via ruamel.yaml to preserve comments (the catalog is hand-edited).
@@ -246,7 +244,7 @@ def update_shas(catalog_path: Path, *, gh_token: Optional[str]) -> list[tuple[st
     return updates
 
 
-def main(argv: Optional[list[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     parser.add_argument(
@@ -267,9 +265,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     print("-" * 100)
     for status, path, item_id, details in results:
         detail_str = details.get("reason", "")
-        if status == "ok":
-            pass
-        elif status == "skipped":
+        if status == "ok" or status == "skipped":
             pass
         else:
             rc = 1

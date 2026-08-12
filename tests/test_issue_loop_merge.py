@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+
 from scripts.issue_loop.merge import Merger
 
 

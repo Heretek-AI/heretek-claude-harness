@@ -12,7 +12,7 @@ import pytest
 PLUGIN_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PLUGIN_ROOT / "scripts"))
 
-import heretek_cli as cli  # noqa: E402
+import heretek_cli as cli
 
 
 @pytest.fixture
@@ -143,12 +143,23 @@ def test_diff_reports_each_missing_session_individually(
 
 def test_show_session_help_mentions_substring_match() -> None:
     """--session help text documents substring match behavior."""
+    import argparse
+
     parser = cli.build_parser()
-    # Find the --session argument on the 'show' subcommand
-    show_parser = parser._subparsers._group_actions[0].choices["telemetry"]
-    show_sub = show_parser._subparsers._group_actions[0].choices["show"]
+    subparsers_action = next(
+        a for a in parser._actions if isinstance(a, argparse._SubParsersAction)
+    )
+    choices = getattr(subparsers_action, "choices", {})
+    show_parser = choices.get("telemetry")
+    assert show_parser is not None
+    telemetry_subparsers = next(
+        a for a in show_parser._actions if isinstance(a, argparse._SubParsersAction)
+    )
+    telemetry_choices = getattr(telemetry_subparsers, "choices", {})
+    show_sub = telemetry_choices.get("show")
+    assert show_sub is not None
     for action in show_sub._actions:
-        if action.dest == "session":
+        if action.dest == "session" and action.help:
             assert "substring match" in action.help
             assert "2026-08-08" in action.help
             return

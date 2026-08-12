@@ -12,9 +12,8 @@ import json
 import sys
 from pathlib import Path
 
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-import plugins.hooks.scripts.stale_dep_intercept as hook  # noqa: E402
+import plugins.hooks.scripts.stale_dep_intercept as hook
 
 
 def _build_payload(tool_name: str, file_path: str, content: str) -> dict:

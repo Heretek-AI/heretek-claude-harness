@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from scripts.issue_loop.ledger import IssueRef, Ledger
 
 
@@ -24,7 +25,8 @@ def test_select_next_returns_lowest_open(tmp_ledger: Path) -> None:
         IssueRef(number=158, title="y", files=[]),
         IssueRef(number=159, title="z", files=[]),
     ]
-    assert Ledger(tmp_ledger).select_next(candidates).number == 158
+    res1 = Ledger(tmp_ledger).select_next(candidates)
+    assert res1 is not None and res1.number == 158
 
 
 def test_select_next_skips_already_merged(tmp_ledger: Path) -> None:
@@ -34,7 +36,8 @@ def test_select_next_skips_already_merged(tmp_ledger: Path) -> None:
         IssueRef(number=158, title="x", files=[]),
         IssueRef(number=159, title="y", files=[]),
     ]
-    assert ledger.select_next(candidates).number == 159
+    res2 = ledger.select_next(candidates)
+    assert res2 is not None and res2.number == 159
 
 
 def test_select_next_skips_three_time_failure(tmp_ledger: Path) -> None:

@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+
 from scripts.issue_loop.branch import BranchManager
 from scripts.issue_loop.driver import IssueLoop
 from scripts.issue_loop.gate import GatePoller, GateVerdict

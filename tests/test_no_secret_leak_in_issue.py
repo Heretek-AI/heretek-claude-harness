@@ -9,7 +9,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from comparison_report import (
     compute_diff,
     load_summary,

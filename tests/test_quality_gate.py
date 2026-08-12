@@ -8,7 +8,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "plugins" / "hooks" / "scripts"))
-import quality_gate  # noqa: E402
+import quality_gate
 
 
 def test_parse_scope_repo() -> None:

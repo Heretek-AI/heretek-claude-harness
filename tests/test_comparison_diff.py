@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from _factories import fixture_root, make_summary
 from comparison_report import compute_diff, load_summary
 

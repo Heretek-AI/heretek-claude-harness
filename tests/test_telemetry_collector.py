@@ -14,7 +14,7 @@ import pytest
 PLUGIN_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PLUGIN_ROOT))
 
-from plugins.hooks.scripts import telemetry_collector as tc  # noqa: E402
+from plugins.hooks.scripts import telemetry_collector as tc
 
 
 @pytest.fixture

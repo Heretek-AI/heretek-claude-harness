@@ -9,7 +9,6 @@ import pytest
 
 from scripts.catalog_updater import bump_item_sha
 
-
 SAMPLE = """# heretek marketplace — source of truth.
 # Generated from this file by scripts/generate_marketplace.py; do NOT
 # hand-edit .claude-plugin/marketplace.json (it's regenerated).

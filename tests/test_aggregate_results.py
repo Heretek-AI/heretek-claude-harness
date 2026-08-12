@@ -6,7 +6,8 @@ import json
 from pathlib import Path
 
 from aggregate_results import aggregate_jobs_dir
-from tests._factories import write_trial as _write_trial  # noqa: F401
+
+from tests._factories import write_trial as _write_trial
 
 
 def _make_jobs_dir(tmp_path: Path) -> Path:

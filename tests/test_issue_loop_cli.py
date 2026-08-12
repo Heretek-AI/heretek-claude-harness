@@ -7,13 +7,12 @@ Each subcommand wraps an existing Ledger method. The cli module exposes
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import pytest
 
 from scripts.issue_loop import cli
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -26,7 +25,7 @@ def ledger_path(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def fake_gh() -> Callable[..., "FakeGH"]:
+def fake_gh() -> Callable[..., FakeGH]:
     return FakeGH
 
 
@@ -42,7 +41,7 @@ class FakeGH:
         self.calls: list[list[str]] = []
         self.raise_on_call: bool = False
 
-    def __call__(self, args: list[str], **_kwargs) -> "FakeGH":
+    def __call__(self, args: list[str], **_kwargs) -> FakeGH:
         self.calls.append(args)
         if self.raise_on_call:
             raise RuntimeError("fake gh failure")
@@ -536,8 +535,8 @@ class _Captured:
 
 def _capture_main(argv: list[str], gh_runner: FakeGH | None = None) -> _Captured:
     """Run cli.main with patched stdout and capture return + output."""
-    import io
     import contextlib
+    import io
 
     buf = io.StringIO()
     try:

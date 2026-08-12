@@ -9,7 +9,7 @@ import pytest
 # Make scripts/ importable as a package.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-import validate  # noqa: E402
+import validate
 
 
 def _write(p: Path, payload: dict | list) -> None:

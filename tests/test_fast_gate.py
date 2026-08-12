@@ -9,8 +9,7 @@ import pytest
 
 # Import the dispatcher as a module.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "plugins" / "hooks" / "scripts"))
-import fast_gate  # noqa: E402
-
+import fast_gate
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "fast_gate"
 

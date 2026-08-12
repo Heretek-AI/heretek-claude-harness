@@ -5,7 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 FIXTURES = Path(__file__).parent / "fixtures"
 SCANNER = Path("plugins/hooks/scripts/forbidden_pattern_scanner.py")
 

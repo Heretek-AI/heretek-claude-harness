@@ -120,11 +120,11 @@ def scan_skill(path: Path, *, item_id: str) -> ScannerReport:
     if not findings:
         severity: Severity = "clean"
     else:
-        worst = max(
+        worst_severity: Severity = max(
             (_map_severity(f.get("severity", "warn")) for f in raw_findings),
             key=lambda s: ["clean", "info", "warn", "block"].index(s),
         )
-        severity = worst
+        severity = worst_severity
 
     return ScannerReport(
         item_id=item_id,

@@ -14,7 +14,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from scripts import security_scan  # noqa: E402
+from scripts import security_scan
 
 
 def test_shallow_clone_rejects_evil_upstream(tmp_path: Path) -> None:

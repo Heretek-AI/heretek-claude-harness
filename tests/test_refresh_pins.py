@@ -10,7 +10,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-import refresh_pins  # noqa: E402
+import refresh_pins
 
 FIXTURE = REPO_ROOT / "tests" / "fixtures" / "refresh_pins" / "sample_catalog.yaml"
 

@@ -8,18 +8,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from scripts.issue_loop.gate import GatePoller, GateVerdict
+from scripts.issue_loop.gate import GatePoller, GateVerdict, Status
 
 
 @dataclass
 class FakeGitHub:
-    ci: str = "green"
-    copilot: str = "approved"
-    sonar: str = "passed"
-    cr: str = "approved"
+    ci: Status = "green"
+    copilot: Status = "approved"
+    sonar: Status = "passed"
+    cr: Status = "approved"
+
+    def __call__(self) -> GateVerdict:
+        return GateVerdict(
+            ci=self.ci, copilot=self.copilot, sonar=self.sonar, code_reviewer=self.cr
+        )
 
     @property
-    def code_reviewer(self) -> str:
+    def code_reviewer(self) -> Status:
         return self.cr
 
     @property
@@ -48,7 +53,7 @@ def test_gate_poller_returns_verdict_on_first_pass() -> None:
         github_token="x",
         repo="o/r",
         pr_number=1,
-        fetcher=lambda: fake,
+        fetcher=fake,
         sleep=lambda s: None,
     )
     v = poller.wait(timeout_s=10)
@@ -61,7 +66,7 @@ def test_gate_poller_times_out_to_red() -> None:
         github_token="x",
         repo="o/r",
         pr_number=1,
-        fetcher=lambda: fake,
+        fetcher=fake,
         sleep=lambda s: None,
     )
     v = poller.wait(timeout_s=0)

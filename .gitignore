@@ -44,6 +44,9 @@ reports/
 # additions from `freshness_index` runs, not the committed fixtures.
 catalog/freshness/*.yaml
 
+# Benchmark results
+terminal-bench-ab-results/
+
 # Editor / OS
 .DS_Store
 *.swp

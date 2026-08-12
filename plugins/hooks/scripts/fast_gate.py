@@ -21,7 +21,6 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 # Map of file extension -> (binary name, argv template)
 # `{}` is replaced with the file path.
@@ -72,7 +71,7 @@ def parse_payload(payload_text: str) -> dict:
     return {"tool_name": payload.get("tool_name", "?"), "file_path": file_path}
 
 
-def _resolve_binary(preferred: str) -> Optional[str]:
+def _resolve_binary(preferred: str) -> str | None:
     """Find the binary on PATH.
 
     Test override: callers (e.g. ``tests/test_fast_gate.py``) may set

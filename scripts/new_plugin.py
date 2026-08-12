@@ -15,8 +15,8 @@ import argparse
 import json
 import re
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_NAME_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")

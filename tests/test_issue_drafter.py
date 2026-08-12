@@ -53,7 +53,7 @@ def test_drafts_issue_and_pr_when_clean(
         new_sha="0" * 40,
     )
     assert "issue/1" in issue_url
-    assert "pr/2" in pr_url
+    assert pr_url is not None and "pr/2" in pr_url
     assert mock_post.call_count == 3
 
 

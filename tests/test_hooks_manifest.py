@@ -8,8 +8,7 @@ import jsonschema
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
-import validate  # noqa: E402
-
+import validate
 
 HOOKS_JSON = REPO_ROOT / "plugins" / "hooks" / "hooks" / "hooks.json"
 

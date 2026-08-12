@@ -15,7 +15,7 @@ from pathlib import Path
 PLUGIN_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PLUGIN_ROOT / "scripts"))
 
-import harness_test as ht  # noqa: E402
+import harness_test as ht
 
 
 def test_compute_sha256_deterministic() -> None:

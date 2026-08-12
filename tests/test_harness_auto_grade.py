@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from harness_auto_grade import auto_grade, compute_sha256
 
 

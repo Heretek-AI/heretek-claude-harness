@@ -10,7 +10,6 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Optional
 
 import requests
 
@@ -40,7 +39,7 @@ def _tarball_candidate(path: Path) -> Path | None:
     return None
 
 
-def _vt_lookup(file_sha256: str, *, token: Optional[str]) -> ScannerReport:
+def _vt_lookup(file_sha256: str, *, token: str | None) -> ScannerReport:
     """VirusTotal v3 lookup by file SHA-256. Soft-fails if no record."""
     if not token:
         return ScannerReport(
@@ -132,7 +131,7 @@ def _vt_lookup(file_sha256: str, *, token: Optional[str]) -> ScannerReport:
     )
 
 
-def scan_mcp(path: Path, *, item_id: str, vt_token: Optional[str] = None) -> ScannerReport:
+def scan_mcp(path: Path, *, item_id: str, vt_token: str | None = None) -> ScannerReport:
     """Run SkillSpector on content + VirusTotal on the tarball candidate."""
     skill_report = scan_skill(path, item_id=item_id)
 

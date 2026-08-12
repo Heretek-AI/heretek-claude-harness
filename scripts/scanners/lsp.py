@@ -20,7 +20,6 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Optional
 
 from .base import Finding, ScannerReport, Severity
 
@@ -45,7 +44,7 @@ ALLOWLIST = frozenset(
 GITHUB_COMMIT_RE = re.compile(r"^https?://github\.com/[\w.-]+/[\w.-]+/commit/([0-9a-f]{40})/?$")
 
 
-def _find_config(path: Path) -> Optional[Path]:
+def _find_config(path: Path) -> Path | None:
     """Find the LSP config JSON inside `path`."""
     candidates = [path / ".lsp.json", path / "lsp.json"]
     for c in candidates:
@@ -112,7 +111,7 @@ def _invalid_json_report(
 
 def _check_command(
     item_id: str, rel_cfg: str, command: object
-) -> tuple[Optional[ScannerReport], list[Finding]]:
+) -> tuple[ScannerReport | None, list[Finding]]:
     """Validate cfg['command'] is a string on ALLOWLIST. Returns (block_report, findings)."""
     if not isinstance(command, str):
         block = _block_invalid(
@@ -137,8 +136,8 @@ def _check_command(
 
 
 def _check_urls(
-    item_id: str, rel_cfg: str, cfg: dict, pinned_sha: Optional[str]
-) -> tuple[Optional[ScannerReport], list[Finding]]:
+    item_id: str, rel_cfg: str, cfg: dict, pinned_sha: str | None
+) -> tuple[ScannerReport | None, list[Finding]]:
     """Validate cfg['rootUri'] / cfg['url'] (or skip). Returns (block_report, findings)."""
     findings: list[Finding] = []
     for url_field in ("rootUri", "url"):
@@ -180,7 +179,7 @@ def _compute_severity(findings: list[Finding]) -> Severity:
     return "clean" if not findings else _severity_from_findings(findings)
 
 
-def scan_lsp(path: Path, *, item_id: str, pinned_sha: Optional[str] = None) -> ScannerReport:
+def scan_lsp(path: Path, *, item_id: str, pinned_sha: str | None = None) -> ScannerReport:
     """Lint the LSP config in `path`. Returns a ScannerReport."""
     findings: list[Finding] = []
 

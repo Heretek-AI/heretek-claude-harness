@@ -8,7 +8,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
-import new_plugin  # noqa: E402
+import new_plugin
 
 
 def test_scaffold_creates_plugin_dir(tmp_path: Path) -> None:

@@ -15,7 +15,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-import plugins.hooks.scripts.drift_detector as hook  # noqa: E402
+import plugins.hooks.scripts.drift_detector as hook
 
 
 def _build_payload(
@@ -96,6 +96,7 @@ def test_drift_detector_warns_on_monotonic_growth(monkeypatch, tmp_path, capsys)
     # file length so the diff between new_string and old_string is exactly `d`.
     diffs = [1, 2, 3, 4, 5]
     total = 0
+    out: dict = {}
     for d in diffs:
         old = "x" * total
         new = "x" * (total + d)
@@ -118,6 +119,7 @@ def test_drift_detector_no_monotonicity_warning_on_steady_growth(monkeypatch, tm
     target.write_text("")
 
     # Use 3 edits (the minimum to evaluate monotonicity) with constant diff_size.
+    out: dict = {}
     for i in range(3):
         old = "x" * i
         new = "x" * (i + 1)  # diff_size = 1 every time
@@ -327,6 +329,7 @@ def test_drift_detector_rejects_session_state_env_var_traversal(monkeypatch):
     """#160: HERETEK_SESSION_STATE_DIR pointing outside safe root must raise."""
     monkeypatch.setenv("HERETEK_SESSION_STATE_DIR", "/tmp/evil")
     import importlib
+
     import plugins.hooks.scripts.drift_detector as hook
 
     with pytest.raises(ValueError, match="escapes safe root"):
@@ -336,6 +339,7 @@ def test_drift_detector_rejects_session_state_env_var_traversal(monkeypatch):
 def test_drift_detector_accepts_session_state_env_var_inside_safe_root(monkeypatch):
     """#160: env var pointing inside Path.cwd() / '.heretek' must be accepted."""
     import importlib
+
     import plugins.hooks.scripts.drift_detector as hook
 
     safe_child = (Path.cwd() / ".heretek" / "sub").resolve()
@@ -347,6 +351,7 @@ def test_drift_detector_accepts_session_state_env_var_inside_safe_root(monkeypat
 def test_drift_detector_default_session_state_dir_when_env_unset(monkeypatch):
     """#160 (happy path): unset env var falls back to Path.cwd() / '.heretek' / 'session_state'."""
     import importlib
+
     import plugins.hooks.scripts.drift_detector as hook
 
     monkeypatch.delenv("HERETEK_SESSION_STATE_DIR", raising=False)

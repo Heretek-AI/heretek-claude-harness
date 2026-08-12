@@ -91,7 +91,8 @@ def cmd_telemetry_diff(args: argparse.Namespace) -> int:
     counts_a = Counter(e.get("hook_decision") for e in events_a)
     counts_b = Counter(e.get("hook_decision") for e in events_b)
     print(f"{'decision':<10} {'A':>5} {'B':>5} {'delta':>7}")
-    for key in sorted(set(counts_a) | set(counts_b)):
+    decisions = [str(k) for k in (set(counts_a) | set(counts_b)) if k is not None]
+    for key in sorted(decisions):
         a, b = counts_a.get(key, 0), counts_b.get(key, 0)
         print(f"{key:<10} {a:>5} {b:>5} {b - a:>+7}")
     return 0

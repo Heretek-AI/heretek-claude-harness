@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Optional
 
 import requests
 
@@ -28,7 +27,7 @@ def _gh_headers(token: str) -> dict:
     }
 
 
-def _search_existing_issue(*, token: str, repo: str, title: str) -> Optional[str]:
+def _search_existing_issue(*, token: str, repo: str, title: str) -> str | None:
     """Return existing issue html_url if an open issue with this title exists."""
     r = requests.get(
         f"{GITHUB_API}/search/issues",
@@ -117,7 +116,7 @@ def draft_issue_and_pr(
     item: str,
     new_sha: str,
     base_branch: str = "main",
-) -> tuple[str, Optional[str]]:
+) -> tuple[str, str | None]:
     """Open tracking issue (or update existing) and draft a SHA-bump PR.
 
     Returns (issue_url, pr_url_or_None).

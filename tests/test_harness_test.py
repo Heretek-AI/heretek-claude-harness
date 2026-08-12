@@ -14,7 +14,7 @@ from unittest.mock import patch
 PLUGIN_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PLUGIN_ROOT / "scripts"))
 
-from harness_test import run_fixture  # noqa: E402
+from harness_test import run_fixture
 
 
 def test_run_fixture_meta_meta_produces_artifact_bundle(tmp_path: Path) -> None:

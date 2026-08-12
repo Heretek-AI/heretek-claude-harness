@@ -6,10 +6,10 @@ from pathlib import Path
 import pytest
 
 from scripts.model_profile_loader import (
-    load_profile,
-    list_known_profiles,
-    resolve_active_model_id,
     apply_profile_to_pattern,
+    list_known_profiles,
+    load_profile,
+    resolve_active_model_id,
 )
 
 

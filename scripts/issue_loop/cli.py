@@ -17,7 +17,6 @@ from pathlib import Path
 
 from .ledger import IssueRef, Ledger
 
-
 DEFAULT_LEDGER_PATH = Path(".omc/state/issue-loop/ledger.json")
 DEFAULT_LABELS: list[str] = []  # empty = all open issues (see ADR 2026-08-09 widening)
 GH_TIMEOUT_S = 30

@@ -23,10 +23,9 @@ import sys
 import tempfile
 from datetime import date
 from pathlib import Path
-from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from scripts._allowlist import (  # noqa: E402,I001
+from scripts._allowlist import (  # noqa: I001
     require_id_segment,
     require_ref_segment,
     require_sha,
@@ -43,7 +42,7 @@ from scripts.scanners.base import Finding, ScannerReport
 from scripts.scanners.lsp import scan_lsp
 from scripts.scanners.mcp import scan_mcp
 from scripts.scanners.skills import scan_skill
-from scripts.suppression import load_suppressions  # noqa: F401
+from scripts.suppression import load_suppressions
 
 log = logging.getLogger(__name__)
 
@@ -65,8 +64,8 @@ _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 def _get_latest_release_sha(
-    upstream: str, *, gh_token: Optional[str]
-) -> tuple[Optional[str], Optional[str]]:
+    upstream: str, *, gh_token: str | None
+) -> tuple[str | None, str | None]:
     """Return (sha, tag) of the latest upstream release, or (None, None).
 
     Resolves branch-name `target_commitish` to a commit SHA via the
@@ -133,7 +132,7 @@ def _shallow_clone(upstream: str, sha: str, target: Path) -> None:
     )
 
 
-def _dispatch_scanner(item: dict, path: Path, *, vt_token: Optional[str]) -> ScannerReport:
+def _dispatch_scanner(item: dict, path: Path, *, vt_token: str | None) -> ScannerReport:
     kind = item.get("kind")
     item_id = item.get("id", path.name)
     if kind == "skill":
@@ -261,7 +260,7 @@ def _commit_catalog_bump(
     return branch
 
 
-def _setup_state(state_dir: Optional[Path]) -> tuple[Optional[Path], set[str]]:
+def _setup_state(state_dir: Path | None) -> tuple[Path | None, set[str]]:
     """Initialize the checkpoint state file for resumption.
 
     Returns (state_file, done_items). state_file is None when checkpointing
@@ -274,7 +273,7 @@ def _setup_state(state_dir: Optional[Path]) -> tuple[Optional[Path], set[str]]:
     return state_file, _load_done_items(state_file)
 
 
-def _should_skip_item(item: dict, composite_id: str, done_items: set[str]) -> Optional[str]:
+def _should_skip_item(item: dict, composite_id: str, done_items: set[str]) -> str | None:
     """Return a skip-reason string if this item should be skipped, else None.
 
     Skips: first-party items, malformed upstream, items already in checkpoint.
@@ -290,9 +289,7 @@ def _should_skip_item(item: dict, composite_id: str, done_items: set[str]) -> Op
     return None
 
 
-def _vt_cap_state(
-    vt_calls: int, vt_cap: int, vt_token: Optional[str]
-) -> tuple[Optional[str], bool]:
+def _vt_cap_state(vt_calls: int, vt_cap: int, vt_token: str | None) -> tuple[str | None, bool]:
     """Honour the per-run VT cap. Returns (effective_vt, cap_hit).
 
     Above the cap we pass vt_token=None so scan_mcp soft-fails via its
@@ -314,11 +311,11 @@ def _scan_and_persist(
     latest_sha: str,
     scratch: Path,
     output_dir: Path,
-    effective_vt: Optional[str],
+    effective_vt: str | None,
     suppressions: set[tuple[str, str]],
-    state_file: Optional[Path],
+    state_file: Path | None,
     done_items: set[str],
-) -> tuple[Optional[ScannerReport], Optional[str]]:
+) -> tuple[ScannerReport | None, str | None]:
     """Clone, dispatch, apply suppressions, write report, checkpoint.
 
     Returns (report, error_msg). report is None iff error_msg is set.
@@ -350,11 +347,11 @@ def _bump_and_draft_pr(
     item_id: str,
     composite_id: str,
     latest_sha: str,
-    gh_token: Optional[str],
+    gh_token: str | None,
     dry_run: bool,
     repo_root: Path,
     catalog_path: Path,
-) -> Optional[str]:
+) -> str | None:
     """Bump catalog.yaml on a branch + draft a tracking issue/PR.
 
     Returns an error message string on failure, None on success.
@@ -401,14 +398,14 @@ def run(
     catalog_path: Path,
     output_dir: Path,
     *,
-    gh_token: Optional[str] = None,
-    vt_token: Optional[str] = None,
+    gh_token: str | None = None,
+    vt_token: str | None = None,
     dry_run: bool = False,
-    item_filter: Optional[str] = None,
-    repo_root: Optional[Path] = None,
-    vt_cap: Optional[int] = None,
-    reviews_dir: Optional[Path] = None,
-    state_dir: Optional[Path] = None,
+    item_filter: str | None = None,
+    repo_root: Path | None = None,
+    vt_cap: int | None = None,
+    reviews_dir: Path | None = None,
+    state_dir: Path | None = None,
 ) -> ScanSummary:
     """Run the full scan. Emit per-item JSON reports under output_dir.
 
@@ -484,7 +481,7 @@ def run(
                 state_file=state_file,
                 done_items=done_items,
             )
-            if scan_err:
+            if scan_err or report is None:
                 error_count += 1
                 continue
             report_count += 1

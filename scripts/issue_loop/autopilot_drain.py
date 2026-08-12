@@ -63,8 +63,8 @@ def run_cli(*args: str) -> subprocess.CompletedProcess:
 def classify_fixture(fix: dict) -> str:
     """Inject fixture body via a fake-gh runner is overkill for smoke; instead
     use the classifier directly and verify against expected_path."""
-    from scripts.issue_loop.ledger import IssueRef
     from scripts.issue_loop.classifier import classify
+    from scripts.issue_loop.ledger import IssueRef
 
     issue = IssueRef(number=fix["number"], title=fix["title"], files=[])
     actual = classify(issue, body=fix["body"])
