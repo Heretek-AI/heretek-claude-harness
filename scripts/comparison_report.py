@@ -114,6 +114,102 @@ def _fmt_signed(value: float, suffix: str = "") -> str:
     return text if value >= 0 else f"-{text}"
 
 
+def _render_header(meta: dict, n_tasks: int) -> list[str]:
+    n = n_tasks
+    return [
+        f"# Terminal-Bench A/B — `{meta['commit_sha_short']}`",
+        "",
+        f"**Trigger:** `{meta['trigger']}`",
+        f"**Actor:** {meta['actor']}",
+        f"**Tier:** `{meta['tier']}` ({n} task{'s' if n != 1 else ''})",
+        f"**Model:** `{meta['model']}` (via `{meta['base_url']}`)",
+        "",
+    ]
+
+
+def _render_headline_rows(a: Summary, b: Summary) -> list[str]:
+    return [
+        "## Headline",
+        "",
+        "| Agent | Pass rate | Passed | Failed | Wall-clock | Tokens |",
+        "|---|---|---|---|---|---|",
+        (
+            f"| **A — with heretek** | {_fmt_pct(a.pass_rate)} | {a.passed}/{a.n_tasks} "
+            f"| {a.failed}/{a.n_tasks} | {a.wall_clock_sec_total}s | {a.tokens_total:,} |"
+        ),
+        (
+            f"| **B — baseline** | {_fmt_pct(b.pass_rate)} | {b.passed}/{b.n_tasks} "
+            f"| {b.failed}/{b.n_tasks} | {b.wall_clock_sec_total}s | {b.tokens_total:,} |"
+        ),
+    ]
+
+
+def _signed(value: float, suffix: str) -> str:
+    text = _fmt_signed(value, suffix)
+    return f"+{text}" if not text.startswith("-") else text
+
+
+def _render_delta_row(diff: dict) -> list[str]:
+    return [
+        (
+            f"| **Δ** | **{_signed(diff['delta_pass_rate'] * 100, '%')}** "
+            f"| **{_signed(diff['delta_passed'], '')}** "
+            f"| — | **{_signed(diff['wall_clock_delta_sec'], 's')}** "
+            f"| **{_signed(diff['tokens_delta'], '')}** |"
+        ),
+    ]
+
+
+def _format_task_cell(task: PerTaskResult | None) -> str:
+    if task is None:
+        return "—"
+    mark = "✓" if task.verdict == "pass" else "✗"
+    return f"{mark} ({task.wall_clock_sec}s)"
+
+
+def _note_for(a_pass: bool, b_pass: bool) -> str:
+    if a_pass and b_pass:
+        return "both"
+    if a_pass:
+        return "A wins"
+    if b_pass:
+        return "B wins"
+    return "both fail"
+
+
+def _render_per_task_table(a: Summary, b: Summary) -> list[str]:
+    a_by_id = {t.task_id: t for t in a.per_task}
+    b_by_id = {t.task_id: t for t in b.per_task}
+    all_ids = sorted(set(a_by_id) | set(b_by_id))
+    out = [
+        "## Per-task",
+        "",
+        "| Task | A | B | Notes |",
+        "|---|---|---|---|",
+    ]
+    for tid in all_ids:
+        a_task = a_by_id.get(tid)
+        b_task = b_by_id.get(tid)
+        a_pass = a_task is not None and a_task.verdict == "pass"
+        b_pass = b_task is not None and b_task.verdict == "pass"
+        out.append(
+            f"| {tid} | {_format_task_cell(a_task)} "
+            f"| {_format_task_cell(b_task)} | {_note_for(a_pass, b_pass)} |"
+        )
+    return out
+
+
+def _render_list_section(title: str, items: list, verb: str) -> list[str]:
+    out = [title, ""]
+    if items:
+        for tid in items:
+            out.append(f"- `{tid}` ({verb})")
+    else:
+        out.append("(none)")
+    out.append("")
+    return out
+
+
 def render_markdown(
     a: Summary,
     b: Summary,
@@ -122,92 +218,26 @@ def render_markdown(
 ) -> str:
     """Render the comparison Markdown body for the GitHub issue."""
     lines: list[str] = []
-    lines.append(f"# Terminal-Bench A/B — `{meta['commit_sha_short']}`")
+    lines.extend(_render_header(meta, a.n_tasks))
+    lines.extend(_render_headline_rows(a, b))
+    lines.extend(_render_delta_row(diff))
     lines.append("")
-    lines.append(f"**Trigger:** `{meta['trigger']}`")
-    lines.append(f"**Actor:** {meta['actor']}")
-    n = a.n_tasks
-    lines.append(f"**Tier:** `{meta['tier']}` ({n} task{'s' if n != 1 else ''})")
-    lines.append(f"**Model:** `{meta['model']}` (via `{meta['base_url']}`)")
+    lines.extend(_render_per_task_table(a, b))
     lines.append("")
-    lines.append("## Headline")
-    lines.append("")
-    lines.append("| Agent | Pass rate | Passed | Failed | Wall-clock | Tokens |")
-    lines.append("|---|---|---|---|---|---|")
-    lines.append(
-        f"| **A — with heretek** | {_fmt_pct(a.pass_rate)} | {a.passed}/{a.n_tasks} "
-        f"| {a.failed}/{a.n_tasks} | {a.wall_clock_sec_total}s | {a.tokens_total:,} |"
-    )
-    lines.append(
-        f"| **B — baseline** | {_fmt_pct(b.pass_rate)} | {b.passed}/{b.n_tasks} "
-        f"| {b.failed}/{b.n_tasks} | {b.wall_clock_sec_total}s | {b.tokens_total:,} |"
-    )
-    sign_pct = _fmt_signed(diff["delta_pass_rate"] * 100, "%")
-    sign_pct = f"+{sign_pct}" if not sign_pct.startswith("-") else sign_pct
-    sign_passed = _fmt_signed(diff["delta_passed"])
-    sign_passed = f"+{sign_passed}" if not sign_passed.startswith("-") else sign_passed
-    sign_wall = _fmt_signed(diff["wall_clock_delta_sec"], "s")
-    sign_wall = f"+{sign_wall}" if not sign_wall.startswith("-") else sign_wall
-    sign_tokens = _fmt_signed(diff["tokens_delta"])
-    sign_tokens = f"+{sign_tokens}" if not sign_tokens.startswith("-") else sign_tokens
-    lines.append(
-        f"| **Δ** | **{sign_pct}** | **{sign_passed}** | — | **{sign_wall}** | **{sign_tokens}** |"
-    )
-    lines.append("")
-    lines.append("## Per-task")
-    lines.append("")
-    lines.append("| Task | A | B | Notes |")
-    lines.append("|---|---|---|---|")
-    a_by_id = {t.task_id: t for t in a.per_task}
-    b_by_id = {t.task_id: t for t in b.per_task}
-    all_ids = sorted(set(a_by_id) | set(b_by_id))
-    for tid in all_ids:
-        a_task = a_by_id.get(tid)
-        b_task = b_by_id.get(tid)
-        a_str = (
-            f"✓ ({a_task.wall_clock_sec}s)"
-            if a_task and a_task.verdict == "pass"
-            else f"✗ ({a_task.wall_clock_sec}s)"
-            if a_task
-            else "—"
+    lines.extend(
+        _render_list_section(
+            "## Tasks where heretek helped",
+            diff["tasks_agent_a_passed_b_failed"],
+            "A pass, B fail",
         )
-        b_str = (
-            f"✓ ({b_task.wall_clock_sec}s)"
-            if b_task and b_task.verdict == "pass"
-            else f"✗ ({b_task.wall_clock_sec}s)"
-            if b_task
-            else "—"
+    )
+    lines.extend(
+        _render_list_section(
+            "## Tasks where heretek hurt",
+            diff["tasks_agent_b_passed_a_failed"],
+            "A fail, B pass",
         )
-        a_pass = a_task is not None and a_task.verdict == "pass"
-        b_pass = b_task is not None and b_task.verdict == "pass"
-        if a_pass and b_pass:
-            note = "both"
-        elif a_pass and not b_pass:
-            note = "A wins"
-        elif b_pass and not a_pass:
-            note = "B wins"
-        else:
-            note = "both fail"
-        lines.append(f"| {tid} | {a_str} | {b_str} | {note} |")
-    lines.append("")
-    helped = diff["tasks_agent_a_passed_b_failed"]
-    hurt = diff["tasks_agent_b_passed_a_failed"]
-    lines.append("## Tasks where heretek helped")
-    lines.append("")
-    if helped:
-        for tid in helped:
-            lines.append(f"- `{tid}` (A pass, B fail)")
-    else:
-        lines.append("(none)")
-    lines.append("")
-    lines.append("## Tasks where heretek hurt")
-    lines.append("")
-    if hurt:
-        for tid in hurt:
-            lines.append(f"- `{tid}` (A fail, B pass)")
-    else:
-        lines.append("(none)")
-    lines.append("")
+    )
     return "\n".join(lines)
 
 
