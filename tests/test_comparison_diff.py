@@ -104,5 +104,6 @@ def test_identical_results_yield_zero_deltas() -> None:
 
 def test_missing_agent_b_raises_file_not_found() -> None:
     """If agent-b/summary.json is missing, load_summary must raise."""
+    path = _fixture_root("case-agent-b-missing") / "agent-b" / "summary.json"
     with pytest.raises(FileNotFoundError):
-        load_summary(_fixture_root("case-agent-b-missing") / "agent-b" / "summary.json")
+        (lambda: load_summary(path))()
