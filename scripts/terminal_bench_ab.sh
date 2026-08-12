@@ -17,6 +17,10 @@
 # Per-agent results land in:
 #   ${RESULTS_DIR}/agent-a/jobs/<job-name>/trials/<trial-id>/...
 #   ${RESULTS_DIR}/agent-b/jobs/<job-name>/trials/<trial-id>/...
+# After each agent's harbor run, aggregate_results.py emits:
+#   ${RESULTS_DIR}/agent-a/summary.json
+#   ${RESULTS_DIR}/agent-b/summary.json
+# (consumed by scripts/comparison_report.py).
 #
 # Exit code: 0 if both agents succeed; non-zero if either fails.
 
@@ -65,5 +69,21 @@ harbor run \
   --n-concurrent "$HERETEK_N_CONCURRENT" \
   --jobs-dir "$AGENT_B_JOBS" \
   "${TASK_ARGS[@]}"
+
+echo "[terminal_bench_ab] aggregating results for agent A -> ${RESULTS_DIR}/agent-a/summary.json"
+python scripts/aggregate_results.py \
+  --jobs-dir    "$AGENT_A_JOBS" \
+  --agent-label agent-a-with-heretek \
+  --model       "$ANTHROPIC_MODEL" \
+  --commit-sha  "${GITHUB_SHA:-local}" \
+  --output      "${RESULTS_DIR}/agent-a/summary.json"
+
+echo "[terminal_bench_ab] aggregating results for agent B -> ${RESULTS_DIR}/agent-b/summary.json"
+python scripts/aggregate_results.py \
+  --jobs-dir    "$AGENT_B_JOBS" \
+  --agent-label agent-b-baseline \
+  --model       "$ANTHROPIC_MODEL" \
+  --commit-sha  "${GITHUB_SHA:-local}" \
+  --output      "${RESULTS_DIR}/agent-b/summary.json"
 
 echo "[terminal_bench_ab] both agents complete"
