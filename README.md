@@ -1,83 +1,110 @@
-# heretek
+# `heretek-claude-harness`
 
-> Opinionated Claude Code plugin marketplace: task plugins, quality-gate hooks, curated MCP/LSP/skills.
+> Open-source **plugin marketplace framework and distribution CLI** that installs mechanical quality guardrails, Claude Code hooks, MCP servers, and language packs into **target developer repositories**.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Marketplace: heretek](https://img.shields.io/badge/marketplace-heretek-blueviolet)](https://github.com/Heretek-AI/heretek-claude-harness)
-[![CI](https://img.shields.io/badge/CI-passing-brightgreen)](.github/workflows/validate.yml)
+[![Python: 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](pyproject.toml)
+[![Type Checking: Pyright Strict](https://img.shields.io/badge/pyright-strict-success)](pyproject.toml)
+[![Linting: Ruff](https://img.shields.io/badge/ruff-passing-brightgreen)](pyproject.toml)
 
-## What is this?
+---
 
-`heretek` is a Claude Code marketplace that bundles 11 first-party plugins — Rust, Python, JS/TS, web frontend, security, MCP, LSP, skills, agents, output styles — plus the flagship `hooks` plugin that gates every Edit/Write/MultiEdit with a sub-100ms quality check.
+## Overview
 
-Every item ships after D7 vetting (stars ≥ 500, last commit ≤ 12mo, OSI license, source-audit pass, no critical CVEs in 24 months) with an ADR in `catalog/reviews/` documenting the decision.
+`heretek-claude-harness` is designed to allow developers (and automated Claude Code sessions) to install curated marketplace packages into any project workspace.
 
-## Install
+These installed packages enforce deterministic, fast feedback loops (`ruff`, `pyright`, `cargo clippy`, `biome`, `ast-grep`) directly inside target developer repositories to prevent model hallucinations, context bloat, and specification drift—especially when executing smaller models like Qwen 3.6 27B.
+
+> [!IMPORTANT]
+> **Key Architecture Principle**: This repository is the **packaging standard, marketplace catalog registry, installer CLI, and distribution engine**. Running `heretek install` projects standalone plugin assets, hooks, and LSP/MCP configs into user target repositories.
+
+---
+
+## Architectural Pillars
+
+1. **Marketplace Registry & Catalog** (`catalog/catalog.yaml`): The central index mapping first-party and curated third-party marketplace packages, version pins, and dependency relationships.
+2. **Packaging Schemas** (`tests/schemas/`): JSON Schema definitions (Draft 2020-12) validating installable package manifests (`plugin.schema.json`, `hooks.schema.json`, `mcp.schema.json`, `lsp.schema.json`, `marketplace.schema.json`).
+3. **Packaging & Distribution CLI** (`scripts/heretek_cli.py`):
+   - `heretek install <pack-name>`: Deploys hooks, configs, LSP/MCP declarations, and interceptor scripts into target project `.claude/` directories.
+   - `heretek validate`: Validates all plugin packages and marketplace manifests against JSON Schemas.
+   - `heretek build-catalog`: Re-indexes `catalog/catalog.yaml` and builds canonical `.claude-plugin/marketplace.json`.
+4. **LLM Diagnostic Error Translator**: A lightweight utility in the hook bundle (`plugins/hooks/scripts/error_translator.py`) that converts verbose compiler and linter stderr/stdout into minimalist high-signal error blocks (e.g. `[ERROR] main.py:12:5 - Type mismatch: expected str, got int`).
+
+---
+
+## Installable Marketplace Packages (`plugins/`)
+
+`heretek` provides out-of-the-box installable plugin packages:
+
+| Package | Category | Description | Key Assets Deployed |
+| :--- | :--- | :--- | :--- |
+| **`plugins/python`** | `task` | Python language pack | `pyright` & `ruff-lsp` declarations (`.lsp.json`), fast quality skills |
+| **`plugins/rust`** | `task` | Rust language pack | `rust-analyzer` declaration (`.lsp.json`), `cargo check` / `cargo clippy` skills |
+| **`plugins/js-ts`** | `task` | JavaScript & TypeScript pack | `biome` & `tsc` declarations (`.lsp.json`), typecheck skills |
+| **`plugins/hooks`** | `quality-gate` | Core mechanical hook bundle | `hooks.json`, `secrets_pre_tool.py`, `fast_gate.py`, `stale_dep_intercept.py`, `error_translator.py` |
+| **`plugins/mcp-pack`** | `tools` | Codebase memory & context tools | Pre-configured `.mcp.json` server declarations (`codebase-memory-mcp`, `context7`, `serena`) |
+
+---
+
+## Quick Start & Usage
+
+### Installing Plugin Packs into Target Projects
+To deploy a plugin pack into a target developer repository:
 
 ```bash
-# Add the marketplace (once)
-/plugin marketplace add heretek https://github.com/Heretek-AI/heretek-claude-harness
+# Install Python language pack into target repository
+python scripts/heretek_cli.py install python --target /path/to/target/repo
 
-# Install a plugin
-/plugin install rust@heretek
-/plugin install hooks@heretek
+# Install mechanical quality hooks & interceptors into target repository
+python scripts/heretek_cli.py install hooks --target /path/to/target/repo
 
-# Install all 11
-for p in rust python js-ts web-frontend hooks security skills-pack mcp-pack lsp-pack agents output-styles; do
-  /plugin install $p@heretek
-done
+# Install MCP codebase memory servers into target repository
+python scripts/heretek_cli.py install mcp-pack --target /path/to/target/repo
 ```
 
-## Common commands
+This populates the target workspace's `.claude/` directory with `.lsp.json`, `.mcp.json`, `hooks.json`, and supporting Python interceptor scripts.
+
+### Schema Validation & Catalog Building
+```bash
+# Validate all marketplace and plugin manifests against JSON Schemas
+python scripts/heretek_cli.py validate
+
+# Re-generate .claude-plugin/marketplace.json from catalog/catalog.yaml
+python scripts/heretek_cli.py build-catalog
+```
+
+---
+
+## Developer Workflows
+
+### Quality Protocol & Commands
 
 ```bash
-# Inspect local hook event telemetry
-python scripts/heretek_cli.py telemetry show
-python scripts/heretek_cli.py telemetry grep "Edit"
-python scripts/heretek_cli.py telemetry schema
+# 1. Run full test suite
+pytest
+
+# 2. Enforce strict Pyright type checking
+.venv/bin/basedpyright scripts
+
+# 3. Enforce Ruff code quality rules
+ruff check .
+
+# 4. Execute full local CI pipeline
+bash scripts/ci.sh
 ```
 
-## What ships?
-
-See [`docs/superpowers/specs/2026-08-03-heretek-marketplace-design.md`](docs/superpowers/specs/2026-08-03-heretek-marketplace-design.md) for the canonical plugin catalog. Quick summary:
-
-| Plugin | Category | What it does |
-|---|---|---|
-| `rust` | task | rust-analyzer LSP + cargo-check + cargo-clippy skills |
-| `python` | task | ruff LSP + ruff-check skill |
-| `js-ts` | task | biome LSP + typecheck skill |
-| `web-frontend` | task | chrome-devtools-mcp + lighthouse skill |
-| `hooks` | cross (flagship) | 3-layer quality gates (fast blocking <100ms, slow on-demand, git pre-commit) |
-| `security` | cross | security-research + audit-checklist skills (NO hooks — `hooks` plugin owns all hook components per D15) |
-| `skills-pack` | cross | caveman, superpowers |
-| `mcp-pack` | cross | context7, github-mcp-server, codebase-memory-mcp, serena |
-| `lsp-pack` | cross | rust-analyzer, basedpyright, gopls, clangd |
-| `agents` | cross | code-reviewer, security-reviewer, test-engineer |
-| `output-styles` | cross | terse, detailed, tabular, explanatory |
-
-## How vetting works
-
-Every entry in `catalog.yaml`'s `items[]` carries:
-- `vetting.status` (approved | rejected | pending)
-- `vetting.date` (when last verified)
-- `vetting.review` (path to ADR in `catalog/reviews/`)
-- `upstream` (the actual repo)
-- `sha` (40-char pin, lock-step with D11 SHA-ride)
-- `license` (SPDX id)
-
-Quarterly, run `python scripts/refresh_pins.py --github-token $GH_TOKEN` to re-verify every entry against the D7 bar. Items that fail (stars drop, license drift, critical CVE published) get flagged for review.
+---
 
 ## Documentation
 
-- [`docs/superpowers/specs/2026-08-03-heretek-marketplace-design.md`](docs/superpowers/specs/2026-08-03-heretek-marketplace-design.md) — design spec (locked decisions D1–D17)
-- [`docs/recommended-marketplaces.md`](docs/recommended-marketplaces.md) — external marketplaces to add manually
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to add new items, submit PRs
-- [`SECURITY.md`](SECURITY.md) — supply-chain risk model + reporting path
+- **[`CLAUDE.md`](CLAUDE.md)** — Quick-reference guide for developer workflows, commands, and repository architecture.
+- **[`AGENTS.md`](AGENTS.md)** — Operational guidelines for AI coding assistants working on or extending this repository.
+- **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — Guidelines for contributing new plugin packages and marketplace catalog entries.
+- **[`SECURITY.md`](SECURITY.md)** — Supply-chain security policy and vulnerability reporting.
 
-## Versioning
-
-No `version` field on first-party plugins (D11). The marketplace itself is versioned by commit SHA. Every plugin entry's `sha` field pins the exact upstream commit.
+---
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for details.
