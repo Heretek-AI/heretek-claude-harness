@@ -81,20 +81,25 @@ jobs:
           path: results/
           retention-days: 30
 
-      - name: Ensure issue label exists
-        # Self-heal: the 'terminal-bench-ab' label is required by the issue
-        # create step below. If it doesn't exist in the repo, 'gh issue create'
-        # fails with "could not add label: 'terminal-bench-ab' not found".
-        # `gh label create --force` is idempotent (creates if missing, updates
-        # otherwise). Wrapped in continue-on-error so a label-creation
-        # permission failure still lets the issue step try (and fail
-        # gracefully) instead of blocking the workflow.
+      - name: Ensure issue labels exist
+        # Self-heal: the issue create step below requires both
+        # 'terminal-bench-ab' and 'automated' labels. If either is missing
+        # in the repo, 'gh issue create' fails with
+        # "could not add label: '<name>' not found". `gh label create --force`
+        # is idempotent (creates if missing, updates otherwise). Wrapped in
+        # continue-on-error so a label-creation permission failure still lets
+        # the issue step try (and fail gracefully) instead of blocking the
+        # workflow.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh label create terminal-bench-ab \
             --color 1d76db \
             --description "Terminal-Bench A/B evaluation run" \
+            --force
+          gh label create automated \
+            --color ededed \
+            --description "Generated automatically; no human review required" \
             --force
         continue-on-error: true
 
