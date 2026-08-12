@@ -59,6 +59,7 @@ harbor run \
   --n-concurrent "$HERETEK_N_CONCURRENT" \
   --ak "config={\"plugin_dir\":\"${HERETEK_PLUGIN_DIR}\"}" \
   --jobs-dir "$AGENT_A_JOBS" \
+  --debug \
   "${TASK_ARGS[@]}"
 
 echo "[terminal_bench_ab] agent B (baseline) -> ${AGENT_B_JOBS}"
@@ -68,6 +69,7 @@ harbor run \
   --model "$ANTHROPIC_MODEL" \
   --n-concurrent "$HERETEK_N_CONCURRENT" \
   --jobs-dir "$AGENT_B_JOBS" \
+  --debug \
   "${TASK_ARGS[@]}"
 
 echo "[terminal_bench_ab] aggregating results for agent A -> ${RESULTS_DIR}/agent-a/summary.json"
