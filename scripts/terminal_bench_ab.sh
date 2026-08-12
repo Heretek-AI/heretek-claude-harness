@@ -15,8 +15,8 @@
 #   RESULTS_DIR              — optional. Default ./results.
 #
 # Per-agent results land in:
-#   ${RESULTS_DIR}/agent-a/jobs/<job-name>/trials/<trial-id>/...
-#   ${RESULTS_DIR}/agent-b/jobs/<job-name>/trials/<trial-id>/...
+#   ${RESULTS_DIR}/agent-a/jobs/<job-name>/<trial-name>/...
+#   ${RESULTS_DIR}/agent-b/jobs/<job-name>/<trial-name>/...
 # After each agent's harbor run, aggregate_results.py emits:
 #   ${RESULTS_DIR}/agent-a/summary.json
 #   ${RESULTS_DIR}/agent-b/summary.json
@@ -47,7 +47,7 @@ fi
 rm -rf "$RESULTS_DIR"
 mkdir -p "$RESULTS_DIR/agent-a" "$RESULTS_DIR/agent-b"
 
-# Per-agent jobs dirs (harbor writes <jobs-dir>/<job-name>/trials/... under each).
+# Per-agent jobs dirs (harbor writes <jobs-dir>/<job-name>/<trial-name>/... under each).
 AGENT_A_JOBS="${RESULTS_DIR}/agent-a/jobs"
 AGENT_B_JOBS="${RESULTS_DIR}/agent-b/jobs"
 
