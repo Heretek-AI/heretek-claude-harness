@@ -12,12 +12,30 @@
 
 ## Overview
 
-`heretek-claude-harness` is designed to allow developers (and automated Claude Code sessions) to install curated marketplace packages into any project workspace.
+`heretek-claude-harness` allows developers (and automated Claude Code sessions) to install curated, opinionated quality packages into any target project workspace.
 
-These installed packages enforce deterministic, fast feedback loops (`ruff`, `pyright`, `cargo clippy`, `biome`, `ast-grep`) directly inside target developer repositories to prevent model hallucinations, context bloat, and specification drift—especially when executing smaller models like Qwen 3.6 27B.
+These packages enforce deterministic, fast feedback loops (`ruff`, `basedpyright`, `cargo clippy`, `biome`, `fallow`, `semgrep`, `gitleaks`) directly inside target developer repositories to prevent model hallucinations, context bloat, and specification drift.
 
 > [!IMPORTANT]
-> **Key Architecture Principle**: This repository is the **packaging standard, marketplace catalog registry, installer CLI, and distribution engine**. Running `heretek install` projects standalone plugin assets, hooks, and LSP/MCP configs into user target repositories.
+> **Key Architecture Principle**: This repository is the **packaging standard, marketplace catalog registry, installer CLI, and distribution engine**. Running `python scripts/heretek_cli.py install <pack>` projects standalone plugin assets, hooks, and LSP/MCP configs into user target repositories.
+
+---
+
+## The 9 Logical Quality Packs
+
+`heretek` provides 9 out-of-the-box installable plugin pack categories:
+
+| Package | Category | Description | Key Deployed Assets |
+| :--- | :--- | :--- | :--- |
+| **`plugins/best-practices`** | `cross` | Output & persona quality pack | `humanizer` (anti-slop rules), `i-have-adhd` (Action-First), `ponytail` (7-Rung Lazy Ladder), `caveman` (terse mode), `outline-driven-dev` |
+| **`plugins/quality-audit`** | `cross` | Production audit & decay analysis | `launchworthy` (5-domain audit: Auth, Data, Frontend, Infra, Ops), `brooks-lint` (decay risks R1-R6, T1-T6) |
+| **`plugins/pre-commit`** | `cross` | Git commit/push mechanical gates | SHA-pinned `.pre-commit-config.yaml` (`ruff`, `biome`, `cargo clippy`, `fallow`, `semgrep`, `gitleaks`, `shellcheck`), `install_precommit.sh` |
+| **`plugins/ci-cd`** | `cross` | GitHub Actions workflow templates | `pre-commit.yml`, `security-scan-digest.yml`, `shellcheck.yml`, `validate.yml` |
+| **`plugins/agents`** | `cross` | Specialized subagent team | `architecture-auditor`, `build-error-resolver`, `code-reviewer`, `database-reviewer`, `performance-optimizer`, `security-reviewer`, `test-engineer` |
+| **`plugins/hooks`** | `quality-gate` | Core mechanical interceptor bundle | `ir_shell_parser.py` (IR shell parser & secret/destructive command block), `circuit_breaker.py` (consecutive error filter), `fast_gate.py`, `secrets_pre_tool.py` |
+| **`plugins/mcp-pack`** | `tools` | Token-efficient MCP servers | Pre-configured `.mcp.json` (`codebase-memory-mcp` prefix trees, `context7` live docs, `claude-mem` 3-layer progressive disclosure, `github-mcp-server`) |
+| **`plugins/lsp-pack`** | `tools` | 38+ Language Server suite | Pre-configured `.lsp.json` for 38+ language servers (`basedpyright`, `gopls`, `rust-analyzer`, `clangd`, `jdtls`, `vtsls`, `solidity-ls`) |
+| **`plugins/{lang}`** | `task` | Language-specific task packs | `python`, `rust`, `js-ts`, `go`, `cpp`, `java`, `web-frontend` (LSP server declarations & `check` skills) |
 
 ---
 
@@ -29,21 +47,6 @@ These installed packages enforce deterministic, fast feedback loops (`ruff`, `py
    - `heretek install <pack-name>`: Deploys hooks, configs, LSP/MCP declarations, and interceptor scripts into target project `.claude/` directories.
    - `heretek validate`: Validates all plugin packages and marketplace manifests against JSON Schemas.
    - `heretek build-catalog`: Re-indexes `catalog/catalog.yaml` and builds canonical `.claude-plugin/marketplace.json`.
-4. **LLM Diagnostic Error Translator**: A lightweight utility in the hook bundle (`plugins/hooks/scripts/error_translator.py`) that converts verbose compiler and linter stderr/stdout into minimalist high-signal error blocks (e.g. `[ERROR] main.py:12:5 - Type mismatch: expected str, got int`).
-
----
-
-## Installable Marketplace Packages (`plugins/`)
-
-`heretek` provides out-of-the-box installable plugin packages:
-
-| Package | Category | Description | Key Assets Deployed |
-| :--- | :--- | :--- | :--- |
-| **`plugins/python`** | `task` | Python language pack | `pyright` & `ruff-lsp` declarations (`.lsp.json`), fast quality skills |
-| **`plugins/rust`** | `task` | Rust language pack | `rust-analyzer` declaration (`.lsp.json`), `cargo check` / `cargo clippy` skills |
-| **`plugins/js-ts`** | `task` | JavaScript & TypeScript pack | `biome` & `tsc` declarations (`.lsp.json`), typecheck skills |
-| **`plugins/hooks`** | `quality-gate` | Core mechanical hook bundle | `hooks.json`, `secrets_pre_tool.py`, `fast_gate.py`, `stale_dep_intercept.py`, `error_translator.py` |
-| **`plugins/mcp-pack`** | `tools` | Codebase memory & context tools | Pre-configured `.mcp.json` server declarations (`codebase-memory-mcp`, `context7`, `serena`) |
 
 ---
 
@@ -53,17 +56,20 @@ These installed packages enforce deterministic, fast feedback loops (`ruff`, `py
 To deploy a plugin pack into a target developer repository:
 
 ```bash
-# Install Python language pack into target repository
-python scripts/heretek_cli.py install python --target /path/to/target/repo
+# Install Best Practices pack (Humanizer, Action-First, Ponytail) into target repository
+python scripts/heretek_cli.py install best-practices --target /path/to/target/repo
 
-# Install mechanical quality hooks & interceptors into target repository
-python scripts/heretek_cli.py install hooks --target /path/to/target/repo
+# Install Production Quality Audit pack into target repository
+python scripts/heretek_cli.py install quality-audit --target /path/to/target/repo
 
-# Install MCP codebase memory servers into target repository
-python scripts/heretek_cli.py install mcp-pack --target /path/to/target/repo
+# Install Pre-Commit git hooks into target repository
+python scripts/heretek_cli.py install pre-commit --target /path/to/target/repo
+
+# Install Go language pack into target repository
+python scripts/heretek_cli.py install go --target /path/to/target/repo
 ```
 
-This populates the target workspace's `.claude/` directory with `.lsp.json`, `.mcp.json`, `hooks.json`, and supporting Python interceptor scripts.
+This populates the target workspace's `.claude/` directory with `.lsp.json`, `.mcp.json`, `hooks.json`, and supporting Python/Shell interceptor scripts.
 
 ### Schema Validation & Catalog Building
 ```bash
@@ -88,7 +94,7 @@ pytest
 .venv/bin/basedpyright scripts
 
 # 3. Enforce Ruff code quality rules
-ruff check .
+ruff check plugins scripts tests
 
 # 4. Execute full local CI pipeline
 bash scripts/ci.sh
