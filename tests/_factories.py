@@ -7,6 +7,7 @@ path resolver that were previously duplicated across
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from comparison_report import PerTaskResult, Summary
@@ -61,3 +62,35 @@ def make_summary(
         tokens_total=tokens_total,
         per_task=per_task,
     )
+
+
+def write_trial(
+    jobs_dir: Path,
+    task_name: str,
+    *,
+    verdict_pass: bool = True,
+    n_input_tokens: int = 0,
+    n_output_tokens: int = 0,
+    started_at: str = "2026-08-12T00:00:00Z",
+    finished_at: str = "2026-08-12T00:01:00Z",
+    job_name: str = "job-1",
+) -> None:
+    """Write a single harbor-style trial result.json.
+
+    Mirrors harbor 0.21.0's TrialResult schema (only the fields the
+    aggregator reads). Used by aggregate_results tests; future harbor-
+    related tests can reuse this.
+    """
+    trial_dir = jobs_dir / job_name / task_name
+    trial_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "task_name": task_name,
+        "verifier_result": {"rewards": {"reward": 1.0 if verdict_pass else 0.0}},
+        "agent_result": {
+            "n_input_tokens": n_input_tokens,
+            "n_output_tokens": n_output_tokens,
+        },
+        "started_at": started_at,
+        "finished_at": finished_at,
+    }
+    (trial_dir / "result.json").write_text(json.dumps(payload))

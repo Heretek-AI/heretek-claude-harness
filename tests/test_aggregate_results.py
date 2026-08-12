@@ -6,33 +6,7 @@ import json
 from pathlib import Path
 
 from aggregate_results import aggregate_jobs_dir
-
-
-def _write_trial(
-    jobs_dir: Path,
-    task_name: str,
-    *,
-    verdict_pass: bool = True,
-    n_input_tokens: int = 0,
-    n_output_tokens: int = 0,
-    started_at: str = "2026-08-12T00:00:00Z",
-    finished_at: str = "2026-08-12T00:01:00Z",
-    job_name: str = "job-1",
-) -> None:
-    """Write a single trial result.json under <jobs_dir>/<job_name>/<task_name>/."""
-    trial_dir = jobs_dir / job_name / task_name
-    trial_dir.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "task_name": task_name,
-        "verifier_result": {"rewards": {"reward": 1.0 if verdict_pass else 0.0}},
-        "agent_result": {
-            "n_input_tokens": n_input_tokens,
-            "n_output_tokens": n_output_tokens,
-        },
-        "started_at": started_at,
-        "finished_at": finished_at,
-    }
-    (trial_dir / "result.json").write_text(json.dumps(payload))
+from tests._factories import write_trial as _write_trial  # noqa: F401
 
 
 def _make_jobs_dir(tmp_path: Path) -> Path:
@@ -229,3 +203,28 @@ def test_missing_agent_result_zeros_tokens_and_wall_clock(tmp_path: Path) -> Non
     assert summary["passed"] == 1
     assert summary["tokens_total"] == 0
     assert summary["wall_clock_sec_total"] == 0
+
+
+def test_round_trip_through_summary_dataclass(tmp_path: Path) -> None:
+    """Output dict must round-trip through comparison_report.load_summary."""
+    from comparison_report import load_summary
+
+    jobs = _make_jobs_dir(tmp_path)
+    _write_trial(jobs, "tb-001", verdict_pass=True, n_input_tokens=100, n_output_tokens=50)
+    _write_trial(jobs, "tb-002", verdict_pass=False, n_input_tokens=200, n_output_tokens=75)
+
+    summary = aggregate_jobs_dir(
+        jobs, agent_label="agent-a-with-heretek", model="m", commit_sha="abc"
+    )
+
+    # Write to a file and load back via the prod code path.
+    out_path = tmp_path / "summary.json"
+    out_path.write_text(json.dumps(summary))
+    loaded = load_summary(out_path)
+
+    assert loaded.agent == "agent-a-with-heretek"
+    assert loaded.passed == 1
+    assert loaded.failed == 1
+    assert loaded.n_tasks == 2
+    assert loaded.tokens_total == 100 + 50 + 200 + 75
+    assert len(loaded.per_task) == 2
