@@ -1,8 +1,0 @@
-[project]
-name = "stale-fixture"
-version = "0.1.0"
-dependencies = [
-    "requests==2.20.0",  # Old; latest is 2.34+
-    "pyyaml==5.1",       # Old; latest is 6.0+
-    "ruff==0.1.0",       # Old; latest is 0.16+
-]

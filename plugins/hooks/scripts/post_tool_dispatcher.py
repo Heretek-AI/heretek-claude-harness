@@ -105,7 +105,7 @@ def main() -> int:  # nosonar — egress aggregator; always exits 0
 
     all_warnings: list[str] = []
     for script in CHILDREN:
-        rc, stdout, stderr = _run_child(script, payload_text)
+        _rc, stdout, stderr = _run_child(script, payload_text)
         if stderr.strip():
             print(f"post_tool_dispatcher: {script}: {stderr}", file=sys.stderr)
         if script in PARSE_JSON_CHILDREN:

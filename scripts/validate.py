@@ -1,11 +1,4 @@
-"""Validate the marketplace and every plugin manifest against JSON Schemas.
-
-Run as CLI:
-    python scripts/validate.py [--repo-root PATH] [--schemas-dir PATH]
-
-Exit codes: 0 on success, 1 on any schema failure. Each failure is printed
-to stderr so CI logs make failures obvious.
-"""
+"""Validate the marketplace and every plugin manifest against JSON Schemas."""
 
 from __future__ import annotations
 
@@ -14,6 +7,7 @@ import json
 import sys
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any, cast
 
 import jsonschema
 
@@ -29,19 +23,22 @@ SCHEMAS = {
 }
 
 
-def _load_schema(name: str, schemas_dir: Path) -> dict:
+def _load_schema(name: str, schemas_dir: Path) -> dict[str, Any]:
     path = schemas_dir / SCHEMAS[name]
     if not path.is_file():
         raise FileNotFoundError(f"schema not found: {path}")
-    return json.loads(path.read_text())
+    loaded: Any = json.loads(path.read_text())
+    if not isinstance(loaded, dict):
+        raise ValueError(f"schema root in {path} must be a dict")
+    return cast(dict[str, Any], loaded)
 
 
-def _validate_one(schema: dict, instance: dict, label: str) -> list[str]:
+def _validate_one(schema: dict[str, Any], instance: Any, label: str) -> list[str]:
     validator = jsonschema.Draft202012Validator(schema)
-    return [f"{label}: {e.message}" for e in validator.iter_errors(instance)]
+    return [f"{label}: {e.message}" for e in validator.iter_errors(instance)]  # type: ignore[no-any-expr]
 
 
-def _validate_plugin_manifests(repo_root: Path, schemas: dict[str, dict]) -> list[str]:
+def _validate_plugin_manifests(repo_root: Path, schemas: dict[str, dict[str, Any]]) -> list[str]:
     """Walk plugins/<name>/.claude-plugin/ and validate plugin.json + sibling manifests."""
     errors: list[str] = []
     plugins_root = repo_root / "plugins"
@@ -64,7 +61,7 @@ def _validate_plugin_manifests(repo_root: Path, schemas: dict[str, dict]) -> lis
                 continue
             label = f"plugins/{plugin_dir.name}/.claude-plugin/{kind}"
             try:
-                instance = json.loads(path.read_text())
+                instance: object = json.loads(path.read_text())
             except json.JSONDecodeError as exc:
                 errors.append(f"{label}: invalid JSON ({exc.msg})")
                 continue
@@ -87,7 +84,7 @@ def validate_all(repo_root: Path, schemas_dir: Path | None = None) -> list[str]:
         errors.append(f"missing marketplace manifest: {marketplace_path}")
     else:
         try:
-            instance = json.loads(marketplace_path.read_text())
+            instance: object = json.loads(marketplace_path.read_text())
         except json.JSONDecodeError as exc:
             errors.append(f".claude-plugin/marketplace.json: invalid JSON ({exc.msg})")
         else:

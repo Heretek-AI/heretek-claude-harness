@@ -191,3 +191,48 @@ def test_read_events_warns_on_malformed_jsonl(
     assert cli.main(["telemetry", "show"]) == 0
     captured = capsys.readouterr()
     assert "warning: 1 malformed JSONL line(s) skipped" in captured.err
+
+
+def test_cli_install_python(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+    """heretek install python deploys assets to target directory."""
+    ret = cli.main(["install", "python", "--target", str(tmp_path)])
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "Successfully installed 'python'" in captured.out
+    assert (tmp_path / ".claude" / "lsp.json").is_file()
+    assert (tmp_path / ".claude" / "plugins" / "python" / "plugin.json").is_file()
+
+
+def test_cli_install_hooks(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+    """heretek install hooks deploys hooks and interceptors."""
+    ret = cli.main(["install", "hooks", "--target", str(tmp_path)])
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "Successfully installed 'hooks'" in captured.out
+    assert (tmp_path / ".claude" / "scripts" / "fast_gate.py").is_file()
+
+
+def test_cli_install_nonexistent(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+    """heretek install with invalid pack returns code 1."""
+    ret = cli.main(["install", "invalid-pack", "--target", str(tmp_path)])
+    assert ret == 1
+    captured = capsys.readouterr()
+    assert "not found in plugins/" in captured.err
+
+
+def test_cli_validate(capsys: pytest.CaptureFixture) -> None:
+    """heretek validate returns 0 on valid codebase manifests."""
+    ret = cli.main(["validate"])
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "OK" in captured.out
+
+
+def test_cli_build_catalog(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+    """heretek build-catalog writes output manifest."""
+    output = tmp_path / "marketplace.json"
+    ret = cli.main(["build-catalog", "--output", str(output)])
+    assert ret == 0
+    assert output.is_file()
+    data = json.loads(output.read_text())
+    assert data["name"] == "heretek"

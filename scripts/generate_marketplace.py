@@ -1,25 +1,4 @@
-"""Generate .claude-plugin/marketplace.json from catalog/catalog.yaml.
-
-catalog.yaml is the source of truth (spec §5). The generator maps catalog
-plugin entries to the marketplace.json plugin entry shape:
-
-- relative source `{type: relative, path: rust}` → `"./plugins/rust"`
-  (resolved against metadata.pluginRoot per the canonical marketplace.json
-  schema; Claude Code requires the `./<pluginRoot>/<path>` form)
-- bare-string sources (already in canonical `./...` form) → pass through
-- git-subdir / github / url / npm source objects → pass through unchanged
-- catalog-only fields (components, items) → stripped from the output
-- first-party plugin entries have no `version` field (D11 SHA-ride)
-
-Run as CLI:
-    python scripts/generate_marketplace.py [--catalog PATH] [--output PATH]
-
-Exit code: 0 on success, 1 on any error. The CLI catches the full set
-of expected runtime errors (ValueError, KeyError, TypeError, OSError,
-FileNotFoundError, yaml.YAMLError) so the user sees a clear stderr
-message instead of a Python traceback. Idempotent: re-running on the
-same catalog produces byte-identical output (verified by Task 11).
-"""
+"""Generate .claude-plugin/marketplace.json from catalog/catalog.yaml."""
 
 from __future__ import annotations
 
@@ -28,6 +7,7 @@ import json
 import sys
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any, cast
 
 import yaml
 
@@ -35,79 +15,65 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CATALOG = REPO_ROOT / "catalog" / "catalog.yaml"
 DEFAULT_OUTPUT = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 
-# catalog.yaml-only fields that must NOT appear in marketplace.json.
 _INTERNAL_FIELDS = {"components", "items"}
 
 
-def _normalize_source(source: dict | str, plugin_root: str | None = None) -> dict | str:
-    """Translate the catalog's source shape into the marketplace.json shape.
-
-    Relative sources are resolved against ``plugin_root`` (the catalog's
-    ``metadata.pluginRoot``, defaulting to ``"./plugins"``) and emitted as
-    the canonical ``./<pluginRoot>/<path>`` form expected by Claude Code's
-    marketplace.json schema. Bare-string sources (already in canonical form)
-    are passed through unchanged.
-    """
+def _normalize_source(
+    source: dict[str, Any] | str, plugin_root: str | None = None
+) -> dict[str, Any] | str:
     if isinstance(source, str):
         return source
-    src_type = source.get("type")
+    src_type = cast(str, source.get("type"))
     if src_type == "relative":
-        path = source["path"]
+        path = cast(str, source["path"])
         root = (plugin_root or "./plugins").lstrip("./").rstrip("/")
         return f"./{root}/{path}"
-    # 3rd-party object: translate to the Claude Code marketplace shape
-    # (which uses `source:` discriminator, not `type:`).
-    out = {"source": src_type}
+    out: dict[str, Any] = {"source": src_type}
     for key in ("repo", "url", "path", "ref", "sha", "package", "headers"):
         if key in source:
             out[key] = source[key]
     return out
 
 
-def _plugin_entry(catalog_plugin: dict, plugin_root: str | None = None) -> dict:
-    """Project a catalog plugin entry into the marketplace.json entry shape."""
-    # Strip catalog-only fields first. _INTERNAL_FIELDS is the canonical
-    # list of fields that must NEVER appear in marketplace.json.
+def _plugin_entry(catalog_plugin: dict[str, Any], plugin_root: str | None = None) -> dict[str, Any]:
     filtered = {k: v for k, v in catalog_plugin.items() if k not in _INTERNAL_FIELDS}
-    out: dict = {
-        "name": filtered["name"],
-        "source": _normalize_source(filtered["source"], plugin_root=plugin_root),
+    name_val = cast(str, filtered["name"])
+    source_val = cast(dict[str, Any] | str, filtered["source"])
+    out: dict[str, Any] = {
+        "name": name_val,
+        "source": _normalize_source(source_val, plugin_root=plugin_root),
     }
     for optional in ("category", "tags", "description", "author"):
         if optional in filtered:
             out[optional] = filtered[optional]
-    # Note: 'version' is intentionally NEVER added — first-party plugins
-    # use SHA-ride (D11). 3rd-party entries get their version (if any)
-    # from the catalog entry directly.
     if "version" in filtered:
         out["version"] = filtered["version"]
     return out
 
 
-def _safe_load_catalog(catalog_path: Path) -> dict:
-    """Read catalog.yaml after resolving the path. Sanitizes S8707.
-
-    SonarCloud's S8707 data-flow analysis recognizes `Path.resolve()`
-    as a path-sanitizing call. Routing the read through this helper
-    gives Sonar an explicit sanitizer between the CLI arg and the
-    file I/O sink. See #141 for the broader remediation plan.
-    """
-    return yaml.safe_load(catalog_path.resolve().read_text())
+def _safe_load_catalog(catalog_path: Path) -> dict[str, Any]:
+    loaded: Any = yaml.safe_load(catalog_path.resolve().read_text())
+    if not isinstance(loaded, dict):
+        raise ValueError(f"{catalog_path}: root content is not a dict")
+    return cast(dict[str, Any], loaded)
 
 
-def generate(catalog_path: Path, output_path: Path) -> dict:
-    """Read catalog.yaml, write marketplace.json; return the generated dict."""
+def generate(catalog_path: Path, output_path: Path) -> dict[str, Any]:
     catalog = _safe_load_catalog(catalog_path)
-    if not isinstance(catalog, dict) or "marketplace" not in catalog:
+    if "marketplace" not in catalog or not isinstance(catalog["marketplace"], dict):
         raise ValueError(f"{catalog_path}: top-level 'marketplace' key missing or not a mapping")
-    if not isinstance(catalog.get("plugins"), list):
+    plugins_raw = catalog.get("plugins")
+    if not isinstance(plugins_raw, list):
         raise ValueError(f"{catalog_path}: 'plugins' must be a list")
 
-    marketplace_section = catalog["marketplace"]
-    plugin_root = marketplace_section.get("metadata", {}).get("pluginRoot")
-    plugins = [_plugin_entry(p, plugin_root=plugin_root) for p in catalog["plugins"]]
+    marketplace_section = cast(dict[str, Any], catalog["marketplace"])
+    plugin_root = cast(dict[str, Any], marketplace_section.get("metadata", {})).get("pluginRoot")
+    plugins: list[dict[str, Any]] = [
+        _plugin_entry(cast(dict[str, Any], p), plugin_root=cast(str | None, plugin_root))
+        for p in cast(list[Any], plugins_raw)
+    ]
 
-    generated = {
+    generated: dict[str, Any] = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         **marketplace_section,
         "plugins": plugins,
@@ -132,7 +98,7 @@ def main(argv: Iterable[str] | None = None) -> int:
         ValueError,
         KeyError,
         TypeError,
-        OSError,  # includes FileNotFoundError (subclass of OSError)
+        OSError,
         yaml.YAMLError,
     ) as exc:
         print(f"generate: error: {exc}", file=sys.stderr)

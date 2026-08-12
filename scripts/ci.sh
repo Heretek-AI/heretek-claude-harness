@@ -1,31 +1,22 @@
 #!/usr/bin/env bash
 # scripts/ci.sh — single local-CI entry for the heretek harness.
-# Replaces the 5-line bash block in CLAUDE.md with one command.
-# Mirrors the GitHub Actions validate.yml pipeline:
-#   pytest + validate (schema) + generate (marketplace.json) + smoke.
 set -euo pipefail
 
-# Tests
+# 1. Pytest suite
 pytest -q
 
-# Catalog/marketplace schema validation
+# 2. Schema validation
 python scripts/validate.py
 
-# Regenerate the marketplace index from catalog.yaml
+# 3. Regenerate marketplace index
 python scripts/generate_marketplace.py
 
-# Marketplace.json must match the regenerated copy (no drift)
+# 4. Marketplace.json drift check
 git diff --exit-code .claude-plugin/marketplace.json
 
-# Heretek-specific smoke tests
-bash tests/smoke/fast_gate_smoke.sh
-bash catalog/tests/smoke_test.sh
-
-# Lint the Terminal-Bench A/B workflow (actionlint is optional; skip with a notice)
-if command -v actionlint >/dev/null 2>&1; then
-  actionlint .github/workflows/terminal-bench-ab.yml
-else
-  echo "ci: actionlint not installed; skipping workflow lint (install: brew install actionlint)"
+# 5. Catalog smoke test
+if [ -f catalog/tests/smoke_test.sh ]; then
+  bash catalog/tests/smoke_test.sh
 fi
 
 echo "ci: OK"

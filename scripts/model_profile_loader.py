@@ -1,16 +1,10 @@
-"""Model profile loader (#44).
-
-Loads per-model enforcement profiles from `catalog/model_profiles/<model-id>.yaml`
-and applies them to pattern definitions (promote/demote severities).
-
-Active model is resolved from env var HERETEK_ACTIVE_MODEL, defaulting to
-'claude-opus-4' (the lightest enforcement profile).
-"""
+"""Model profile loader (#44)."""
 
 from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Any, cast
 
 import yaml
 
@@ -28,36 +22,25 @@ def resolve_active_model_id() -> str:
     return os.environ.get("HERETEK_ACTIVE_MODEL", DEFAULT_MODEL_ID)
 
 
-def load_profile(model_id: str) -> dict:
+def load_profile(model_id: str) -> dict[str, Any]:
     """Load a profile by ID. Raises FileNotFoundError if unknown."""
     path = PROFILES_DIR / f"{model_id}.yaml"
     if not path.exists():
         raise FileNotFoundError(f"No profile for model {model_id!r}")
-    return yaml.safe_load(path.read_text())
+    loaded: Any = yaml.safe_load(path.read_text())
+    if not isinstance(loaded, dict):
+        raise ValueError(f"profile in {path} must be a dict")
+    return cast(dict[str, Any], loaded)
 
 
-def apply_profile_to_pattern(pattern: dict, profile: dict) -> dict:
-    """Apply a profile's enforcement rules to a single pattern definition.
+def apply_profile_to_pattern(pattern: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
+    """Apply a profile's enforcement rules to a single pattern definition."""
+    pid = cast(str, pattern["id"])
+    severity = cast(str, pattern["severity"])
+    enforcement = cast(dict[str, Any], profile.get("enforcement", {}))
 
-    Promote/demote semantics:
-      * Ids in ``profile.enforcement.promote_to_block`` are upgraded
-        ``warn → error`` (errors remain errors).
-      * Ids in ``profile.enforcement.demote_to_warn`` are downgraded
-        ``error → warn`` (warns remain warns).
-      * Ids in neither list are passed through unchanged.
-
-    Collision guard: if a pattern ``id`` appears in BOTH
-    ``promote_to_block`` and ``demote_to_warn`` for the same profile,
-    the ordering is ambiguous, so this raises :class:`ValueError` rather
-    than silently picking one. Resolve the collision in the profile YAML
-    before applying.
-    """
-    pid = pattern["id"]
-    severity = pattern["severity"]
-    enforcement = profile.get("enforcement", {})
-
-    promote = enforcement.get("promote_to_block", [])
-    demote = enforcement.get("demote_to_warn", [])
+    promote = cast(list[str], enforcement.get("promote_to_block", []))
+    demote = cast(list[str], enforcement.get("demote_to_warn", []))
 
     if pid in promote and pid in demote:
         raise ValueError(
