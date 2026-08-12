@@ -21,4 +21,11 @@ git diff --exit-code .claude-plugin/marketplace.json
 bash tests/smoke/fast_gate_smoke.sh
 bash catalog/tests/smoke_test.sh
 
+# Lint the Terminal-Bench A/B workflow (actionlint is optional; skip with a notice)
+if command -v actionlint >/dev/null 2>&1; then
+  actionlint .github/workflows/terminal-bench-ab.yml
+else
+  echo "ci: actionlint not installed; skipping workflow lint (install: brew install actionlint)"
+fi
+
 echo "ci: OK"

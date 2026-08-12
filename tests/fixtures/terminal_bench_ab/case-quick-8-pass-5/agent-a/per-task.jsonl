@@ -1,0 +1,8 @@
+{"task_id": "tb-001-fix-permissions", "verdict": "pass", "wall_clock_sec": 45, "tokens": 12345}
+{"task_id": "tb-002-edit-json", "verdict": "pass", "wall_clock_sec": 60, "tokens": 15000}
+{"task_id": "tb-003-build-c", "verdict": "fail", "wall_clock_sec": 180, "tokens": 30000}
+{"task_id": "tb-005-network-fetch", "verdict": "pass", "wall_clock_sec": 120, "tokens": 22000}
+{"task_id": "tb-006-chmod", "verdict": "pass", "wall_clock_sec": 30, "tokens": 8000}
+{"task_id": "tb-007-rotate", "verdict": "fail", "wall_clock_sec": 90, "tokens": 18000}
+{"task_id": "tb-008-install", "verdict": "pass", "wall_clock_sec": 200, "tokens": 40000}
+{"task_id": "tb-004-build-system", "verdict": "fail", "wall_clock_sec": 120, "tokens": 25000}

@@ -1,0 +1,19 @@
+{
+  "agent": "agent-b-baseline",
+  "model": "claude-test",
+  "commit_sha": "deadbeef",
+  "heretek_harness": false,
+  "n_tasks": 4,
+  "passed": 0,
+  "failed": 4,
+  "pass_rate": 0.0,
+  "wall_clock_sec_total": 580,
+  "wall_clock_sec_p50": 145,
+  "tokens_total": 78000,
+  "per_task": [
+    {"task_id": "tb-A", "verdict": "fail", "wall_clock_sec": 145, "tokens": 19500},
+    {"task_id": "tb-B", "verdict": "fail", "wall_clock_sec": 145, "tokens": 19500},
+    {"task_id": "tb-C", "verdict": "fail", "wall_clock_sec": 145, "tokens": 19500},
+    {"task_id": "tb-D", "verdict": "fail", "wall_clock_sec": 145, "tokens": 19500}
+  ]
+}
