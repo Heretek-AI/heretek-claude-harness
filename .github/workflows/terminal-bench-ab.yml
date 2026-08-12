@@ -56,6 +56,7 @@ jobs:
           ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
           ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
           ANTHROPIC_AUTH_TOKEN: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
+          HERETEK_N_TASKS: ${{ github.event.inputs.n_tasks || '8' }}
         run: bash scripts/terminal_bench_ab.sh
 
       - name: Render comparison
