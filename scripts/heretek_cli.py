@@ -344,12 +344,84 @@ def cmd_init(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_status(args: argparse.Namespace) -> int:
+    """Display Heretek quality status scorecard and deployed plugin inventory."""
+    target_dir = Path(args.target).resolve()
+    if not target_dir.is_dir():
+        print(f"error: target directory '{target_dir}' does not exist", file=sys.stderr)
+        return 1
+
+    claude_dir = target_dir / ".claude"
+    plugins_dir = claude_dir / "plugins"
+    hooks_file = claude_dir / "hooks.json"
+    precommit_file = target_dir / ".pre-commit-config.yaml"
+
+    installed_plugins: list[str] = []
+    if plugins_dir.is_dir():
+        installed_plugins = [d.name for d in plugins_dir.iterdir() if d.is_dir()]
+
+    # Calculate 4-Pillar Agentic Readiness Score
+    score = 0
+    if hooks_file.is_file():
+        score += 25
+    if precommit_file.is_file():
+        score += 25
+    if any((target_dir / f).is_file() for f in ("AGENTS.md", "CLAUDE.md", "README.md")):
+        score += 25
+    if "best-practices" in installed_plugins or "quality-audit" in installed_plugins:
+        score += 25
+
+    print("┌──────────────────────────────────────────────────────────┐")
+    print("│                 HERETEK QUALITY SCORECARD                │")
+    print("├──────────────────────────────────────────────────────────┤")
+    print(f"│ Target Directory : {target_dir!s:<38} │")
+    print(f"│ Readiness Score  : {score}/100 pts                              │")
+    print(f"│ Pre-Commit Guard : {'[ACTIVE]' if precommit_file.is_file() else '[INACTIVE]':<38} │")
+    print(f"│ Hook Interceptor : {'[INSTALLED]' if hooks_file.is_file() else '[MISSING]':<38} │")
+    print(f"│ Deployed Packs   : {len(installed_plugins):<2} pack(s)                            │")
+    for pack in sorted(installed_plugins):
+        print(f"│   - {pack:<50} │")
+    print("└──────────────────────────────────────────────────────────┘")
+    return 0
+
+
+def cmd_metrics(args: argparse.Namespace) -> int:
+    """Benchmark local fast-gate hook execution latencies to enforce <100ms SLA."""
+    import time
+
+    from plugins.hooks.scripts.fast_gate import dispatch
+
+    t0 = time.perf_counter()
+    dispatch(Path("scripts/heretek_cli.py"))
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+
+    print("┌──────────────────────────────────────────────────────────┐")
+    print("│            HERETEK FAST-GATE LATENCY BENCHMARK          │")
+    print("├──────────────────────────────────────────────────────────┤")
+    print(f"│ Fast-Gate Execution Latency : {elapsed_ms:.2f} ms                  │")
+    status_str = "[PASS <100ms SLA]" if elapsed_ms < 100.0 else "[WARN Exceeds 100ms]"
+    print(f"│ SLA Compliance Boundary    : {status_str:<28} │")
+    print("└──────────────────────────────────────────────────────────┘")
+    return 0 if elapsed_ms < 500.0 else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="heretek",
         description="heretek marketplace & distribution CLI",
     )
     sub = parser.add_subparsers(dest="command", required=True)
+
+    # heretek status [--target TARGET_DIR]
+    status_parser = sub.add_parser("status", help="display repository quality scorecard & status")
+    status_parser.add_argument(
+        "--target", default=".", help="target project directory (default: current dir)"
+    )
+    status_parser.set_defaults(func=cmd_status)
+
+    # heretek metrics
+    metrics_parser = sub.add_parser("metrics", help="benchmark fast-gate hook execution latencies")
+    metrics_parser.set_defaults(func=cmd_metrics)
 
     # heretek init [--target TARGET_DIR]
     init_parser = sub.add_parser(

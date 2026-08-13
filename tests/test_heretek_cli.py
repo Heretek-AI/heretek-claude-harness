@@ -252,3 +252,22 @@ def test_cli_init_auto_detects_python_and_rust(
     assert "rust" in captured.out
     assert (tmp_path / ".claude" / "plugins" / "python" / "plugin.json").is_file()
     assert (tmp_path / ".claude" / "plugins" / "rust" / "plugin.json").is_file()
+
+
+def test_cli_status_command(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+    """heretek status displays quality scorecard and deployed packs."""
+    (tmp_path / "README.md").touch()
+    ret = cli.main(["status", "--target", str(tmp_path)])
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "HERETEK QUALITY SCORECARD" in captured.out
+    assert "Readiness Score" in captured.out
+
+
+def test_cli_metrics_command(capsys: pytest.CaptureFixture) -> None:
+    """heretek metrics benchmarks fast-gate hook execution latency."""
+    ret = cli.main(["metrics"])
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "HERETEK FAST-GATE LATENCY BENCHMARK" in captured.out
+    assert "Fast-Gate Execution Latency" in captured.out
