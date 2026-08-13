@@ -1,4 +1,4 @@
-name: Terminal-Bench A/B Evaluation
+name: TerminalBench A/B Evaluation
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
     inputs:
       n_tasks:
-        description: "Number of Terminal-Bench tasks (default 8, full = all)"
-        default: "8"
+        description: "Number of TerminalBench tasks ('all' or '8')"
+        default: "all"
       n_concurrent:
         description: "Per-agent concurrency"
         default: "8"
@@ -25,86 +25,18 @@ jobs:
   terminal-bench-ab:
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    env:
-      HERETEK_PLUGIN_DIR: ${{ github.workspace }}/plugins
-      HERETEK_N_CONCURRENT: ${{ github.event.inputs.n_concurrent || '8' }}
-      RESULTS_DIR: ${{ github.workspace }}/results
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Run TerminalBench A/B & Quality Audit
+        uses: Heretek-AI/harness-audit@v1
         with:
-          python-version: "3.12"
-
-      - name: Install uv
-        run: "pip install uv==0.5.9 --only-binary :all:"
-
-      - name: Install Harbor Framework
-        run: "uv tool install harbor==0.21.0 --no-build"
-
-      - name: Docker Info Verification
-        run: docker info
-
-      - name: Run Terminal-Bench A/B Evaluation
-        env:
-          ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
-          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
-          ANTHROPIC_AUTH_TOKEN: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
-          HERETEK_N_TASKS: ${{ github.event.inputs.n_tasks || '8' }}
-        run: bash scripts/terminal_bench_ab.sh
-
-      - name: Render Comparison Report
-        env:
-          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
-          ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
-        run: |
-          python scripts/comparison_report.py \
-            --results-dir "$RESULTS_DIR" \
-            --commit-sha "$GITHUB_SHA" \
-            --trigger push \
-            --actor "$GITHUB_ACTOR" \
-            --tier quick \
-            --model "$ANTHROPIC_MODEL" \
-            --base-url "$ANTHROPIC_BASE_URL" \
-            --output /tmp/comparison.md
-
-      - name: Upload Results Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: terminal-bench-ab-results
-          path: results/
-          retention-days: 30
-
-      - name: Ensure Issue Labels Exist
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh label create terminal-bench-ab \
-            --color 1d76db \
-            --description "Terminal-Bench A/B evaluation run" \
-            --force
-          gh label create automated \
-            --color ededed \
-            --description "Generated automatically; no human review required" \
-            --force
-        continue-on-error: true
-
-      - name: Open Comparison Report Issue
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ ! -f /tmp/comparison.md ]; then
-            echo "::error::comparison.md not generated; skipping issue creation"
-            exit 0
-          fi
-          gh issue create \
-            --repo "$GITHUB_REPOSITORY" \
-            --label terminal-bench-ab \
-            --label automated \
-            --title "Terminal-Bench A/B: $(echo "$GITHUB_SHA" | cut -c1-7) — $(date -u +%Y-%m-%d)" \
-            --body-file /tmp/comparison.md
-        continue-on-error: true
+          anthropic_api_key: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
+          anthropic_model: ${{ secrets.ANTHROPIC_MODEL || 'claude-sonnet-5-20260301' }}
+          plugin_dir: ${{ github.workspace }}/plugins
+          n_tasks: ${{ github.event.inputs.n_tasks || 'all' }}
+          n_concurrent: ${{ github.event.inputs.n_concurrent || '8' }}
+          mode: 'full'
+          open_issue: 'true'
