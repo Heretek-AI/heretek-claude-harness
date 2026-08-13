@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-kaitai"
+version = "0.1.0"
+description = "MCP server exposing kaitai-struct for custom binary format reverse engineering."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "kaitai", "kaitai-struct", "format-reverse", "binary-format"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "kaitaistruct>=0.10",
+    "pydantic>=2.6",
+    "requests>=2.31",
+    # Cycle 3 (2026-06-06): lz4 is required by parse_unityfs to
+    # decompress the first block of a UnityFS / Addressables
+    # bundle (the directory lives inside the LZ4-decompressed
+    # first block, not on disk). The lz4 dep is soft-required
+    # at the function-call level — the MCP server can still
+    # load without it; `parse_unityfs` raises a useful
+    # ImportError at call time.
+    "lz4>=4.0",
+]
+
+[project.scripts]
+re-kaitai = "re_kaitai.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

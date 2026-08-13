@@ -1,0 +1,42 @@
+{
+  "name": "@android-re/mcp-bridge",
+  "version": "0.1.0",
+  "description": "MCP server (TypeScript) for Android device bridge: adb shell, screencap, logcat, frida-ps. RE-focused subset of mobile automation.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "android-re-mcp-bridge": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "adbkit": "^2.11.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "eslint": "^9.13.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^8.0.5",
+    "vitest": "^4.1.4"
+  }
+}

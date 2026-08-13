@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-il2cpp"
+version = "0.2.0"
+description = "MCP server reading Unity IL2CPP global-metadata.dat files to recover class/method/field/param names that the IL2CPP compiler stripped from GameAssembly.dll. Walks all 7 binary tables (typeDefinitions, methods, fields, parameters, properties, events, images) and resolves method RVAs in GameAssembly.dll. Supports Unity 2019.4 - 2022.3 LTS (metadata versions 24-29)."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "unity", "il2cpp", "global-metadata", "il2cppdumper", "reverse-engineering", "game-re", "binary-tables"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.13.4",
+    # LIEF is required for resolve_method_rva (cross-references class FQNs
+    # from global-metadata.dat into the binary's RVA table). Keep this in
+    # the top-level deps so a vanilla `uv pip install -e .` produces a
+    # working server; the [rva] extra is preserved for back-compat.
+    "lief>=0.16,<0.18",
+]
+
+[project.optional-dependencies]
+# RVA cross-reference into GameAssembly.dll — requires LIEF.
+# (LIEF is now also a top-level dep; the extra is kept for users who
+# install via `pip install re-il2cpp[rva]` from older configs.)
+rva = ["lief>=0.16,<0.18"]
+
+[project.scripts]
+re-il2cpp = "re_il2cpp.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

@@ -1,0 +1,70 @@
+name: Validate skills
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "skills/**"
+      - ".github/workflows/validate-skills.yml"
+  pull_request:
+    paths:
+      - "skills/**"
+      - ".github/workflows/validate-skills.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Detect changed skills
+        id: changed
+        run: |
+          # If on PR, compare against base; otherwise compare against previous commit.
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE="HEAD~1"
+          fi
+          # Detect all changed skill folders (new + modified).
+          CHANGED=$(git diff --name-only "$BASE"...HEAD 2>/dev/null | \
+            grep -oE '^skills/[^/]+' | sort -u || true)
+          # If no diff (e.g., first push), validate everything.
+          if [ -z "$CHANGED" ]; then
+            CHANGED=$(find skills -mindepth 1 -maxdepth 1 -type d ! -name '_template' -printf 'skills/%f\n')
+          fi
+          # Always exclude the underscore-prefixed template.
+          CHANGED=$(echo "$CHANGED" | grep -v '_template' || true)
+          echo "skills_list<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Validate skill frontmatter and structure
+        env:
+          SKILLS: ${{ steps.changed.outputs.skills_list }}
+        run: |
+          echo "Validating skills:"
+          echo "$SKILLS"
+          echo "---"
+          while IFS= read -r skill; do
+            [ -z "$skill" ] && continue
+            echo "::group::Validating $skill"
+            if [ ! -f "$skill/SKILL.md" ]; then
+              echo "::error::Missing SKILL.md in $skill"
+              exit 1
+            fi
+            npx -y skills-ref validate "$skill"
+            echo "::endgroup::"
+          done <<< "$SKILLS"
+
+      - name: Check README skill list drift
+        run: |
+          # Read all skill names from skills/ and ensure each appears in README.md.
+          npx -y skills-ref readme --check

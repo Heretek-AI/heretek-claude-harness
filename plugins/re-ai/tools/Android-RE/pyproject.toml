@@ -1,0 +1,264 @@
+# ---- uv workspace root for the Android-RE monorepo ----
+# This file declares the workspace and shared dev dependencies. Each member
+# package has its own pyproject.toml that inherits from this one via
+# [tool.uv.sources] / [tool.uv.workspace] entries.
+
+[project]
+name = "android-re-root"
+version = "0.1.0"
+description = "Claude Code skills and MCP servers for Android APK reverse engineering (monorepo root)"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.12,<3.15"
+authors = [
+  { name = "The Android-RE Authors" },
+]
+keywords = [
+  "android",
+  "reverse-engineering",
+  "apk",
+  "mcp",
+  "claude",
+  "frida",
+  "androguard",
+  "lief",
+  "apktool",
+  "masvs",
+  "mobile-security",
+]
+
+# This is a workspace aggregator; no installable distribution.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = []
+
+# ---- uv workspace declaration ----
+[tool.uv.workspace]
+members = [
+  "android_re_core",
+  "mcp_servers/static",
+  "mcp_servers/native",
+  "mcp_servers/dynamic",
+  "mcp_servers/triage",
+]
+
+# Shared dev dependencies. Run `uv sync --all-packages` from the root.
+[tool.uv]
+package = false
+dev-dependencies = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "pytest-cov>=6",
+  "ruff>=0.7.4",
+  "mypy>=1.13",
+  "types-requests>=2.32",
+  "pre-commit>=4",
+  "uv>=0.5",
+  "pipx>=1.7",
+  "jsonschema>=4.23",
+  "sarif-tools>=0.3",  # SARIF validation
+  "build>=1.2",
+  "twine>=6",
+]
+
+[tool.uv.sources]
+"android-re-core" = { workspace = true }
+"android-re-mcp-static" = { workspace = true }
+"android-re-mcp-native" = { workspace = true }
+"android-re-mcp-dynamic" = { workspace = true }
+"android-re-mcp-triage" = { workspace = true }
+
+# ---- ruff ----
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [
+  ".venv",
+  "vendor",
+  "build",
+  "dist",
+  ".triage",
+]
+
+[tool.ruff.lint]
+# A pragmatic default: pycodestyle, pyflakes, isort, pyupgrade, bugbear, comprehensions.
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "UP",  # pyupgrade
+  "N",   # pep8-naming
+  "S",   # flake8-bandit (security)
+  "TID", # flake8-tidy-imports
+  "SIM", # flake8-simplify
+  "RUF", # ruff-specific
+]
+ignore = [
+  "E501",   # line length is enforced by formatter
+  "B008",   # do not perform function calls in default argument
+  "S101",   # allow `assert` (used in tests)
+  "S301",   # pickle: only used internally for trusted data
+  "S311",   # pseudo-random: we don't generate crypto
+  "S314",   # XML: we use defusedxml at the tool layer; manifest parsing happens in a sandboxed analyzer process
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S105", "S106", "S107", "S310"]
+"mcp_bridge/**" = ["S105"]
+"**/__init__.py" = ["F401"]
+# android_re_core.errors: exception classes are intentionally named without
+# an "Error" suffix (APKTooLarge, not APKTooLargeError) to keep imports short.
+"**/android_re_core/errors.py" = ["N818"]
+# android_re_core.dex and android_re_core.certs: iteration over DEX/cert
+# entries uses try/except/continue to skip malformed entries without
+# aborting the whole scan. This is intentional.
+"**/android_re_core/dex.py" = ["S112"]
+"**/android_re_core/certs.py" = ["S110"]
+"**/android_re_core/manifest.py" = ["SIM105"]
+# android_re_core.native: same — iteration over binary entries.
+"**/android_re_core/native.py" = ["S110", "S112"]
+# android_re_core.reporting: Severity/ControlStatus/Status str+Enum is a
+# common Python idiom for serializable enums.
+"**/android_re_core/reporting/**/*.py" = ["UP042", "S105"]
+# android_re_core.secrets: relative imports inside the secrets subpackage.
+"**/android_re_core/secrets/**/*.py" = ["TID252", "S603", "UP042"]
+"**/android_re_core/store/__init__.py" = ["E402"]
+"**/android_re_core/store/sqlite.py" = ["UP042", "S608"]
+# android_re_core.smali and android_re_core.sources: subprocess is the
+# whole point of these modules (apktool, jadx invocation).
+"**/android_re_core/smali.py" = ["S603", "S108", "SIM102"]
+"**/android_re_core/sources.py" = ["S603", "S108"]
+# android_re_core.device and .frida: subprocess wrappers; relative
+# imports inside the subpackage; try/except/pass in cleanup paths.
+"**/android_re_core/device/**/*.py" = ["TID252", "S603", "S110", "SIM105"]
+"**/android_re_core/frida/**/*.py" = ["TID252", "S603", "S110", "SIM105"]
+# Tests: nested with-statements are fine; rpc_exports is the frida
+# API name (snake_case is canonical there).
+"**/android_re_core/tests/test_frida.py" = ["SIM117", "N801"]
+# mcp_servers: subprocess is the whole point; /tmp workdirs are
+# expected (and guarded against zip-bombs and path traversal already).
+"mcp_servers/**/*.py" = ["S603", "S108", "S110", "S603", "SIM102", "SIM105", "B006"]
+"mcp_servers/static/src/android_re_mcp_static/errors.py" = ["N818"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+  "android_re_core",
+  "android_re_mcp_static",
+  "android_re_mcp_native",
+  "android_re_mcp_dynamic",
+  "android_re_mcp_triage",
+]
+
+# ---- mypy ----
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = true
+no_implicit_optional = true
+check_untyped_defs = true
+ignore_missing_imports = false
+# src-layout: mypy needs to be told that `import android_re_core` resolves
+# under android_re_core/src/android_re_core/. Without this, mypy sees
+# android_re_core as a top-level namespace package and the test files
+# can't import the shipped package.
+mypy_path = "android_re_core/src"
+# Two test directories both contain a conftest.py; mypy treats the second
+# one as a duplicate module. conftest.py is a pytest convention only and
+# has no runtime role outside test discovery, so exclude it from type
+# checking entirely.
+exclude = "conftest\\.py$"
+# The repo has test directories under both `android_re_core/tests/` and
+# `mcp_servers/*/tests/`. mypy's default module-resolution mode treats
+# both as the same top-level `tests` namespace package and flags the
+# duplicate. With explicit_package_bases=true, mypy treats each path
+# as its own package (the actual FQN becomes `android_re_core.tests.*`
+# and `mcp_servers.native.tests.*`, which then matches the override
+# below and lets the test functions be type-relaxed).
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = [
+  "androguard.*",
+  "asn1crypto.*",
+  "capstone.*",
+  "lief.*",
+  "pyaxmlparser.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Test files live at android_re_core/tests/* and mcp_servers/*/tests/*.
+# Relax strictness for the test package: don't require return type
+# annotations, don't enforce untyped-def body checks, and disable the
+# specific error codes that fire on test scaffolding.
+module = [
+  "android_re_core.tests.*",
+  "mcp_servers.*.tests.*",
+]
+strict = false
+disallow_untyped_defs = false
+check_untyped_defs = false
+no_implicit_optional = false
+warn_return_any = false
+warn_unused_ignores = false
+disable_error_code = ["no-untyped-def", "no-untyped-call", "import-untyped", "unused-ignore"]
+
+# ---- pytest ----
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests", "android_re_core/tests", "mcp_servers/*/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+# Note: ``asyncio_mode = "auto"`` is intentionally NOT set. None of the
+# existing tests use the ``@pytest.mark.asyncio`` decorator (the async
+# MCP contract tests call ``asyncio.run()`` explicitly), and pytest 9
+# + pytest-asyncio 1.4 + ``--strict-config`` rejects the option before
+# the plugin is loaded. Add it back if/when the suite starts using
+# async test functions.
+addopts = [
+  "-ra",
+  "--strict-markers",
+  "--strict-config",
+  "--showlocals",
+  "--tb=short",
+]
+markers = [
+  "device: requires a connected Android device via adb",
+  "slow: full integration tests (repackage, dynamic hooking)",
+  "unit: pure unit tests (no subprocess, no device)",
+]
+filterwarnings = [
+  "error",
+  "ignore::DeprecationWarning:androguard.*",
+  "ignore::DeprecationWarning:lief.*",
+  "ignore::PendingDeprecationWarning",
+  "ignore::ResourceWarning",
+  "ignore::pytest.PytestUnraisableExceptionWarning",
+]
+
+# ---- coverage ----
+[tool.coverage.run]
+source = ["android_re_core", "mcp_servers"]
+branch = true
+omit = [
+  "*/tests/*",
+  "*/__init__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+fail_under = 70

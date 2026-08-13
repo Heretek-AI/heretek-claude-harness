@@ -1,0 +1,860 @@
+{
+  "mcpServers": {
+    "re-android-dynamic": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-android-dynamic",
+        "run",
+        "re-android-dynamic"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-angr": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-angr",
+        "run",
+        "re-angr"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-anti-analysis": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-anti-analysis",
+        "run",
+        "re-anti-analysis"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-anti-debug-patch": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-anti-debug-patch",
+        "run",
+        "re-anti-debug-patch"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-anti-vm-spoof": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-anti-vm-spoof",
+        "run",
+        "re-anti-vm-spoof"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-apktool": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-apktool",
+        "run",
+        "re-apktool"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-binary-diff": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-binary-diff",
+        "run",
+        "re-binary-diff"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-c-injection-build": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-c-injection-build",
+        "run",
+        "re-c-injection-build"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-capa": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-capa",
+        "run",
+        "re-capa"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-catalog-match": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-catalog-match",
+        "run",
+        "re-catalog-match"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-cinematic-skip": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-cinematic-skip",
+        "run",
+        "re-cinematic-skip"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-dotnet": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-dotnet",
+        "run",
+        "re-dotnet"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-dotnet-patch": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-dotnet-patch",
+        "run",
+        "re-dotnet-patch"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-encrypted-vm-bypass": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-encrypted-vm-bypass",
+        "run",
+        "re-encrypted-vm-bypass"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-entitlement-bypass": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-entitlement-bypass",
+        "run",
+        "re-entitlement-bypass"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-frida": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-frida",
+        "run",
+        "re-frida"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-frida-runtime": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-frida-runtime",
+        "run",
+        "re-frida-runtime"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-frida-wine-runtime": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-frida-wine-runtime",
+        "run",
+        "re-frida-wine-runtime"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-fuzz-replay": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-fuzz-replay",
+        "run",
+        "re-fuzz-replay"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-game-ac-bypass": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-game-ac-bypass",
+        "run",
+        "re-game-ac-bypass"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-gdb": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-gdb",
+        "run",
+        "re-gdb"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-ghidra-remote": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-ghidra-remote",
+        "run",
+        "re-ghidra-remote"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-hypervisor-detect": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-hypervisor-detect",
+        "run",
+        "re-hypervisor-detect"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-ida-remote": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-ida-remote",
+        "run",
+        "re-ida-remote"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-il2cpp": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-il2cpp",
+        "run",
+        "re-il2cpp"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-il2cpp-triage": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-il2cpp-triage",
+        "run",
+        "re-il2cpp-triage"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-injection-runtime": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-injection-runtime",
+        "run",
+        "re-injection-runtime"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-ios": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-ios",
+        "run",
+        "re-ios"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-kaitai": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-kaitai",
+        "run",
+        "re-kaitai"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-launch-and-observe": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-launch-and-observe",
+        "run",
+        "re-launch-and-observe"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-leak-scan": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-leak-scan",
+        "run",
+        "re-leak-scan"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-lief": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-lief",
+        "run",
+        "re-lief"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-llm-decompile": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-llm-decompile",
+        "run",
+        "re-llm-decompile"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-mitm2swagger": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-mitm2swagger",
+        "run",
+        "re-mitm2swagger"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-orchestrator": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-orchestrator",
+        "run",
+        "re-orchestrator"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-patch": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-patch",
+        "run",
+        "re-patch"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-patch-apply": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-patch-apply",
+        "run",
+        "re-patch-apply"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-pcap": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-pcap",
+        "run",
+        "re-pcap"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-pdb": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-pdb",
+        "run",
+        "re-pdb"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-qemu-antidetect": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-qemu-antidetect",
+        "run",
+        "re-qemu-antidetect"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-report-write": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-report-write",
+        "run",
+        "re-report-write"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-rizin": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-rizin",
+        "run",
+        "re-rizin"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-runtime-dump": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-runtime-dump",
+        "run",
+        "re-runtime-dump"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-speakeasy": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-speakeasy",
+        "run",
+        "re-speakeasy"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-target-fingerprint": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-target-fingerprint",
+        "run",
+        "re-target-fingerprint"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-traffic-capture": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-traffic-capture",
+        "run",
+        "re-traffic-capture"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-triage": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-triage",
+        "run",
+        "re-triage"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-triton": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-triton",
+        "run",
+        "re-triton"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vendor-anti-tamper": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vendor-anti-tamper",
+        "run",
+        "re-vendor-anti-tamper"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vm-bridge": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vm-bridge",
+        "run",
+        "re-vm-bridge"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vm-control": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vm-control",
+        "run",
+        "re-vm-control"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vm-debug": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vm-debug",
+        "run",
+        "re-vm-debug"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vm-decrypt": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vm-decrypt",
+        "run",
+        "re-vm-decrypt"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vm-launch": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vm-launch",
+        "run",
+        "re-vm-launch"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vm-memory": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vm-memory",
+        "run",
+        "re-vm-memory"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vm-ssh": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vm-ssh",
+        "run",
+        "re-vm-ssh"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-vtil": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-vtil",
+        "run",
+        "re-vtil"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-winedbg": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-winedbg",
+        "run",
+        "re-winedbg"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-x64dbg-remote": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-x64dbg-remote",
+        "run",
+        "re-x64dbg-remote"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-yara": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-yara",
+        "run",
+        "re-yara"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "re-yara-author": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/servers/re-yara-author",
+        "run",
+        "re-yara-author"
+      ],
+      "env": {
+        "RE_AI_PLUGIN_ROOT": "",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "ghidra-mcp": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/re-mcps/ghidra-mcp",
+        "run",
+        "ghidra-mcp"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "ida-pro-mcp": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/re-mcps/ida-pro-mcp",
+        "run",
+        "ida-pro-mcp"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "x64DbgMCPServer": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/re-mcps/x64DbgMCPServer",
+        "run",
+        "x64dbg-mcp"
+      ],
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "ssh-mcp": {
+      "command": "/vendored/ssh-mcp/ssh-mcp",
+      "args": [
+        "--storage",
+        "/data/ssh-mcp/storage.db"
+      ],
+      "env": {}
+    },
+    "re-ui-automate": {
+      "command": "/vendored/touchpoint/.venv/bin/touchpoint-mcp",
+      "args": [],
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "TOUCHPOINT_FALLBACK_INPUT": "true"
+      }
+    },
+    "re-persistproc": {
+      "command": "/vendored/persistproc/.venv/bin/persistproc",
+      "args": [
+        "serve",
+        "--port",
+        "8947"
+      ],
+      "env": {
+        "PERSISTPROC_PORT": "8947"
+      }
+    }
+  }
+}

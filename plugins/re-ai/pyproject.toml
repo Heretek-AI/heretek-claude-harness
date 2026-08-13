@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-ai-agent-space"
+version = "0.1.0"
+description = "Agent-space orchestrator for the Heretek-RE per-MCP reverse-engineering toolchain."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "reverse-engineering", "agent-space", "toolchain"]
+authors = [{name = "Heretek-RE contributors"}]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

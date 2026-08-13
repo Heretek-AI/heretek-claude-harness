@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-dotnet"
+version = "0.1.0"
+description = "MCP server for .NET assembly analysis: enumerate types, methods, fields, strings, and decompile to C# (ILSpy backend). Vendor-neutral wrapper around AsmResolver + ICSharpCode.Decompiler."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "dotnet", "ilspy", "asmresolver", "decompiler", "reverse-engineering", "binary-analysis"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+# Build a self-contained AOT-compiled .NET 10 binary (slower build, no
+# runtime requirement). Default is framework-dependent (.NET 10 runtime
+# must be on PATH).
+aot = []
+
+[project.scripts]
+re-dotnet = "re_dotnet.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

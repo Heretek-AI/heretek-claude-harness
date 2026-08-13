@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-leak-scan"
+version = "0.1.0"
+description = "MCP server for detecting publisher telemetry pipeline leaks in binaries: Sentry DSNs, Logstash URLs, Confluence wiki links, Google Drive document URLs, Kafka topics. Pure-Python, vendor-neutral."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "leak", "sentry", "logstash", "confluence", "telemetry", "secret", "binary-analysis", "reverse-engineering"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# Active verification (HTTP probes) for the live-check tools.
+verify = ["httpx>=0.27"]
+
+[project.scripts]
+re-leak-scan = "re_leak_scan.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

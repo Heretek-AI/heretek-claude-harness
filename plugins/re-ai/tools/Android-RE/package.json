@@ -1,0 +1,30 @@
+{
+  "name": "android-re-root",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monorepo root for Claude Code skills and MCP servers for Android APK reverse engineering",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "build": "pnpm -r --filter='./mcp_bridge' build",
+    "test": "pnpm -r --filter='./mcp_bridge' test",
+    "lint": "pnpm -r --filter='./mcp_bridge' lint",
+    "format": "pnpm -r --filter='./mcp_bridge' format",
+    "typecheck": "pnpm -r --filter='./mcp_bridge' typecheck",
+    "dev:bridge": "pnpm --filter '@android-re/mcp-bridge' dev"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "node-forge": "^1.4.0",
+      "esbuild": "^0.25.0"
+    }
+  }
+}

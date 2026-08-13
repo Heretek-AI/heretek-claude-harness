@@ -1,0 +1,148 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs of the same branch on new pushes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Lint + mypy
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint (ruff + mypy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Sync workspace
+        run: uv sync --all-packages --group dev
+
+      - name: ruff check
+        run: uv run ruff check .
+
+      - name: ruff format check
+        run: uv run ruff format --check .
+
+      - name: mypy
+        run: uv run mypy android_re_core mcp_servers
+
+  # ---------------------------------------------------------------------------
+  # Unit + contract tests (no device required)
+  # ---------------------------------------------------------------------------
+  test-unit:
+    name: Tests (unit + MCP contract)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Sync workspace
+        run: uv sync --all-packages --group dev --python ${{ matrix.python-version }}
+
+      - name: Run unit + contract tests
+        run: uv run pytest -m "not device" -q --cov=android_re_core --cov=mcp_servers --cov-report=xml --cov-report=term
+
+      - name: Upload coverage
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Bridge (TypeScript) build + test
+  # ---------------------------------------------------------------------------
+  bridge-build:
+    name: Bridge (build + test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build
+        run: pnpm -r --filter='./mcp_bridge' build
+
+      - name: Test
+        run: pnpm -r --filter='./mcp_bridge' test
+
+  # ---------------------------------------------------------------------------
+  # Skill smoke test (frontmatter is valid YAML, SKILL.md exists)
+  # ---------------------------------------------------------------------------
+  skill-smoke:
+    name: Skills (frontmatter smoke test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate SKILL.md frontmatter
+        run: |
+          set -e
+          for skill in skills/*/SKILL.md; do
+            if [[ ! -s "$skill" ]]; then
+              echo "Missing or empty: $skill"
+              exit 1
+            fi
+            # Frontmatter must be delimited by ---
+            head -1 "$skill" | grep -q '^---$' || {
+              echo "Frontmatter missing in $skill"
+              exit 1
+            }
+            # Must contain a name and description
+            grep -q '^name:' "$skill" || {
+              echo "Missing 'name:' in $skill"
+              exit 1
+            }
+            grep -q '^description:' "$skill" || {
+              echo "Missing 'description:' in $skill"
+              exit 1
+            }
+            echo "OK: $skill"
+          done

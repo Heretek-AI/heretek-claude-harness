@@ -1,0 +1,73 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+uv.lock.bak
+
+# ---- Node ----
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-error.log*
+.vite/
+
+# ---- Vendored tools (re-created by bin/pull-tools.sh) ----
+vendor/
+
+# ---- Triage state ----
+.triage/
+*.db
+*.sqlite
+*.sqlite3
+
+# ---- IDE ----
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Secrets ----
+.env
+.env.local
+*.pem
+*.key
+keystore/
+
+# ---- Test artifacts ----
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# ---- Fraktal outputs ----
+.worktrees/
+out/
+tmp/
+Input/
+Output/
+
+# ---- Test fixture side-effects (fake-jadx writes argv here at runtime) ----
+tests/fixtures/last-jadx-args.txt
+CLAUDE.md

@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# Fake jadx for tests/fixtures/. Records argv to last-jadx-args.txt and
+# writes a small canned set of .java files to <workdir>/sources/ so
+# the rest of the Android-RE pipeline can be exercised end-to-end
+# without a real jadx install or a binary APK in the repo.
+#
+# Usage: fake-jadx [<flags>...] -d <workdir> <apk>
+#
+# Recognised flags (recorded; no behaviour change unless noted):
+#   --no-res                 (default; harmless)
+#   --show-bad-code          (default; harmless)
+#   --no-imports             (default; harmless)
+#   --deobf                  (recorded; behaviour unchanged)
+#   --use-kotlin-source      (recorded; writes .kt instead of .java)
+#   --threads-count <N>      (recorded)
+#   --version                (prints a fake version and exits)
+#   --help                   (prints a fake help and exits)
+set -euo pipefail
+
+# Resolve fixture directory regardless of where the script is invoked from.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RECORD="${SCRIPT_DIR}/../last-jadx-args.txt"
+
+# Persist the full argv (one flag per line for easy diffing) for the
+# next test to inspect.
+{
+  echo "argv0=$0"
+  for a in "$@"; do
+    echo "arg=$a"
+  done
+  echo "---"
+} > "$RECORD"
+
+# Handle meta-flags first.
+for a in "$@"; do
+  case "$a" in
+    --version)
+      echo "1.5.0-fake"
+      exit 0
+      ;;
+    --help|-h)
+      cat <<'EOF'
+fake-jadx (test fixture) — emulates the jadx CLI for android-re tests.
+EOF
+      exit 0
+      ;;
+  esac
+done
+
+# Pull out -d <workdir> and the trailing APK path.
+WORKDIR=""
+APK=""
+KOTLIN=0
+i=0
+ARGS=("$@")
+while [ $i -lt $# ]; do
+  a="${ARGS[$i]}"
+  case "$a" in
+    -d) i=$((i+1)); WORKDIR="${ARGS[$i]}";;
+    --use-kotlin-source) KOTLIN=1;;
+  esac
+  i=$((i+1))
+done
+# APK is the last positional arg.
+LAST_IDX=$(( $# - 1 ))
+APK="${ARGS[$LAST_IDX]}"
+
+if [ -z "$WORKDIR" ]; then
+  echo "fake-jadx: missing -d <workdir>" >&2
+  exit 2
+fi
+if [ -z "$APK" ] || [ ! -f "$APK" ]; then
+  echo "fake-jadx: APK not found: $APK" >&2
+  exit 2
+fi
+
+mkdir -p "$WORKDIR/sources/com/example"
+if [ "$KOTLIN" -eq 1 ]; then
+  cat > "$WORKDIR/sources/com/example/Foo.kt" <<'EOF'
+package com.example
+class Foo {
+    fun hello(): String {
+        val s = "hello } world"
+        return s
+    }
+    fun add(a: Int, b: Int): Int {
+        if (a > 0) {
+            return a + b
+        }
+        return b
+    }
+}
+EOF
+else
+  cat > "$WORKDIR/sources/com/example/Foo.java" <<'EOF'
+package com.example;
+
+public class Foo {
+    private final String greeting = "hello } world";
+    public String hello() {
+        String s = "world } again";
+        return s;
+    }
+    public int add(int a, int b) {
+        if (a > 0) {
+            return a + b;
+        }
+        return b;
+    }
+}
+EOF
+fi
+
+# Empty AndroidManifest.xml so the manifest_path probe succeeds.
+mkdir -p "$WORKDIR/resources"
+cat > "$WORKDIR/resources/AndroidManifest.xml" <<'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.example"/>
+EOF
+
+exit 0

@@ -1,0 +1,22 @@
+{
+  "name": "Heretek Claude Code Plugin Marketplace",
+  "description": "Unified marketplace hosting Heretek reverse-engineering toolchains, Claude Code skills, MCP servers, and quality guardrails.",
+  "version": "1.0.0",
+  "plugins": [
+    {
+      "name": "re-ai",
+      "path": "plugins/re-ai",
+      "description": "Reverse-engineering toolchain, 31 MCP tools, 34 skill workflows, RE-BREAKER toolkit, and Morphe patch creation skills."
+    },
+    {
+      "name": "core-skills",
+      "path": "plugins/core-skills",
+      "description": "General Heretek skills, maintenance skill workflows, and Morphe patch creation."
+    },
+    {
+      "name": "guardrails",
+      "path": "plugins/guardrails",
+      "description": "Fast quality guardrails including ruff, pyright, biome, and clippy."
+    }
+  ]
+}

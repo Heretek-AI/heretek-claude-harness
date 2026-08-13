@@ -1,0 +1,54 @@
+{# android-re-masvs-report Phase 1 template #}
+# MASVS Security Report — {{ package }}
+
+**Generated**: {{ generated_at }}
+**Analyzer**: android-re-masvs-report (Phase 1 stub)
+**Status**: Static-only coverage. Re-run after Phase 4 for full MASVS audit.
+
+## Summary
+
+| Metric                | Value                                |
+|-----------------------|--------------------------------------|
+| Package               | {{ package }}                        |
+| Version               | {{ version_name }} ({{ version_code }}) |
+| min/target SDK        | {{ min_sdk }} / {{ target_sdk }}     |
+| SHA-256               | {{ sha256 }}                         |
+| Findings              | {{ findings|length }} total          |
+| Highest severity      | {{ highest_severity }}               |
+| Status                | {{ status }}                         |
+
+## MASVS Coverage (Phase 1)
+
+| MASVS Control   | Status   | Evidence                                            |
+|-----------------|----------|------------------------------------------------------|
+{% for control in coverage %}
+| {{ control.id }}   | {{ control.status }} | {{ control.evidence | truncate(60) }} |
+{% endfor %}
+
+## Findings
+
+{% for finding in findings %}
+### F-{{ "%03d" | format(loop.index) }}: {{ finding.title }}
+
+- **MASVS**: {{ finding.masvs_control }}
+- **Severity**: {{ finding.severity }}
+- **Evidence**: `{{ finding.evidence_path }}:{{ finding.evidence_line }}`
+- **Description**: {{ finding.description }}
+- **Remediation**: {{ finding.remediation }}
+
+{% endfor %}
+
+## What Phase 4 will add
+
+The following MASVS control groups require the dynamic, native, and
+orchestrator MCP servers (Phase 2–4) for full coverage:
+
+- **MASVS-AUTH** — authentication flow analysis (dynamic).
+- **MASVS-CRYPTO** — algorithm and key strength review (decompile + static).
+- **MASVS-RESILIENCE-1/2/3/4/5** — runtime root/hook/tamper/emulator/debug detection (dynamic).
+- **MASVS-RESILIENCE-7** — obfuscation analysis (native + decompile).
+- **MASVS-STORAGE-1/2/3** — sensitive data at rest (decompile).
+- **MASVS-PRIVACY-3** — runtime logging (dynamic logcat + decompile).
+
+To upgrade, install the Phase 4 components and re-run with the
+`android-re-triage-orchestrator` skill.

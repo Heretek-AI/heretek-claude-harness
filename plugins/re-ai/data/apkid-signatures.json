@@ -1,0 +1,128 @@
+{
+  "_meta": {
+    "version": 1,
+    "last_updated": "2026-06-06",
+    "purpose": "Vendored subset of public APK protection detection signatures (DEX, native, manifest). Used by the re-apktool classify_apk_protection tool. Vendor-neutral: only category labels, no product / publisher / app names.",
+    "category_legend": {
+      "apk_packager": "The APK was assembled by a 3rd-party packager that obscures the original package layout.",
+      "dex_obfuscator": "The DEX classes were processed by a Java/Kotlin obfuscator (name-rename + control-flow flatten + string-encrypt).",
+      "native_vm_bytecode_interpreter": "A native .so was wrapped by an encrypted-VM bytecode interpreter; classes.dex is a thin shim.",
+      "anti_tamper_runtime": "A native .so contains a runtime integrity / debugger / emulator detection surface.",
+      "string_encryption": "The DEX string pool was processed by a string-encryptor that the consumer must decrypt before reading.",
+      "resource_encryption": "The APK resources were processed by a resource-encryptor; resources.arsc is opaque without the matching decryptor.",
+      "anti_debug_native": "A native .so contains anti-debug primitives (ptrace self-attach, /proc/status walk, signal-mask probe).",
+      "anti_frida_native": "A native .so contains Frida-gadget detection (port scan, library walk, dlsym lookup).",
+      "root_detection": "The APK or its native libs probe for Magisk / SuperSU / su binary.",
+      "ssl_pinning": "The network code uses OkHttp / TrustManager / NetworkSecurityConfig to pin certificates."
+    },
+    "evidence_legend": {
+      "class_name": "DEX class with a non-obfuscated name (the obfuscator's seed names tend to be a single letter or symbol).",
+      "method_signature": "DEX method signature with a known-encrypted prefix.",
+      "string_literal": "DEX or native lib contains a string literal that is the canonical signal.",
+      "native_section": "A .so has a section name (or absence of expected section) that signals the protection class.",
+      "manifest_meta": "The AndroidManifest.xml has a meta-data tag that the packager / obfuscator adds.",
+      "file_path": "An APK file is at a path that signals the protection class (e.g. /lib/.../lib<packager-name>.so)."
+    },
+    "source_credits": [
+      "https://github.com/rednaga/APKiD (APKiD open signatures for DEX/native/manifest protection detection)"
+    ]
+  },
+  "entries": [
+    {
+      "id": "apk-001",
+      "category": "apk_packager",
+      "evidence_kind": "manifest_meta",
+      "match_pattern": "application-meta-data: packagername",
+      "platforms": ["android"],
+      "note": "Meta-data tag in AndroidManifest.xml that a known APK packager adds. Multiple packager tags on one APK = the APK was re-packed."
+    },
+    {
+      "id": "apk-002",
+      "category": "dex_obfuscator",
+      "evidence_kind": "class_name",
+      "match_pattern": "single-letter class names (a, b, c, aa, ab, ...)",
+      "platforms": ["android"],
+      "note": "Class names in classes.dex that are 1-2 letters are a strong obfuscator signal. Counter-example: some legitimate frameworks also use 1-2 letter names (kotlin.coroutines.intrinsics); review the package prefix."
+    },
+    {
+      "id": "apk-003",
+      "category": "dex_obfuscator",
+      "evidence_kind": "method_signature",
+      "match_pattern": "method bodies with only 1-3 instructions + a single call to a static decrypt stub",
+      "platforms": ["android"],
+      "note": "Method bodies that are just 'invoke-static decrypt-stub' are a control-flow-flattened string-decrypt pattern."
+    },
+    {
+      "id": "apk-004",
+      "category": "string_encryption",
+      "evidence_kind": "class_name",
+      "match_pattern": "presence of a 'Decrypt' or 'd' class with a single static 'd(String)' method",
+      "platforms": ["android"],
+      "note": "The canonical string-decrypt stub. The obfuscator rewrites every string-literal load as a call to this method."
+    },
+    {
+      "id": "apk-005",
+      "category": "native_vm_bytecode_interpreter",
+      "evidence_kind": "native_section",
+      "match_pattern": "lib<obfuscated>.so with a non-standard .text section (small, low entropy) and a large .data or .bss (high entropy)",
+      "platforms": ["android"],
+      "note": "Native encrypted-VM bytecode interpreter shape: the interpreter + dispatcher are in .text (small, normal entropy); the encrypted handlers are in .data / .bss (large, high entropy). The .init_array entry point is the lazy-decrypt stub."
+    },
+    {
+      "id": "apk-006",
+      "category": "anti_tamper_runtime",
+      "evidence_kind": "string_literal",
+      "match_pattern": "native lib contains the strings 'frida', 'gadget', 'gmain'",
+      "platforms": ["android"],
+      "note": "Strings that indicate the native lib is searching for Frida gadget or frida-server. Note: these strings are not in the catalog (they are matched at runtime); the catalog only describes the *category*."
+    },
+    {
+      "id": "apk-007",
+      "category": "anti_debug_native",
+      "evidence_kind": "string_literal",
+      "match_pattern": "native lib contains '/proc/self/status' and 'TracerPid'",
+      "platforms": ["android"],
+      "note": "The canonical Linux anti-debug primitive: read /proc/self/status, look for 'TracerPid: 0'. Used by native-side anti-debug in modern Android apps."
+    },
+    {
+      "id": "apk-008",
+      "category": "anti_frida_native",
+      "evidence_kind": "string_literal",
+      "match_pattern": "native lib contains 'LIBFRIDA' or 'frida-agent'",
+      "platforms": ["android"],
+      "note": "Native-side Frida detection: scan /proc/self/maps for the frida-agent library, scan TCP for the default 27042 port."
+    },
+    {
+      "id": "apk-009",
+      "category": "root_detection",
+      "evidence_kind": "string_literal",
+      "match_pattern": "DEX contains 'su', 'Magisk', 'Superuser'",
+      "platforms": ["android"],
+      "note": "Strings that indicate the app probes for root: check for the su binary, the Magisk mount, the Superuser.apk package. High FP in apps that legitimately interact with root (e.g. system tools)."
+    },
+    {
+      "id": "apk-010",
+      "category": "ssl_pinning",
+      "evidence_kind": "string_literal",
+      "match_pattern": "DEX contains 'OkHttp' and 'CertificatePinner'",
+      "platforms": ["android"],
+      "note": "OkHttp CertificatePinner is the canonical SSL-pinning pattern. The bypass is to override the pin check in OkHttp's CertificatePinner class."
+    },
+    {
+      "id": "apk-011",
+      "category": "ssl_pinning",
+      "evidence_kind": "manifest_meta",
+      "match_pattern": "networkSecurityConfig meta-data",
+      "platforms": ["android"],
+      "note": "The AndroidManifest declares a networkSecurityConfig XML that pins certs. The bypass is to repackage the APK with an empty networkSecurityConfig."
+    },
+    {
+      "id": "apk-012",
+      "category": "resource_encryption",
+      "evidence_kind": "string_literal",
+      "match_pattern": "resources.arsc is opaque, .arsc decryption stub in DEX",
+      "platforms": ["android"],
+      "note": "The .arsc is encrypted; the obfuscator's decrypt stub must be called before the resources can be read. Pair with apk-004 (string-encryption stub)."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-angr"
+version = "0.1.0"
+description = "MCP server for angr (UC Santa Barbara) — symbolic execution + CFG + reaching-definitions. Cross-validates re-triton for MBA-obfuscated arithmetic. Vendor-neutral."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "angr", "symbolic-execution", "cfg", "binary-analysis", "reverse-engineering"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.6",
+    # angr is a heavy optional dep. The MCP server can be
+    # loaded without it (degraded mode) — install.sh installs it.
+]
+
+[project.optional-dependencies]
+core = ["angr>=9.2"]
+
+[project.scripts]
+re-angr = "re_angr.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

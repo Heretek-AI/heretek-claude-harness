@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-android-dynamic"
+version = "0.1.0"
+description = "MCP server for runtime analysis of an Android APK via Frida + the device. Wraps re-frida + re-apktool. Vendor-neutral."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ['mcp', 'android', 'frida', 'dynamic', 'ssl-pinning', 'root']
+authors = [{name = "John"}]
+dependencies = ['mcp[cli]>=1.2', 'pydantic>=2.6']
+
+[project.scripts]
+re-android-dynamic = "re_android_dynamic.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

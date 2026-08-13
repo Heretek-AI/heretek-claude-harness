@@ -1,0 +1,66 @@
+{
+  "mcpServers": {
+    "android-re-static": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        ".",
+        "--package",
+        "android-re-mcp-static",
+        "android-re-mcp-static"
+      ]
+    },
+    "android-re-native": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        ".",
+        "--package",
+        "android-re-mcp-native",
+        "android-re-mcp-native"
+      ]
+    },
+    "android-re-dynamic": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        ".",
+        "--package",
+        "android-re-mcp-dynamic",
+        "android-re-mcp-dynamic"
+      ]
+    },
+    "android-re-triage": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        ".",
+        "--package",
+        "android-re-mcp-triage",
+        "android-re-mcp-triage"
+      ]
+    },
+    "android-re-bridge": {
+      "command": "node",
+      "args": [
+        "./mcp_bridge/dist/index.js"
+      ]
+    },
+    "re-library": {
+      "command": "uv",
+      "args": [
+        "tool",
+        "run",
+        "--from",
+        "re-library-mcp",
+        "python",
+        "-m",
+        "re_library_mcp"
+      ]
+    }
+  }
+}

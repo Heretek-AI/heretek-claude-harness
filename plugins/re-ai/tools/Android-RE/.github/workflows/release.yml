@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Tag to release (e.g. v0.1.0). Must already exist locally."
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Sync workspace
+        run: uv sync --all-packages --group dev
+
+      - name: Lint + test
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy android_re_core mcp_servers
+          uv run pytest -m "not device" -q
+
+      - name: Build Python wheels + sdists
+        run: uv build --all-packages --out-dir dist/
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+
+      - name: Build bridge
+        run: pnpm install --frozen-lockfile=false && pnpm -r --filter='./mcp_bridge' build
+
+      - name: Package bridge
+        run: |
+          mkdir -p dist/mcp-bridge
+          cp -R mcp_bridge/dist/. dist/mcp-bridge/
+          cp mcp_bridge/package.json dist/mcp-bridge/
+          cp mcp_bridge/README.md dist/mcp-bridge/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-re-${{ github.ref_name }}
+          path: dist/
+
+  publish:
+    name: Publish GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-re-${{ github.ref_name }}
+          path: dist/
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

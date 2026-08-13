@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-binary-diff"
+version = "0.1.0"
+description = "MCP server for binary diff and section fingerprinting: unified diff between two files, per-section fingerprint of one file. Dry-run only — never writes. Pure-Python, no system dependencies."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "diff", "binary-diff", "fingerprint", "section", "reverse-engineering"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.6",
+]
+
+[project.scripts]
+re-binary-diff = "re_binary_diff.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

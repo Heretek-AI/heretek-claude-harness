@@ -1,0 +1,36 @@
+# Local reference clones (distillation sources, not committed)
+MorpheApp/
+
+# Android / Gradle
+build/
+.gradle/
+*.iml
+local.properties
+captures/
+.kotlin/
+*.apk
+*.aab
+*.apkm
+*.apks
+*.xapk
+*.dex
+*.mpp
+*.mpe
+
+# IDE
+.idea/
+*.iws
+*.ipr
+.vscode/
+.fleet/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (for skills-ref tooling)
+node_modules/
+npm-debug.log*
+
+# Skill-packaging output
+.skill/

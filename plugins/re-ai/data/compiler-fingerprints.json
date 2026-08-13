@@ -1,0 +1,100 @@
+{
+  "_meta": {
+    "version": 1,
+    "last_updated": "2026-06-06",
+    "purpose": "Compiler fingerprint catalog used by the re-rizin list_functions_with_metadata tool to attach a 'compiled_by' hint to each function. The hints are observed patterns (RSDS debug signature, .CRT section prefix, mangled-name scheme) — no product names.",
+    "compiler_categories": {
+      "msvc": "Functions compiled with Microsoft's MSVC toolchain. The .CRT section prefix is .CRT$XC; mangled names start with ?@; debug info is the standard PDB CodeView.",
+      "gcc": "Functions compiled with the GNU Compiler Collection. The .CRT section prefix is .init_array; mangled names use the Itanium ABI (_Z); debug info is DWARF.",
+      "clang": "Functions compiled with Clang/LLVM. The .CRT section prefix is .init_array; mangled names use the Itanium ABI; debug info is DWARF. Distinguishing from GCC requires the build-id or the presence of Clang's __cxxabiv1 namespace imports.",
+      "icc": "Functions compiled with Intel's ICC. Distinguishing from MSVC requires the Intel-specific .CRT section (.CRT$XC with __intel_* symbols).",
+      "rustc": "Functions compiled with rustc. The mangled names start with _ZN; the .CRT section is .init_array; the function name pattern is hash-suffixed (a Rust symbol like '_ZN3std2io5Write9write_all17h8c2a3b1e9d4a5b6E' is rustc-stable).",
+      "go": "Functions compiled with the Go toolchain. The mangled names contain '..func' or '..stkobj' separators; the .gopclntab section is unique to Go.",
+      "delphi": "Functions compiled with Embarcadero Delphi. The mangled names contain '@<unit>@<symbol>$qqrv' or similar patterns; the .itext / .data section prefix is Delphi-specific."
+    },
+    "evidence_legend": {
+      "section_prefix": "The .CRT / .init section name prefix is the canonical signal.",
+      "mangled_prefix": "The first 3 characters of the demangled name is the canonical signal.",
+      "debug_format": "The presence of CodeView (RSDS) vs DWARF debug info is a signal."
+    }
+  },
+  "fingerprints": [
+    {
+      "id": "cf-msvc",
+      "compiler": "msvc",
+      "evidence_kind": "section_prefix",
+      "match_pattern": "section name matches /^\\.CRT\\$XC[A-Z]+$/",
+      "note": "Canonical MSVC .CRT section. The '$' + single uppercase letter is the MSVC convention for ordered init sections."
+    },
+    {
+      "id": "cf-msvc-mangle",
+      "compiler": "msvc",
+      "evidence_kind": "mangled_prefix",
+      "match_pattern": "demangled name starts with '?@' or '??'",
+      "note": "MSVC mangled-name scheme. Functions exported from a .dll start with '?@'; C++ type info starts with '??'."
+    },
+    {
+      "id": "cf-gcc-section",
+      "compiler": "gcc",
+      "evidence_kind": "section_prefix",
+      "match_pattern": "section name matches /^\\.init_array$/ or /^\\.fini_array$/",
+      "note": "Canonical GCC .init_array / .fini_array. Shared with Clang; distinguishing requires the .debug_info build-id."
+    },
+    {
+      "id": "cf-gcc-mangle",
+      "compiler": "gcc",
+      "evidence_kind": "mangled_prefix",
+      "match_pattern": "demangled name starts with '_Z'",
+      "note": "Itanium C++ ABI mangled-name scheme. Shared with Clang and rustc; distinguishing requires the hash-suffix style."
+    },
+    {
+      "id": "cf-clang-marker",
+      "compiler": "clang",
+      "evidence_kind": "mangled_prefix",
+      "match_pattern": "demangled name contains '__cxxabiv1'",
+      "note": "Clang's libcxxabi import marker. Distinguishes Clang from GCC when the .init_array section is ambiguous."
+    },
+    {
+      "id": "cf-icc-symbol",
+      "compiler": "icc",
+      "evidence_kind": "section_prefix",
+      "match_pattern": "section name contains '__intel_' or '__intel_ia32'",
+      "note": "ICC's .CRT section contains __intel_* initialization symbols. Distinguishes ICC from MSVC."
+    },
+    {
+      "id": "cf-rustc-mangle",
+      "compiler": "rustc",
+      "evidence_kind": "mangled_prefix",
+      "match_pattern": "demangled name matches /^_ZN[a-z0-9_]+[0-9]+[a-zA-Z0-9]{16}E$/",
+      "note": "rustc stable mangled-name scheme. The 16-character hex suffix is a TypeName hash that rustc uses to dedup symbol names. Distinguishes rustc from C++ Clang/GCC."
+    },
+    {
+      "id": "cf-go-section",
+      "compiler": "go",
+      "evidence_kind": "section_prefix",
+      "match_pattern": "section name matches /^\\.gopclntab$/",
+      "note": "Go's program-counter-line-number table. Unique to Go binaries; presence confirms a Go target."
+    },
+    {
+      "id": "cf-go-mangle",
+      "compiler": "go",
+      "evidence_kind": "mangled_prefix",
+      "match_pattern": "demangled name contains '..func' or '..stkobj' or '..stk_'",
+      "note": "Go's symbol-naming scheme uses '..' as a category separator. The '..func' separator is the most common in a Go binary."
+    },
+    {
+      "id": "cf-delphi-mangle",
+      "compiler": "delphi",
+      "evidence_kind": "mangled_prefix",
+      "match_pattern": "demangled name matches /@[A-Za-z0-9_]+@[A-Za-z0-9_]+\\$[a-z0-9]+/",
+      "note": "Delphi's mangled-name scheme. The '@UnitName@MethodName$qqrv' pattern is the canonical signal. Pairs with the .itext / .data section prefix."
+    },
+    {
+      "id": "cf-delphi-section",
+      "compiler": "delphi",
+      "evidence_kind": "section_prefix",
+      "match_pattern": "section name matches /^(itext|odata|tls|data|bss)$/",
+      "note": "Delphi's standard section set. The 'itext' section is the canonical signal — no other compiler uses it."
+    }
+  ]
+}

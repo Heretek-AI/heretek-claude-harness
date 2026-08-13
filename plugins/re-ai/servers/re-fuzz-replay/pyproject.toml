@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-fuzz-replay"
+version = "0.1.0"
+description = "MCP server for fuzz-style replay of an input corpus against a target function. Wraps re-triton + re-gdb. Pure-Python, vendor-neutral."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ['mcp', 'fuzz', 'replay', 'triton', 'coverage', 'binary-analysis']
+authors = [{name = "John"}]
+dependencies = ['mcp[cli]>=1.2', 'pydantic>=2.6']
+
+[project.scripts]
+re-fuzz-replay = "re_fuzz_replay.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

@@ -1,0 +1,92 @@
+[project]
+name = "android-re-core"
+version = "0.1.0"
+description = "Shared Python library for Android reverse engineering: androguard, LIEF, frida, ADB, MASVS reporting."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.12,<3.15"
+authors = [
+  { name = "The Android-RE Authors" },
+]
+keywords = [
+  "android",
+  "reverse-engineering",
+  "apk",
+  "androguard",
+  "lief",
+  "frida",
+  "apktool",
+  "mobile-security",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Security",
+  "Topic :: Software Development :: Disassemblers",
+]
+
+dependencies = [
+  # APK / DEX / Android binary XML analysis
+  "androguard==4.1.4",
+  "pyaxmlparser>=0.3.31",  # latest available; androguard 4.x bundles its own
+  "asn1crypto>=1.5",
+
+  # Native binary analysis (ELF / Mach-O / OAT / VDEX / ART)
+  "lief==0.17.6",
+  "pyelftools>=0.31",
+  "capstone>=5.0.1",
+
+  # Crypto / certs
+  "cryptography>=44.0",
+
+  # Runtime: frida
+  # (pinned here so all servers and tests resolve the same version; not imported
+  # at module load time — `import frida` is lazy so this package can be
+  # installed on a host that has no frida-tools.)
+  "frida==17.10.1 ; python_version < '3.14' or sys_platform != 'linux'",
+  "frida-tools>=13.0 ; python_version < '3.14' or sys_platform != 'linux'",
+
+  # Utilities
+  "requests>=2.32",
+  "platformdirs>=4.3",
+  "structlog>=24.4",
+  "typing-extensions>=4.12",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "pytest-cov>=6",
+  "ruff>=0.7.4",
+  "mypy>=1.13",
+]
+
+[project.urls]
+Homepage = "https://github.com/Heretek-AI/Android-RE"
+Issues = "https://github.com/Heretek-AI/Android-RE/issues"
+Source = "https://github.com/Heretek-AI/Android-RE"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/android_re_core"]
+
+# Tell the uv workspace root that this is a workspace member and that
+# sibling packages (mcp_servers/*) should resolve it as a path dep.
+[tool.uv]
+# Inherit the root workspace declarations.
+
+[tool.ruff]
+extend = "../pyproject.toml"
+
+[tool.mypy]
+extend = "../pyproject.toml"

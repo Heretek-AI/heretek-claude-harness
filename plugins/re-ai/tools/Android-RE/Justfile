@@ -1,0 +1,100 @@
+# Android-RE Justfile
+# ====================
+# Operator entry point. Use `just` to list available recipes.
+
+set dotenv-load := false
+set shell := ["bash", "-uc"]
+
+# Default recipe: show help.
+default:
+    @just --list
+
+# ---- Top-level orchestration ----
+
+# Install everything: Python packages, Node package, vendored jars, skill symlinks.
+install:
+    ./bin/install.sh --full
+
+# Install only the Claude Code skills (relies on user installing MCP servers separately).
+install-skills:
+    ./bin/install.sh --skills-only
+
+# Uninstall: remove symlinks, do not touch Python or Node packages.
+uninstall:
+    ./bin/uninstall.sh
+
+# Verify the toolchain (ADB, Java, frida-server, Python deps, Node deps).
+doctor:
+    ./bin/doctor.sh
+
+# Vendor the latest jadx, apktool, uber-apk-signer, frida-server into ./vendor/.
+pull-tools:
+    ./bin/pull-tools.sh
+
+# ---- Development ----
+
+# Install all Python packages in the workspace and sync lockfile.
+py-sync:
+    uv sync --all-packages
+
+# Format Python and TypeScript code.
+format:
+    uv run ruff format .
+    uv run ruff check --fix .
+    pnpm format
+
+# Run ruff + mypy + pytest.
+lint:
+    uv run ruff check .
+    uv run mypy android_re_core mcp_servers
+
+# Run all tests (skip device-marked tests if no device connected).
+test:
+    uv run pytest -m "not device"
+
+# Run all tests including device integration.
+test-device:
+    uv run pytest -m "device"
+
+# Run a single Phase-1 MCP server in the foreground for manual testing.
+dev-static:
+    uv run --package android-re-mcp-static python -m android_re_mcp_static
+
+dev-native:
+    uv run --package android-re-mcp-native python -m android_re_mcp_native
+
+dev-dynamic:
+    uv run --package android-re-mcp-dynamic python -m android_re_mcp_dynamic
+
+dev-bridge:
+    pnpm --filter '@android-re/mcp-bridge' dev
+
+# Install the RE-Library peer MCP server into an isolated uv tool venv.
+# OPT-IN — the main `just install` flow does not pull PyPI packages by
+# design (mirrors SKIP_PULL / SKIP_PY / SKIP_NODE). The MCP client can
+# still launch the peer via `uv tool run --from re-library-mcp …`
+# (configured in .mcp.json) without this step.
+install-re-library:
+    @command -v uv >/dev/null || { echo "uv is required: https://astral.sh/uv/install.sh" >&2; exit 1; }
+    uv tool install re-library-mcp
+    @echo "re-library-mcp installed. Verify with: re-library-mcp --check"
+    @echo "Then restart Claude Code so it picks up the new MCP server."
+
+# Run the RE-Library peer MCP server in the foreground for manual testing.
+dev-re-library:
+    uv run --from re-library-mcp python -m re_library_mcp
+
+# Run the TypeScript MCP bridge build.
+build-bridge:
+    pnpm --filter '@android-re/mcp-bridge' build
+
+# ---- CI / Continuous integration ----
+
+ci: lint test
+    @echo "✅ CI checks passed (lint + test)."
+
+# Build Python wheels and the TypeScript package; produce a release artifact in ./dist/.
+release: py-sync lint test
+    uv build --all-packages
+    pnpm build
+    @echo "Release artifacts in ./dist/."

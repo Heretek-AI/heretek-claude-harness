@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-hypervisor-detect"
+version = "0.1.0"
+description = "MCP server for hypervisor-detection primitive scanning: CPUID leaves, VMX/EPT, TSC skew, SMBIOS/ACPI probes. Wraps re-winedbg + re-lief. Vendor-neutral."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ['mcp', 'hypervisor', 'cpuid', 'vmx', 'ept', 'smbios', 'anti-vm']
+authors = [{name = "John"}]
+dependencies = ['mcp[cli]>=1.2', 'pydantic>=2.6']
+
+[project.scripts]
+re-hypervisor-detect = "re_hypervisor_detect.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

@@ -1,0 +1,37 @@
+# RE-AI agent-space per-MCP server pins
+# Format: <repo-name> <git-tag>
+# Regenerate after any per-MCP repo releases a new tag.
+
+re-android-dynamic v0.1.0
+re-angr v0.1.0
+re-anti-analysis v0.1.0
+re-apktool v0.1.0
+re-binary-diff v0.1.0
+re-capa v0.1.0
+re-dotnet v0.1.0
+re-dotnet-patch v0.1.0
+re-frida v0.1.0
+re-fuzz-replay v0.1.0
+re-game-ac-bypass v0.1.0
+re-gdb v0.1.0
+re-hypervisor-detect v0.1.0
+re-il2cpp v0.1.0
+re-ios v0.1.0
+re-kaitai v0.1.0
+re-leak-scan v0.1.0
+re-lief v0.1.0
+re-llm-decompile v0.1.0
+re-mitm2swagger v0.1.0
+re-patch v0.1.0
+re-pcap v0.1.0
+re-pdb v0.1.0
+re-report-write v0.1.0
+re-rizin v0.1.0
+re-speakeasy v0.1.0
+re-triton v0.1.0
+re-vtil v0.1.0
+re-winedbg v0.1.0
+re-yara v0.1.0
+re-yara-author v0.1.0
+re-ai-data v0.1.0
+re-ai-skills v0.1.0

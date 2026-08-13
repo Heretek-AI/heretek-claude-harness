@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-frida"
+version = "0.1.0"
+description = "MCP server wrapping the Frida dynamic-instrumentation toolkit for Android, iOS, macOS, Linux, and Windows targets. Spawn, attach, load scripts, enumerate modules/exports, hook methods, and call RPC exports."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = [
+    "mcp",
+    "frida",
+    "dynamic-analysis",
+    "instrumentation",
+    "android",
+    "ios",
+    "reverse-engineering",
+    "hooking",
+    "rpc",
+]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.6",
+    "frida>=16.0",
+    "frida-tools>=12.0",
+]
+
+[project.scripts]
+re-frida = "re_frida.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

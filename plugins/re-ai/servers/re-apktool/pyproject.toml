@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-apktool"
+version = "0.1.0"
+description = "MCP server for Android APK triage: parse APK headers, list DEX classes, decode AndroidManifest.xml. Wraps apktool (Java) and androguard (Python) so the MCP caller can pick either backend."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = [
+    "mcp",
+    "apk",
+    "android",
+    "apktool",
+    "androguard",
+    "dex",
+    "manifest",
+    "binary-triage",
+    "reverse-engineering",
+]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.6",
+    "androguard>=4.0",
+]
+
+[project.optional-dependencies]
+# The apktool Java CLI is optional — the server falls back to a
+# pure-Python (zipfile + androguard) implementation when missing.
+apktool = []
+
+[project.scripts]
+re-apktool = "re_apktool.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

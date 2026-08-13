@@ -1,0 +1,242 @@
+#!/usr/bin/env python3
+"""angr-cli — UC Santa Barbara angr binary-analysis helper.
+
+Subcommand surface (one JSON document on stdout per invocation):
+
+  check                                 -> angr + cle versions
+  cfg <path> [--function NAME]           -> CFG JSON
+  symbolic-exec <path> <addr_hex> [...]  -> constraints JSON
+  reaching-defs <path> <function>        -> def-use JSON
+
+This is the binary the re-angr Python MCP server shells out to.
+angr keeps long-lived AngrProject objects that don't survive
+across JSON-RPC calls cleanly; the subprocess wrapper keeps each
+call isolated (a fresh Python process per invocation).
+
+Errors emit a JSON {"error": "..."} document with a non-zero
+exit code. Vendor-neutral — no commercial product named.
+"""
+
+import json
+import sys
+from pathlib import Path
+
+
+def emit(payload: dict) -> None:
+    print(json.dumps(payload))
+
+
+def emit_error(message: str, exit_code: int = 1) -> None:
+    emit({"error": message})
+    sys.exit(exit_code)
+
+
+def cmd_check() -> int:
+    try:
+        import angr
+        import cle
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"angr/cle import: {exc}")
+    emit({
+        "angr_version": getattr(angr, "__version__", "unknown"),
+        "cle_version": getattr(cle, "__version__", "unknown"),
+    })
+    return 0
+
+
+def cmd_cfg(args: list[str]) -> int:
+    if not args:
+        emit_error("cfg requires <path>")
+        return 2
+    path = args[0]
+    function = None
+    if "--function" in args:
+        try:
+            i = args.index("--function")
+            function = args[i + 1]
+        except IndexError:
+            emit_error("--function requires a name")
+            return 2
+    if not Path(path).is_file():
+        emit_error(f"file not found: {path}")
+        return 2
+    try:
+        import angr
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"angr import: {exc}")
+    try:
+        proj = angr.Project(path, auto_load_libs=False)
+        cfg = proj.analyses.CFGFast()
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"CFG construction failed: {exc}")
+    # Build a node + edge list. We cap at 50k nodes for the JSON
+    # output; the analyst can re-run with a smaller binary if they
+    # need full fidelity.
+    nodes = []
+    edges = []
+    try:
+        if function:
+            try:
+                target = proj.kb.functions[function]
+                subgraph = cfg.functions.get_callgraph(
+                    cfg.kb.functions[function],
+                    reachability=lambda f: True,
+                )
+            except KeyError:
+                emit_error(f"function not found: {function}")
+            return _emit_function_cfg(cfg, target, nodes, edges)
+        # Whole-program CFG
+        for addr, node in list(cfg.graph.nodes(data=True))[:50000]:
+            nodes.append({
+                "addr": addr,
+                "size": getattr(node, "size", 0),
+                "successors": [n for n in cfg.graph.successors(addr)],
+            })
+            for src, dst, data in cfg.graph.out_edges(addr, data=True):
+                edges.append({
+                    "src": src,
+                    "dst": dst,
+                    "kind": data.get("type", "unknown"),
+                })
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"CFG walk failed: {exc}")
+    emit({"path": path, "function": None, "nodes": nodes, "edges": edges})
+    return 0
+
+
+def _emit_function_cfg(cfg, target, nodes, edges) -> int:
+    """Emit the CFG of a single function."""
+    try:
+        for addr in sorted(target.block_addrs_set):
+            block = cfg.model.get_any_node(addr)
+            nodes.append({
+                "addr": addr,
+                "size": block.size if block else 0,
+                "successors": [
+                    s for s in cfg.model.get_any_node(addr).successors
+                ] if block else [],
+            })
+            for src, dst in target.get_call_sites() or []:
+                if src == addr or dst == addr:
+                    edges.append({"src": src, "dst": dst, "kind": "call"})
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"function CFG walk failed: {exc}")
+    emit({"path": cfg.project.filename, "function": target.name, "nodes": nodes, "edges": edges})
+    return 0
+
+
+def cmd_symbolic_exec(args: list[str]) -> int:
+    if len(args) < 2:
+        emit_error("symbolic-exec requires <path> <addr_hex>")
+        return 2
+    path = args[0]
+    addr_hex = args[1]
+    if not Path(path).is_file():
+        emit_error(f"file not found: {path}")
+        return 2
+    try:
+        addr = int(addr_hex, 16)
+    except ValueError:
+        emit_error(f"invalid hex address: {addr_hex}")
+        return 2
+    try:
+        import angr
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"angr import: {exc}")
+    try:
+        proj = angr.Project(path, auto_load_libs=False)
+        state = proj.factory.blank_state(addr=addr)
+        simgr = proj.factory.simulation_manager(state)
+        simgr.run(n=200)
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"symbolic execution failed: {exc}")
+    constraints = []
+    for stash_name, stash in simgr.stashes.items():
+        for s in stash:
+            try:
+                for c in s.history.constraints_since(-1) or []:
+                    constraints.append({
+                        "stash": stash_name,
+                        "expr": str(c)[:500],
+                    })
+            except Exception:
+                continue
+    emit({
+        "path": path,
+        "address": addr_hex,
+        "states_explored": len(simgr.active) + len(simgr.deadended),
+        "constraints": constraints,
+        "dead_ends": len(simgr.deadended),
+    })
+    return 0
+
+
+def cmd_reaching_defs(args: list[str]) -> int:
+    if len(args) < 2:
+        emit_error("reaching-defs requires <path> <function>")
+        return 2
+    path = args[0]
+    function = args[1]
+    if not Path(path).is_file():
+        emit_error(f"file not found: {path}")
+        return 2
+    try:
+        import angr
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"angr import: {exc}")
+    try:
+        proj = angr.Project(path, auto_load_libs=False)
+        target = proj.kb.functions[function]
+        rda = proj.analyses.ReachingDefinitions(
+            subject=target,
+            func_addr=target.addr,
+        )
+    except KeyError:
+        emit_error(f"function not found: {function}")
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"reaching-defs failed: {exc}")
+    defs = []
+    uses = []
+    try:
+        for var, def_objs in rda.all_definitions.items():
+            for d in def_objs:
+                defs.append({
+                    "variable": str(var),
+                    "defined_at": hex(d.codeloc.ins_addr) if d.codeloc else None,
+                })
+        for codeloc, defs_at in rda.all_uses.items():
+            uses.append({
+                "at": hex(codeloc.ins_addr) if codeloc else None,
+                "reads": [str(d.variable) for d in defs_at if d.variable],
+            })
+    except Exception as exc:  # noqa: BLE001
+        emit_error(f"def-use walk failed: {exc}")
+    emit({
+        "path": path,
+        "function": function,
+        "defs": defs,
+        "uses": uses,
+    })
+    return 0
+
+
+def main() -> int:
+    if len(sys.argv) < 2:
+        emit_error("usage: angr-cli <check|cfg|symbolic-exec|reaching-defs> [args...]")
+        return 2
+    subcommand = sys.argv[1]
+    rest = sys.argv[2:]
+    if subcommand == "check":
+        return cmd_check()
+    if subcommand == "cfg":
+        return cmd_cfg(rest)
+    if subcommand == "symbolic-exec":
+        return cmd_symbolic_exec(rest)
+    if subcommand == "reaching-defs":
+        return cmd_reaching_defs(rest)
+    emit_error(f"unknown subcommand: {subcommand}")
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

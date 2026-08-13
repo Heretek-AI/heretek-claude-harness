@@ -1,0 +1,24 @@
+{# android-re-triage-orchestrator plan template #}
+# Triage Plan — {{ apk_path }}
+
+**Triage id**: {{ triage_id }}
+**Goals**: {{ goals | join(', ') }}
+**APK SHA-256**: {{ apk_sha256 }}
+
+## Steps
+
+| # | Step | Tool | Status | Notes |
+|---|------|------|--------|-------|
+{% for step in plan %}
+| {{ loop.index }} | `{{ step.step }}` | `{{ step.tool }}` | {{ step.status | default('pending') }} | {{ step.notes | default('') }} |
+{% endfor %}
+
+## Blockers
+
+{% if blockers %}
+{% for b in blockers %}
+- {{ b }}
+{% endfor %}
+{% else %}
+_None._
+{% endif %}

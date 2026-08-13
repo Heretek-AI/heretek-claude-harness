@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-game-ac-bypass"
+version = "0.1.0"
+description = "MCP server for game anti-cheat runtime analysis: kernel-callback enumeration, anti-cheat primitive mapping, telemetry-beacon tracing. Wraps re-frida + re-winedbg + re-static-triage. Vendor-neutral: talks about observable anti-cheat primitives, not specific products."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ['mcp', 'anti-cheat', 'kernel', 'callback', 'binary-analysis']
+authors = [{name = "John"}]
+dependencies = ['mcp[cli]>=1.2', 'pydantic>=2.6']
+
+[project.scripts]
+re-game-ac-bypass = "re_game_ac_bypass.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

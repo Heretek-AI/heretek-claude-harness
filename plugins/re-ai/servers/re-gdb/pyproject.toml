@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-gdb"
+version = "0.1.0"
+description = "MCP server wrapping GDB + GEF for dynamic analysis."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "gdb", "gef", "dynamic-analysis", "debugger", "exploit-dev"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pexpect>=4.8",
+    "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+windows = [
+    "pywinpty>=2.0",
+]
+
+[project.scripts]
+re-gdb = "re_gdb.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

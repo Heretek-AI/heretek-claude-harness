@@ -1,0 +1,1305 @@
+# DRM / anti-tamper indicator catalog for the RE-AI plugin.
+#
+# This file is the data layer for the `re-vm-reverse`, `re-mba-deobfuscate`,
+# and `re-drm-fingerprint` skills. It is intentionally structured so the
+# LLM can read it as plain text — no schema magic, just consistent
+# indentation and one observation per bullet.
+#
+# Sources: public reverse-engineering literature on encrypted-VM
+# bytecode interpreters, MBA-obfuscated arithmetic, and the kuser /
+# PEB offsets documented in ReactOS / Wine / Windows Internals 7th ed.
+#
+# The catalog is intentionally vendor-neutral: it records *observable
+# patterns* (section names, import sets, byte patterns, PEB reads) and
+# the *categories* of anti-tamper those patterns suggest. The user
+# supplies the vendor attribution based on their context — see
+# ANTI-TAMPER-TAXONOMY.md for the inference chain.
+#
+# Update this file when a new pattern family shows up in the wild.
+# Don't update it for every new anti-tamper trick — focus on
+# *static-detectable* indicators (imports, sections, byte patterns).
+
+version: 4
+last_updated: 2026-06-07
+
+# Schema note (Cycle 3, 2026-06-06):
+#
+# Each entry in `anti_debug_indicators.checks[]` carries a
+# `confirmation:` field with one of:
+#   - `string_only`     (the API name / signal name appearing in
+#                       the binary's string table is enough)
+#   - `import_only`     (the API must be in the IAT to count;
+#                       link-time `.rdata` strings alone are not
+#                       enough — this is the C6 refactor)
+#   - `requires_disasm` (a disasm hit on the canonical opcode is
+#                       required; the string-table presence of the
+#                       signal name is meaningless)
+#   - `requires_xref`   (manual / xref detection; the categorizer
+#                       cannot count these)
+#
+# The consumer (`re-lief.categorize_strings`) reads this field
+# to filter the `anti_debug` bucket to only the first two
+# evidence levels; `requires_disasm` checks are scored in the
+# `re-drm-fingerprint` Stage 4 disasm pass; `requires_xref` is
+# deferred to manual review.
+#
+# Each `string_categories.categories[]` entry may carry a
+# `min_evidence:` field (integer). The consumer reports
+# `meets_threshold: bool` per category in the categorizer
+# output, where `meets_threshold = count >= min_evidence`. A
+# missing `min_evidence:` defaults to 0 (no gate).
+
+# ─────────────────────────────────────────────────────────────────────
+# KUSER_SHARED_DATA — read by encrypted-VM anti-tamper and other DRM to fingerprint
+# the host.  These are 64-bit fields in the kernel's user-shared region.
+# Address: 0xFFFFF78000000000 (x64) / 0x7FFE0000 (x86, deprecated).
+# ─────────────────────────────────────────────────────────────────────
+
+kuser_shared_data:
+  description: |
+    KUSER_SHARED_DATA is a kernel-mapped page that user code can read
+    without a syscall. DRM schemes use the values here as part of the
+    hardware fingerprint. If a binary reads multiple of these offsets
+    in sequence and then sends the result to a server, it is likely
+    a DRM fingerprinting routine.
+  address_64: 0xFFFFF78000000000
+  address_32: 0x7FFE0000
+  fields_of_interest:
+    - offset: 0x000
+      name: NtMajorVersion
+      size: 4
+      note: Windows major version (e.g. 10 = Windows 10/11).
+    - offset: 0x004
+      name: NtMinorVersion
+      size: 4
+      note: Windows minor version.
+    - offset: 0x008
+      name: NtBuildNumber
+      size: 4
+    - offset: 0x026
+      name: NativeProcessorInformation
+      size: 6
+      note: 6-byte processor feature mask; commonly fingerprint-checked.
+    - offset: 0x02C
+      name: SystemRoot
+      size: 30  # actually a UNICODE_STRING
+      note: read via `GetWindowsDirectoryW` or direct memory access.
+    - offset: 0x058
+      name: NtProductType
+      size: 4
+    - offset: 0x260
+      name: TickCountLow
+      size: 4
+      note: encrypted-VM anti-tamper and other DRM read this for anti-debug timing.
+    - offset: 0x264
+      name: TickCountLowDeprecated
+      size: 4
+    - offset: 0x3C0
+      name: InterruptTime
+      size: 8
+      note: encrypted-VM anti-tamper reads this in spin-lock CPUID guards.
+  detection_pattern: |
+    A sequence of >= 3 distinct reads from this region (in any form —
+    direct memory access, `__readpmc`, or via `NtQuerySystemInformation`)
+    combined with network or registry persistence is a strong DRM signal.
+
+# ─────────────────────────────────────────────────────────────────────
+# PEB (Process Environment Block) — same deal.  Fields commonly read
+# by DRM routines.
+# ─────────────────────────────────────────────────────────────────────
+
+peb:
+  description: |
+    PEB is at fs:[0x30] (x86) / gs:[0x60] (x64).  DRM routines read
+    fields here to fingerprint the process and detect hooks.
+  fields_of_interest:
+    - offset_x64: 0x060
+      offset_x86: 0x030
+      name: PEB pointer itself
+      note: the field where fs:[0x30] / gs:[0x60] points.
+    - offset_x64: 0x118
+      offset_x86: 0x0BC
+      name: OSMajorVersion
+    - offset_x64: 0x11C
+      offset_x86: 0x0C0
+      name: OSMinorVersion
+    - offset_x64: 0x120
+      offset_x86: 0x0C4
+      name: OSBuildNumber
+    - offset_x64: 0x130
+      offset_x86: 0x0D4
+      name: BeingDebugged
+      note: classic anti-debug check. Always 0 in non-attached process.
+    - offset_x64: 0x158
+      offset_x86: 0x0F8
+      name: ProcessHeap
+      note: encrypted-VM anti-tamper and other DRM read this for heap-spray detection.
+  detection_pattern: |
+    Direct PEB reads without going through NtCurrentTeb() are a strong
+    static signal of anti-analysis code.
+
+# ─────────────────────────────────────────────────────────────────────
+# HWID-vector API imports.  These are the user-mode APIs most commonly
+# used to assemble a hardware fingerprint.  Encrypted-VM anti-tamper,
+# legacy disc-based protection, and HWID-fingerprinting routines all
+# read some subset of these.
+# ─────────────────────────────────────────────────────────────────────
+
+hwid_apis:
+  description: |
+    APIs whose values are commonly used to assemble a hardware
+    fingerprint.  A binary that imports *several* of these is a
+    candidate for being a DRM routine or a malware host-fingerprinting
+    routine.
+  high_signal:
+    - api: GetVolumeInformationW
+      library: kernel32
+      note: serial number of the boot volume — classic DRM check.
+    - api: GetComputerNameW
+      library: kernel32
+      note: hostname; rarely used by legitimate code.
+    - api: GetWindowsDirectoryW
+      library: kernel32
+    - api: GetSystemDirectoryW
+      library: kernel32
+    - api: GetUserNameW
+      library: advapi32
+    - api: GetAdaptersInfo
+      library: iphlpapi
+      note: MAC addresses of all NICs.
+    - api: GetAdaptersAddresses
+      library: iphlpapi
+    - api: NtQuerySystemInformation
+      library: ntdll
+      note: used to enumerate a *lot* of things; high-signal only when
+        called with `SystemKernelDebuggerInformation` or
+        `SystemCodeIntegrityInformation`.
+    - api: NtQuerySystemInformationEx
+      library: ntdll
+    - api: NtQueryInformationProcess
+      library: ntdll
+      note: anti-debug target (ProcessDebugPort, ProcessDebugObjectHandle).
+    - api: CPUID
+      library: native
+      note: read directly; not an import. Look for the `cpuid` opcode.
+    # WMI-based fingerprinting (added 2026-06-05 per Sample A finding).
+    - api: IWmiProvider
+      library: wmi
+      note: WMI provider interface; high-signal when called via COM
+        in a host-fingerprinting routine. Look for the CLSID
+        `WmiProvider` in the import table.
+    # Win10+ crypto random (added 2026-06-05 per Sample B finding).
+    - api: BCryptGenRandom
+      library: bcrypt
+      note: replaces the deprecated `RtlGenRandom`. Common in
+        post-2020 host-fingerprinting routines.
+    - api: BCryptOpenAlgorithmProvider
+      library: bcrypt
+  medium_signal:
+    - api: RegOpenKeyExW
+      library: advapi32
+      note: when followed by RegQueryValueExW on
+        `HKLM\SOFTWARE\Microsoft\Cryptography\MachineGuid`.
+    - api: RegQueryValueExW
+      library: advapi32
+      note: with the MachineGuid subkey.
+    - api: GetSystemInfo
+      library: kernel32
+    - api: GetNativeSystemInfo
+      library: kernel32
+    - api: GlobalMemoryStatusEx
+      library: kernel32
+  detection_pattern: |
+    Importing *at least 2* high-signal APIs and *at least 1* medium-signal
+    API is a high-confidence indicator of HWID-fingerprinting code.
+
+# ─────────────────────────────────────────────────────────────────────
+# Section heuristics.  Custom VMs and packers leave recognizable
+# artifacts in the section table.
+# ─────────────────────────────────────────────────────────────────────
+
+section_indicators:
+  description: |
+    Section name + permission patterns that suggest a custom VM, a
+    packer, or a DRM-wrapped binary.  The skill `re-vm-reverse` uses
+    these as a *first-pass triage* signal.
+  rules:
+    - name_match:
+        - "\.vm"
+        - "\.vmp"
+        - "\.code"
+        - "\.themida"
+        - "\.winlice"
+        - "\.securom"
+      flags: any
+      meaning: "encrypted-VM bytecode container (custom VM-pack pattern)"
+    # Added 2026-06-04. These seven section names co-occur on Unity IL2CPP
+    # targets wrapped by a commercial encrypted-VM anti-tamper. They are
+    # *observable* in any binary's section table — not vendor attribution.
+    # The .xtls-style section is the highest-entropy region (entropy 7.85+)
+    # and is encrypted-TLS for the VM bytecode interpreter.
+    # See ANTI-TAMPER-TAXONOMY.md for the inference chain.
+    - name_match:
+        - "\.xtls"
+        - "\.didata"
+        - "\.ecode"
+        - "\.xdata"
+        - "\.xpdata"
+        - "\.udata"
+        - "\.00cfg"
+      flags: any
+      meaning: "encrypted-VM bytecode container (Unity IL2CPP target — observable pattern, not vendor attribution)"
+    # Added 2026-06-05 per Sample B (proprietary-engine target) finding. This
+    # section set is the proprietary-engine-target family: .arch /
+    # .link / .xcode / .xtext / .sbss. .rodata is the encrypted body,
+    # .text is real native code. Distinct from the IL2CPP variant
+    # above because there's no GameAssembly.dll / global-metadata.dat
+    # pairing.
+    - name_match:
+        - "\.arch"
+        - "\.link"
+        - "\.xcode"
+        - "\.xtext"
+        - "\.sbss"
+      flags: any
+      meaning: "encrypted-VM bytecode container (proprietary-engine target — observable pattern, not vendor attribution)"
+    # .rodata as encrypted body: large, high-entropy .rodata with a
+    # tiny .text is a strong "the binary's main code is encrypted
+    # and decrypted on first use" indicator.
+    - flags_match: ["R"]  # read-only data
+      entropy_min: 7.5
+      size_min_bytes: 100_000_000
+      meaning: "very large high-entropy read-only section — likely encrypted-VM bytecode body"
+    - name_match:
+        - "\.UPX0"
+        - "\.UPX1"
+        - "\.mpress1"
+        - "\.aspack"
+        - "\.petite"
+      flags: any
+      meaning: "known packer (less likely a VM, more likely compressed)"
+    - flags_match: ["R", "W", "X"]  # W^X
+      meaning: "writable + executable; suspicious, especially on .text"
+    - large_section_with_tiny_text:
+      meaning: "virtual_size >> raw_size on a code section; classic packed indicator"
+    - section_no_name:
+      meaning: "single-character or empty section names; manual packing"
+
+# ─────────────────────────────────────────────────────────────────────
+# VM dispatcher patterns.  When a binary has a custom VM, the entry
+# point or a frequently-called function has a recognizable dispatcher
+# that fetches the next handler from a table and jumps to it.
+# ─────────────────────────────────────────────────────────────────────
+
+vm_dispatcher_patterns:
+  description: |
+    Patterns to search for in disassembly to locate a VM dispatcher.
+    The skill `re-vm-reverse` uses these as a fast identification
+    signal before deeper analysis.
+  x86_64_patterns:
+    - description: "movzx + jmp via handler table"
+      asm: |
+        mov rax, [rbx+rcx*8]   ; or rdx*8, or rsi*8
+        jmp rax
+    - description: "mov + jmp via handler table (rdi-based)"
+      asm: |
+        mov rax, [rdi+rsi*8]
+        jmp rax
+    - description: "ret after dispatch"
+      asm: |
+        mov rax, [handler_table+rcx*8]
+        ; ... validation ...
+        jmp rax
+  detection_heuristic: |
+    A function that ends with `jmp reg` where `reg` was loaded from a
+    memory operand that is *not* a function pointer is a strong
+    dispatcher candidate.  Confirm with frequency analysis (re-gdb):
+    the dispatcher should be called far more often than ordinary
+    functions.
+
+# ─────────────────────────────────────────────────────────────────────
+# MBA (Mixed-Boolean-Arithmetic) patterns.  These are arithmetic
+# identities rewritten using bitwise operators to defeat pattern
+# matching.  The skill `re-mba-deobfuscate` uses this catalog to
+# construct Z3 queries that simplify MBA expressions back to their
+# original form.
+# ─────────────────────────────────────────────────────────────────────
+
+mba_patterns:
+  description: |
+    MBA-rewritten x86 expressions.  Each entry is a Z3-compatible
+    Python expression.  The skill uses these to drive
+    `re-triton.solve_constraint` queries.
+  identities:
+    - name: "add_via_and_or"
+      original: "x + y"
+      mba: "(x & y) + (x | y)"
+      note: "most common MBA add"
+    - name: "or_via_add"
+      original: "x | y"
+      mba: "x + y + 1 + (~x | ~y)"
+      note: "Z3 will simplify if both are 8-bit or 32-bit"
+    - name: "xor_via_or_and"
+      original: "x ^ y"
+      mba: "(x | y) & ~(x & y)"
+    - name: "and_via_or_and"
+      original: "x & y"
+      mba: "(x + y) - (x | y)"
+    - name: "sub_via_add_not"
+      original: "x - y"
+      mba: "x + ~y + 1"
+      note: "this one is *correct* two's-complement; an MBA tool would
+        expand it further to obscure intent."
+    - name: "neg_via_add"
+      original: "-x"
+      mba: "~x + 1"
+  z3_strategy: |
+    For each MBA expression, construct a Z3 `BitVec` query that
+    asserts `mba_expr == original_expr` and ask the solver to produce
+    a counterexample (i.e. an input pair for which the MBA and the
+    original differ).  If no counterexample exists, the MBA
+    equivalence is proven; the original is the simpler form.
+
+# ─────────────────────────────────────────────────────────────────────
+# Anti-debug / anti-emulation catalog.  Used by `re-drm-fingerprint`
+# to flag binaries that exhibit *any* of these patterns.
+# ─────────────────────────────────────────────────────────────────────
+
+anti_debug_indicators:
+  description: |
+    Static-detectable patterns that suggest a binary is checking for
+    debuggers, emulators, or sandboxes.  Each entry is a
+    detection signal and a static check.
+
+    Cycle 2 fix (C6, 2026-06-06): each check now carries a
+    `confirmation:` field that classifies the evidence level. The
+    categorizer (and downstream `re-drm-fingerprint`) only counts
+    a check if the confirmation is satisfied:
+      - `string_only` — the API name / signal name appearing in
+        the binary's string table is enough.
+      - `import_only` — the binary must import the API (link-time
+        IAT entry) for the check to fire. The string-table
+        presence alone is not enough (C++ symbol fragments like
+        `_Xlength_error` were the FPs that surfaced in the
+        2026-06-06-r01 stress test).
+      - `requires_disasm` — the byte-pattern check (RDTSC, INT 2D,
+        INT 3) must be backed by a disasm hit. The string-table
+        presence of "RDTSC" is meaningless; the `0F 31` opcode
+        at the call site is the evidence.
+      - `requires_xref` — manual / xref-based detection; the
+        automated categorizer cannot count these.
+  checks:
+    - name: "PEB.BeingDebugged"
+      signal: "direct read of fs:[0x30] / gs:[0x60] + 0x02 / 0x130"
+      detection: "string search for the byte sequence in the binary"
+      confirmation: "import_only"
+    - name: "IsDebuggerPresent"
+      signal: "import of kernel32!IsDebuggerPresent"
+      detection: "re-rizin.list_imports_exports"
+      confirmation: "import_only"
+    - name: "CheckRemoteDebuggerPresent"
+      signal: "import of kernel32!CheckRemoteDebuggerPresent"
+      detection: "re-rizin.list_imports_exports"
+      confirmation: "import_only"
+    - name: "NtQueryInformationProcess"
+      signal: "call to ntdll!NtQueryInformationProcess with class
+        ProcessDebugPort (0x07) or ProcessDebugObjectHandle (0x1E)"
+      detection: "re-rizin.disassemble_function around the call site;
+        check the immediate argument to the call"
+      confirmation: "import_only"
+    - name: "RDTSC timing"
+      signal: "sequence of two rdtsc instructions separated by a small
+        amount of code; if delta > N cycles, debugger is present"
+      detection: "re-rizin.search_bytes for `0F 31` opcode (rdtsc)"
+      confirmation: "requires_disasm"
+    - name: "INT 2D"
+      signal: "int 0x2d (single-byte interrupt) — when a debugger is
+        attached, the exception is swallowed and execution continues
+        with different state than when no debugger is attached"
+      detection: "re-rizin.search_bytes for `CD 2D`"
+      confirmation: "requires_disasm"
+    - name: "INT 3 trap"
+      signal: "int 0x3 (0xCC) used as a control-flow check; a
+        debugger will step over it without raising the exception,
+        while normal execution raises EXCEPTION_BREAKPOINT"
+      detection: "re-rizin.search_bytes for `CC` and check that the
+        following code expects SEH"
+      confirmation: "requires_disasm"
+    - name: "OutputDebugString"
+      signal: "import of kernel32!OutputDebugString with a non-null
+        buffer; if a debugger is present, the function returns
+        immediately without side effects, otherwise it raises an
+        exception that the calling code can catch"
+      detection: "re-rizin.list_imports_exports"
+      confirmation: "import_only"
+    - name: "exception-hooking decoys (encrypted-VM-style)"
+      signal: "writes to the stack frame at offsets that match
+        EXCEPTION_RECORD layout, *after* a CPUID or syscall, then
+        reads the same offsets before a comparison"
+      detection: "manual review; pattern: `mov [rsp+0..0x98], X`
+        followed by a `cmp [rsp+0..0x98], X`"  # the decoy pattern
+      confirmation: "requires_disasm"
+    - name: "scattered-bit register storage (encrypted-VM marker)"
+      signal: "VM register values stored as bits scattered across the
+        stack rather than contiguously; defeats pattern matching"
+      detection: "manual; flagged by `re-vm-reverse` after the
+        dispatcher is identified"
+      confirmation: "requires_xref"
+
+# ─────────────────────────────────────────────────────────────────────
+# String categories.  Used by `re-lief.categorize_strings` to bucket
+# the strings extracted from a binary into semantic categories.  Two
+# categories (`anti_debug`, `hwid`) inherit their keyword lists from
+# the catalog lists above via the `seed_from:` / `seed_field:`
+# pointer syntax; the rest have inline keyword lists.  When a future
+# agent adds a new HWID API to `hwid_apis.high_signal`, the
+# `hwid` category picks it up on next MCP-server reload with zero
+# Python change.  All keywords are generic Windows API names,
+# OpenSSL source-path fragments, or standard protocol substrings —
+# no commercial product, publisher, or PDB-path literal appears.
+# ─────────────────────────────────────────────────────────────────────
+
+string_categories:
+  description: |
+    Buckets for `re-lief.categorize_strings`.  Each category is a list
+    of case-insensitive substrings; a string is added to a category
+    if any keyword matches.  A string can match multiple categories
+    (counted in each); the categorizer de-duplicates within a
+    category by (string, section).  Categories whose `seed_from`
+    pointer is set inherit their keyword list from the named catalog
+    list at module load time — see
+    `servers/re-lief/src/re_lief/categorizers.py::load_categories`.
+  categories:
+    - name: anti_debug
+      seed_from: anti_debug_indicators.checks
+      seed_field: name
+      # Cycle 3 (2026-06-06): the bucket only counts toward a
+      # `meets_threshold: true` finding if at least 2 distinct
+      # catalog primitives fired. Single-primitive matches (a
+      # binary that only imports `IsDebuggerPresent` for
+      # legitimate reasons) are still surfaced in the `samples[]`
+      # list but are gated out of the anti-tamper score in
+      # `re-drm-fingerprint` Stage 5. See
+      # `servers/re-lief/src/re_lief/categorizers.py::load_thresholds`
+      # and the `meets_threshold` field in the categorizer output.
+      min_evidence: 2
+      note: |
+        Inherits verbatim from `anti_debug_indicators.checks[].name`
+        — IsDebuggerPresent, OutputDebugString,
+        NtQueryInformationProcess, etc.  The two strings below are
+        detected by the bytes-pattern checks (RDTSC, INT 2D, INT 3
+        are in the catalog as opcode signals) but `re-lief`'s
+        strings pass is a static-import pass, so the names that
+        fire here are the API names and the C++ symbols
+        (`_Xlength_error`, `_Xout_of_range` — typeinfo false
+        positives) that contain the substrings.
+    - name: hwid
+      seed_from: hwid_apis.high_signal
+      seed_field: api
+      # C4 refactor (Cycle 2, 2026-06-06): exclude the OpenSSL
+      # static-link compiler-invocation line that fires on every
+      # binary that statically links OpenSSL (1 FP in the IL2CPP target binary,
+      # the `cl /Zi /Fdossl_static.pdb` line).
+      exclude_keywords:
+        - "cl /Zi /Fd"
+        - "ossl_static.pdb"
+        - "/Fdopenssl"
+      note: |
+        Inherits verbatim from `hwid_apis.high_signal[].api` —
+        GetComputerNameW, GetVolumeInformationW,
+        GetAdaptersAddresses, etc.  The `medium_signal` set
+        (RegOpenKeyExW, RegQueryValueExW, GetSystemInfo, etc.)
+        lives in the `registry` and `process` categories below
+        for a cleaner bucket split. Cycle 2 fix (C4):
+        OpenSSL static-link compiler-invocation lines are
+        excluded.
+    - name: crypto
+      keywords:
+        - "OpenSSL"
+        - "\\crypto\\"
+        - "EVP_"
+        - "RSA"
+        - "AES"
+        - "SHA"
+        - "HMAC"
+        - "DH_"
+        - "EC_"
+        - "PEM_"
+        - "BIO_"
+        - "X509"
+        - "PKCS"
+        - "CRYPTO_"
+        - "SSL_"
+        - "TLS"
+        - "Cipher"
+        - "MD5_"
+        - "digest"
+        - "PRIVATEKEY"
+        - "Public-Key"
+        - "Private-Key"
+        - "key_length"
+        - "cms_"
+        - "pkey"
+        - "ocsp"
+        - "crl"
+      note: |
+        OpenSSL-internal strings, X.509 / CMS / PKCS object names,
+        cipher-suite and digest identifiers.  Statically-linked
+        OpenSSL releases typically contribute 600+ strings to this
+        bucket (every `.\crypto\...` source-path fragment counts).
+    - name: network
+      keywords:
+        - "WinHttp"
+        - "WinINet"
+        - "InternetOpen"
+        - "HttpOpenRequest"
+        - "WSAStartup"
+        - "ws2_32"
+        - "connect"
+        - "send"
+        - "recv"
+        - "socket"
+        - "gethostbyname"
+        - "getaddrinfo"
+        - "URL"
+        - "http://"
+        - "https://"
+        - "ftp://"
+        - "tcp://"
+        - ".com"
+        - ".net"
+        - ".org"
+        - ".io"
+        - "DNS"
+        - "Host:"
+        - "User-Agent:"
+        - "Content-Type:"
+        - "ocsp."
+        - "crl."
+        - "ts-ocsp"
+      note: |
+        HTTP / Winsock / DNS / URL substrings — including CRL/OCSP
+        endpoints (the WinVerifyTrust / PFXImportCertStore
+        license-validation pattern).  False positives: the URL
+        scheme substrings (`.com`, `.net`, etc.) will match
+        non-network strings; review the `samples[]` to confirm.
+    - name: registry
+      keywords:
+        - "RegOpenKeyEx"
+        - "RegQueryValueEx"
+        - "RegSetValueEx"
+        - "RegCloseKey"
+        - "RegCreateKeyEx"
+        - "HKEY_"
+        - "HKLM"
+        - "HKCU"
+        - "Software\\Microsoft"
+        - "CurrentVersion\\Run"
+        - "MachineGuid"
+        - "Cryptography"
+        - "advapi32"
+      note: |
+        Registry API names + common key paths.  Note: HKLM/HKCU
+        are 4-char tokens; a string like 'HKLM\\foo' fires here
+        even if the real registry call is in a different binary.
+    - name: process
+      keywords:
+        - "CreateProcess"
+        - "CreateThread"
+        - "CreateRemoteThread"
+        - "OpenProcess"
+        - "WriteProcessMemory"
+        - "ReadProcessMemory"
+        - "VirtualAlloc"
+        - "VirtualAllocEx"
+        - "VirtualProtect"
+        - "VirtualQuery"
+        - "NtCreateThread"
+        - "ResumeThread"
+        - "SuspendThread"
+        - "TerminateProcess"
+        - "ShellExecute"
+        - "WinExec"
+        - "CreateProcessW"
+        - "CreateProcessA"
+      note: |
+        Process / thread / memory APIs.  Both all-process versions
+        (no 'Ex' suffix) and remote-injection versions are
+        included.
+    - name: file
+      keywords:
+        - "CreateFile"
+        - "ReadFile"
+        - "WriteFile"
+        - "DeleteFile"
+        - "MoveFile"
+        - "CopyFile"
+        - "GetFileSize"
+        - "FindFirstFile"
+        - "FindNextFile"
+        - "GetTempPath"
+        - "GetTempFileName"
+        - "CreateFileW"
+        - "CreateFileA"
+        - "DeleteFileW"
+        - "kernel32"
+      note: |
+        File I/O API names.  Includes both W and A variants.
+        `kernel32` is included because the OpenSSL path-fragment
+        noise often mentions the host DLL; a binary that only
+        links kernel32 + the file APIs (a pure copy tool) will
+        fire only on this bucket.
+    - name: fingerprint
+      # C2 refactor (Cycle 2, 2026-06-06): split the prior
+      # `fingerprint` bucket into two siblings. The new
+      # `windows-com-api-name` bucket contains the standard
+      # COM / typelib property names that show up in every
+      # Windows binary that links a typelib — high false-positive
+      # set for the custom-HW-fingerprint heuristic. The new
+      # `custom-fingerprint` bucket keeps the high-signal
+      # literal-pattern matches.
+      keywords:
+        - "Volume{"
+        - "\\\\.\\PhysicalDrive"
+        - "\\\\.\\CdRom"
+        - "SMBIOS"
+        - "MachineGuid"
+        - "HKLM\\SOFTWARE\\Microsoft\\Cryptography"
+        - "fingerprint"
+        - "hostid"
+      note: |
+        [C2] High-signal HW-fingerprint literal patterns —
+        `Volume{...}` is the canonical Windows volume-serial
+        GUID, `\\.\PhysicalDrive` is the raw-block device path,
+        `SMBIOS` is the system-management-BIOS table path,
+        `MachineGuid` is the Win10+ per-install GUID under
+        `HKLM\SOFTWARE\Microsoft\Cryptography`. Less about the
+        API (which is in the `hwid` bucket), more about the
+        *value* — these are the rare cases where the fingerprint
+        is inlined as a literal.
+    - name: windows-com-api-name
+      # C2 refactor: new bucket split from the prior `fingerprint`
+      # category. Captures the standard COM / typelib property
+      # names that show up in every Windows binary that imports
+      # a typelib (DisplayName, ProductIdentifier, etc.) — high
+      # false-positive set for the custom-HW-fingerprint heuristic
+      # but a real signal of "this binary uses typelib property
+      # introspection" (e.g. WMI providers, DirectShow filter
+      # graphs, MAPI clients).
+      keywords:
+        - "Manufacturer"
+        - "SerialNumber"
+        - "ProductId"
+        - "ProductIdentifier"
+        - "UUID"
+        - "displayName"
+        - "enhancedSearchGuide"
+        - "searchGuide"
+      note: |
+        [C2] Standard COM / WinRT / WMI typelib property names.
+        High false-positive rate on binaries that link any typelib
+        (the property names are in the binary's import table).
+        The reviewer should only treat this as a high-signal
+        finding if the binary also fires on `custom-fingerprint`
+        or `hwid`. Previously grouped with `fingerprint`; the
+        2026-06-06-r01 stress test on target-C (the IL2CPP target binary)
+        surfaced 48 false-positive hits in this set.
+    - name: activation
+      # C1 refactor (Cycle 2, 2026-06-06): split the prior
+      # `activation` bucket into two siblings. `ue-component-activation`
+      # captures the noisy UE/Unity component-lifecycle vocabulary
+      # that fired on every Unity game (the 615 FPs in the IL2CPP target binary).
+      # `license-activation` keeps the real license-gate vocabulary.
+      keywords:
+        - "License"
+        - "Licence"
+        - "Entitlement"
+        - "DeregisterEventSource"
+        - "RegisterEventSource"
+        - "EventSource"
+        - "LocalKeySet"
+        - "PKCS7"
+        - "PKCS8"
+        - "PFX"
+        - "CMS_"
+        - "Recipient"
+        - "SignedData"
+        - "EnvelopedData"
+        - "AuthorityKey"
+        - "SubjectKey"
+        - "Token"
+        - "Challenge"
+        - "Response"
+        - "msi.dll"
+        - "mscoree.dll"
+      note: |
+        [C1] License-gate vocabulary. Includes PKCS#7 / CMS
+        object names, the RegisterEventSource /
+        DeregisterEventSource pair the activation routine
+        typically uses to write to the Windows Event Log, and
+        the manifest-token / challenge-response vocabulary.
+        The Pattern B detection rule in `ANTI-TAMPER-TAXONOMY.md`
+        §"How to detect the patterns" fires on
+        `license-activation.count >= 50` (was `activation.count`).
+    - name: ue-component-activation
+      # C1 refactor: new bucket split from the prior `activation`
+      # category. Captures the UE/Unity component-lifecycle
+      # vocabulary that fired on every Unity game (the 615 FPs
+      # in the IL2CPP target binary). Low signal on its own; useful as a
+      # "this is a Unity game" indicator.
+      keywords:
+        - "Activation"
+        - "Activate"
+        - "Manifest"
+        - "OnComponentActivated"
+        - "ENiagaraSystemSpawnSectionEndBehavior::Deactivate"
+        - "Deactivate"
+      note: |
+        [C1] UE / Unity component-lifecycle vocabulary. Fires
+        on every Unity game; the 2026-06-06-r01 stress test
+        surfaced 615 false-positive hits in the IL2CPP target binary alone. The
+        reviewer should treat this bucket as a Unity / UE
+        *detection* signal, not as a license-activation signal.
+    - name: obfuscation
+      keywords:
+        - "\\crypto\\"
+        - "decrypt"
+        - "encrypt"
+        - "obfuscat"
+        - "packed"
+        - "xor"
+        - "XOR"
+        - "ROL"
+        - "ROR"
+        - "base64"
+        - "Base64"
+        - "lzma"
+        - "zlib"
+        - "deflate"
+        - "inflate"
+        - "RC4"
+        - "S-box"
+        - "sbox"
+        - "lookup"
+        - "dispatch"
+        - "handler"
+        - "vm_entry"
+        - "vm_dispatch"
+        - "vm_init"
+        - "kUSER"
+        - "PEB"
+        - "BeingDebugged"
+        - "NtGlobalFlag"
+      # C5 refactor (Cycle 2, 2026-06-06): exclude the high-FP
+      # Intel TBB / CI-build-path strings that fire on every
+      # binary that statically links Intel TBB (41 FPs in
+      # tbb12.dll in target-C).
+      exclude_keywords:
+        - "__TBB_"
+        - "tbb::"
+        - "tbb::task"
+        - "TBB_internal"
+        - "C:\\ci\\builds\\"
+        - "C:/ci/builds/"
+        - "C:\\BuildBot\\"
+        - "/ci/builds/"
+      # Cycle 3 (2026-06-06): the obfuscation bucket is
+      # multi-marker (single keywords like `xor` or `base64`
+      # fire on every binary). A `meets_threshold: true`
+      # finding requires at least 3 distinct markers. The
+      # `re-drm-fingerprint` Stage 5 score gates on this.
+      min_evidence: 3
+      note: |
+        String patterns that suggest obfuscation / VM-pack code.
+        Note `\\crypto\\` is a *path*, not a runtime call — it
+        ends up in this bucket via OpenSSL source paths leaking
+        into release binaries (a known false positive on
+        statically linked OpenSSL).  The VM-dispatch strings
+        (lookup / dispatch / handler / vm_entry) are the
+        encrypted-VM bytecode category signal. Cycle 2 fix
+        (C5): TBB / CI-build paths excluded.
+    - name: misc
+      keywords: []
+      note: |
+        Catch-all bucket.  Populated only when `include_misc=true`.
+        The `uncategorized_sample` field in the categorizer's
+        return shape is what callers use to spot *missing*
+        categories — a string the user knows is interesting but
+        that the YAML doesn't cover is a signal to add a new
+        keyword to the appropriate category.
+    # Added 2026-06-05 per Sample A + B findings.  Catches the
+    # publisher telemetry pipeline leak attack surface — Sentry
+    # DSN, Logstash URL, Confluence URL, Google Drive URL, AWS
+    # key, Slack token.  For a richer per-leak breakdown
+    # (with HTTP verification), use the ``re-leak-scan`` MCP
+    # server; this bucket is the catch-all for the static
+    # string-pass of ``re-lief.categorize_strings``.
+    - name: telemetry_leak
+      keywords:
+        - "sentry.io"
+        - "@sentry"
+        - "ingest.sentry"
+        - "logstash"
+        - "atlassian.net"
+        - "atlassian.io"
+        - "/wiki/spaces/"
+        - "/wiki/x/"
+        - "docs.google.com"
+        - "drive.google.com"
+        - "AKIA"
+        - "ASIA"
+        - "xoxb-"
+        - "xoxp-"
+        - "xoxa-"
+        - "xoxr-"
+        - "xoxs-"
+      # C3 refactor (Cycle 2, 2026-06-06): exclude the Unicode
+      # UCD-constant substrings that fire on every binary with a
+      # C runtime (the 13 FPs in the IL2CPP target binary were all `East_Asian_Width`,
+      # `Caucasian_Albanian`, `stasianwidth` — substrings of
+      # the `asian` / `albanian` / `width` keywords).
+      exclude_keywords:
+        - "asian"
+        - "Asian"
+        - "Asia"
+        - "albanian"
+        - "Albanian"
+        - "width"
+        - "Width"
+        - "East_Asian_Width"
+        - "Caucasian_Albanian"
+        - "stasianwidth"
+        - "sesasianwidth"
+      note: |
+        String patterns from the public infrastructure of
+        publisher telemetry + collaboration tools.  Vendor-neutral
+        — catches the URL scheme / hostname, not the publisher.
+        Pairs with the ``re-leak-scan`` MCP server for a
+        per-leak breakdown with HTTP verification. Cycle 2
+        fix (C3): Unicode UCD-constant substrings excluded.
+    # ─────────────────────────────────────────────────────────────
+    # v2.7.0 (2026-06-06) — three new buckets for the
+    # re-anti-analysis + re-android-dynamic + re-yara-author
+    # + re-apktool classify_apk_protection workflow.
+    # Vendor-neutral: category names only, no product / publisher.
+    # The 0xD001-0xD003 ids are reserved for future additions.
+    # ─────────────────────────────────────────────────────────────
+    - name: anti_vm_primitives
+      keywords:
+        - "CPUID"
+        - "cpuid"
+        - "hypervisor"
+        - "HypervisorPresent"
+        - "VMXON"
+        - "vmcall"
+        - "VMCALL"
+        - "rdtsc"
+        - "RDTSC"
+        - "SMBIOS"
+        - "ACPI"
+        - "\\\\.\\PhysicalDrive"
+        - "VMware"
+        - "QEMU"
+        - "\\\\.\\VBoxGuest"
+        - "VBOX"
+        - "VirtualBox"
+        - "Xen"
+        - "MS_HYPER_V"
+        - "Hyper-V"
+        # The 0xF hex values are CPUID leaf mnemonics
+        - "0x40000000"
+        - "0x40000001"
+      exclude_keywords:
+        # The string 'cpu id' appears in the Windows error
+        # string pool. Drop it.
+        - "CPU ID"
+        - "cpu id"
+      note: |
+        [v2.7.0] Anti-VM / hypervisor-detection primitive strings.
+        The string-table presence of these is a *string_only*
+        signal; the canonical signal is a disasm hit on the
+        CPUID opcode (0x0F 0xA2).  The
+        `re-anti-analysis.scan_anti_analysis_primitives` tool
+        cross-references the string-table hit with the disasm
+        hit before reporting.
+    - name: android_anti_analysis
+      keywords:
+        - "frida"
+        - "Frida"
+        - "FRIDA"
+        - "gadget"
+        - "gmain"
+        - "LIBFRIDA"
+        - "Magisk"
+        - "MAGISK"
+        - "Superuser"
+        - "/su"
+        - "/system/xbin/su"
+        - "/sbin/su"
+        - "TracerPid"
+        - "/proc/self/status"
+        - "ptrace"
+        - "Xposed"
+        - "Substrate"
+        - "SafetyNet"
+        - "Play Integrity"
+        - "rootbeer"
+        - "RootBeer"
+        - "isRooted"
+        - "isDebugger"
+        - "NetworkSecurityConfig"
+        - "CertificatePinner"
+        - "TrustManager"
+        - "OkHttp"
+      exclude_keywords:
+        # 'play' is in many non-anti-analysis strings. Drop it.
+        - "playback"
+        - "playlist"
+        # 'ok' is in many strings (e.g. "okHttp" itself - the
+        # exclusion is for plain 'ok' which fires on every
+        # binary; we keep the 'OkHttp' canonical signal).
+        - "ok("
+      note: |
+        [v2.7.0] Android-side anti-analysis primitive strings
+        (Frida detection, Magisk detection, root probes,
+        SafetyNet / Play Integrity hooks, native-side ptrace
+        self-attach, /proc/self/status walk, Xposed / Substrate
+        detection, network / cert pinning).  Consumed by
+        `re-android-dynamic.start_android_session` trace output
+        and the `re-anti-analysis.scan_anti_analysis_primitives`
+        tool when called on a .so / .dex.
+    - name: native_packer_signatures
+      keywords:
+        # The encrypted-VM proprietary-engine section set,
+        # observed in target-B (the proprietary-engine target)
+        # and target-C (the IL2CPP target). The bare '.arch' /
+        # '.xcode' etc. tokens are matched as substring against
+        # the section table.
+        - ".arch"
+        - ".link"
+        - ".xcode"
+        - ".xtext"
+        - ".sbss"
+        - ".xtls"
+        - ".xpdata"
+        - ".didata"
+        - ".ecode"
+        - ".00cfg"
+        # Encrypted-VM bytecode section regexes (the C6 refactor's
+        # import_only confirmation requires the literal token to be
+        # in the IAT, not just the string table). The .themida and
+        # .winlice tokens are observable section names used by the
+        # encrypted-VM packer family; the catalog records the
+        # category of the pattern, not the specific packer.
+        - ".themida"
+        - ".winlice"
+        # Standard VM-pack section names
+        - ".vmp0"
+        - ".vmp1"
+        - ".vmp2"
+        # UPX
+        - "UPX0"
+        - "UPX1"
+        - "UPX!"
+        # ASPack
+        - ".aspack"
+        # MPRESS
+        - ".MPRESS1"
+        # PEtite
+        - ".petite"
+        # kkrunchy
+        - ".kkrunchy"
+        # The large-.tls$ pattern from the IL2CPP target binary (67 MB TLS section
+        # is the canonical encrypted-VM-pack side-loading signal)
+        - ".tls$"
+      note: |
+        [v2.7.0] Native packer / VM-pack section-name signatures.
+        String-table hits here are *string_only* confirmation;
+        the canonical signal is the section name in the PE
+        section table.  Consumed by
+        `re-anti-analysis.classify_native_protection` and
+        `re-lief.classify_native_protection`.
+
+# ─────────────────────────────────────────────────────────────────────
+# Pattern indicators.  Soft signals — describe the *category* of
+# anti-tamper a set of observables suggests, not a specific vendor.
+# ─────────────────────────────────────────────────────────────────────
+
+pattern_indicators:
+  description: |
+    Heuristic mappings from observed indicators to anti-tamper
+    *categories*. These are descriptive pattern indicators — the
+    user supplies the vendor attribution based on their context.
+    Confirm with a deeper analysis (capability comparison, signature
+    lookups) before publishing.
+  mappings:
+    - descriptor: "encrypted-VM bytecode, Unity IL2CPP target"
+      indicators:
+        - "large encrypted-VM section with W^X"
+        - "imports of GetVolumeInformationW + GetComputerNameW +
+          GetUserNameW + NtQuerySystemInformation"
+        - "spin-lock-guarded CPUID patches"
+        - "scattered-bit register storage"
+      confidence: "Medium-High"
+    - descriptor: "encrypted-VM bytecode (alternative dispatcher variant)"
+      indicators:
+        - ".vmp0 / .vmp1 section names"
+        - "handlers prefixed with `VMP` in disassembly"
+        - "imports of unknown APIs (resolved at runtime)"
+      confidence: "High"
+    - descriptor: "encrypted-VM bytecode (WinLicense-family)"
+      indicators:
+        - ".themida or .winlice section names"
+        - "Mutant / Mutex named with a vendor tag"
+        - "Imports that are missing or ordinal-only"
+      confidence: "High"
+    - descriptor: "encrypted-VM bytecode (CISC-dispatch variant)"
+      indicators:
+        - ".code section with W^X"
+        - "handler dispatch via `jmp [reg*8+table]`"
+        - "anti-debug catalog hits (PEB.BeingDebugged, RDTSC)"
+      confidence: "Medium"
+    - descriptor: "legacy disc-based protection"
+      indicators:
+        - "section names with 'securom' or '.sdc'"
+        - "imports of `CreateFileA` with a CD/DVD check literal in the
+          string table"
+      confidence: "High"
+    - descriptor: "legacy disc-based protection (kernel-driver variant)"
+      indicators:
+        - "drivers named `*.sys` in the same directory"
+        - "imports of `DeviceIoControl` with high-frequency call
+          patterns"
+      confidence: "Medium"
+    # Sample B (proprietary-engine target) — proprietary-engine target family.
+    # Section set is .arch / .link / .xcode / .xtext / .sbss;
+    # .rodata is the encrypted body (often 300+ MB), .text is real
+    # native code. Distinct from the IL2CPP-target variant above
+    # because there's no GameAssembly.dll / global-metadata.dat
+    # pairing — the proprietary engine is the target.
+    - descriptor: "encrypted-VM bytecode, proprietary-engine target"
+      indicators:
+        - "section set: .arch / .link / .xcode / .xtext / .sbss"
+        - ".rodata as the encrypted body (huge, high entropy)"
+        - ".text as the real native code (small, normal entropy)"
+        - "anti-debug catalog hits (PEB.BeingDebugged, NtQueryInformationProcess)"
+      confidence: "Medium-High"
+    # ─────────────────────────────────────────────────────────────────
+    # NEW: publisher telemetry pipeline leak (Sample A + Sample B, 2026-06-05)
+    # This is an attack-surface category, not a protection category.
+    # Listed here so the pattern_indicators.mappings block covers the
+    # full set of "categories the catalog can flag" — fingerprint,
+    # anti-debug, telemetry, persistence.
+    # ─────────────────────────────────────────────────────────────────
+    - descriptor: "publisher telemetry pipeline leak"
+      indicators:
+        - "Sentry DSN in the string table (https://<key>@<host>/<id>)"
+        - "Logstash / log-ingestion URL in the string table"
+        - "Confluence wiki page URL in the string table"
+        - "Google Drive document URL in the string table"
+        - "AWS access key ID (AKIA / ASIA prefix)"
+        - "Slack token (xox[bpaeors]-…)"
+      confidence: "High"
+    # ─────────────────────────────────────────────────────────────
+    # v2.7.0 (2026-06-06) — three new pattern families for the
+    # re-anti-analysis / re-android-dynamic / re-yara-author /
+    # re-vtil simplify_lifted_il workflow.  Each is a category
+    # of observable behavior, not a specific product.
+    # ─────────────────────────────────────────────────────────────
+    - descriptor: "anti-analysis-primitive scanner (defender)"
+      indicators:
+        - "string-table hits on the `anti_vm_primitives` category"
+        - "string-table hits on the `android_anti_analysis` category (Android targets)"
+        - "string-table hits on the `process_introspection` category (NtQuerySystemInformation, EnumProcessModules)"
+        - "disasm hits on RDTSC (0F 31), INT 2D (CD 2D), INT 3 (CC), CPUID (0F A2)"
+        - "disasm hits on PEB.BeingDebugged / PEB.NtGlobalFlag (the byte-sequence signatures in `data/anti-analysis-catalog.json`)"
+        - "byte-sequence hits on the VMXON / VMCALL opcodes (anti-hypervisor)"
+      confidence: "High"
+      consumes:
+        - "data/anti-analysis-catalog.json"
+    - descriptor: "Android packer / obfuscator classifier"
+      indicators:
+        - "DEX class-name pattern: 1-2 letter names (obfuscator seed)"
+        - "DEX method bodies: single call to a static decrypt stub (string-encryption)"
+        - "DEX `CertificatePinner` + `OkHttp` imports (SSL pinning)"
+        - "native .so with a small .text + large .data/.bss (encrypted-VM bytecode interpreter shape)"
+        - "AndroidManifest `application-meta-data: packagername` (packager tag)"
+        - "string-table hits on the `android_anti_analysis` category"
+      confidence: "Medium-High"
+      consumes:
+        - "data/apkid-signatures.json"
+    - descriptor: "OLLVM / d810-ng IR deobfuscation"
+      indicators:
+        - "lifted IL tree contains MBA identities (the 6 in `mba_patterns.identities`)"
+        - "lifted IL tree contains a switch-dispatcher state machine (high-in-degree block + state-variable update + switch on state)"
+        - "lifted IL tree contains opaque predicates (x*x, x|y)"
+        - "lifted IL tree contains an ldstr -> call decrypt stub -> ret pattern (for .NET IL lifted to VTIL)"
+      confidence: "Medium-High"
+      consumes:
+        - "data/ollvm-pass-catalog.json"
+    # ─────────────────────────────────────────────────────────────
+    # v2.8.0 (2026-06-07) — 7 Cat B entries from r03-stress.
+    # Vendor-neutral names (charter); attribution lives in `note:`.
+    # See gap-analysis.md §"Category B" in
+    # See the RE-AI output directory.
+    # ─────────────────────────────────────────────────────────────
+    - descriptor: "overlay-archive section in a launcher PE"
+      indicators:
+        - "PE section with non-standard name (~2 KB) + small overlay (~7 KB)"
+        - "section entropy ~3.0 (structured table, not encrypted)"
+        - "only 2 ordinal-only imports from a sibling activation DLL"
+        - "launcher .text section entropy ~7.9-8.0 (packed entry-point stub)"
+      confidence: "High"
+      note: |
+        B1. Observed live on an attribution-overlay-archive publisher's
+        launcher (IL2CPP target with a separate activation DLL). Launcher
+        PE has a non-standard section vsize=2048, entropy=3.02, plus a
+        7024-byte trailing overlay. The launcher's two ordinal imports
+        resolve via the sibling activation DLL's Ordinal_100/_101.
+        Pattern is the overlay-archive packaging used by certain
+        publishers; see r03-stress per-binary JSON for the structural
+        evidence.
+    - descriptor: "anti-tamper marker table (4-entry contiguous block in .rdata)"
+      indicators:
+        - "≥5 occurrences of a 4-9 byte vendor-tag marker string in a single .rdata window <256 KB"
+        - "two co-occurring vendor-supply-line strings (`*_atd`, `*_dl`)"
+        - ".xtls section with size 16-64 KB and entropy ≥7.5 (trigger block hot spot)"
+      confidence: "High"
+      note: |
+        B2. Observed on an encrypted-VM-Like Medium binary: 9 markers
+        (4 contiguous + 2 scattered + 2 `*_atd` + 1 `*_dl`) at file
+        offsets 0xA41CE6E..0xA42B0E4 in .rdata. The contiguous 4-entry
+        record array at 12 bytes/entry is the v4-era anti-tamper
+        signature; the v10 generation uses a single marker with the
+        same prefix (see B7).
+    - descriptor: "managed launcher store-gate"
+      indicators:
+        - "Mono / .NET assembly with a `MainWindow`-class field named `_isSteam` / `_isStore` / `_isLauncher`"
+        - "GetStoreRegistryKey-shaped method (`(string, string) -> Dictionary<string,string>`)"
+        - "GetLauncherType-shaped method returning a `LauncherType` enum"
+        - "engine binary independently links a store SDK (e.g. Steamworks ≥1.60)"
+      confidence: "High"
+      note: |
+        B3. Observed on a proprietary-engine target's Mono launcher.
+        MainWindow class hosts the gate for the C++ engine's store
+        handshake. Renamed from a previous storefront-specific name to
+        `managed launcher store-gate` for full vendor neutrality (LO
+        decision; "Steam"/"Steamworks" are not on the NEEDLES list but
+        renamed defensively).
+    - descriptor: "par-asset-archive"
+      indicators:
+        - "file magic `PAR ` (0x50 0x41 0x52 0x20) at offset 0"
+        - "header_size 0x1802"
+        - "paired with a 12-byte stride asset directory sidecar"
+        - "paired with `*.paver` / `*.papgt` / `*.pathc` meta sidecars"
+      confidence: "Medium"
+      note: |
+        B4. PAR (proprietary asset archive) format observed at scale
+        (~60 GB across 33 shards in the r03-stress proprietary-engine
+        target). KSY for the header lives in `data/ksy/par_archive.ksy`
+        (added this cycle).
+    - descriptor: "ue4-iostore-stub-utoc"
+      indicators:
+        - "global.utoc < 1 KB (stub size)"
+        - "16-byte ASCII banner like `-==--==--==--==-` or similar dash-pattern"
+        - "co-located `pakchunk*-*NoEditor.pak` swarm (content lives there)"
+        - "co-located `*.ucas` files that are fully encrypted (entropy ≥7.9)"
+      confidence: "Medium-High"
+      note: |
+        B5. Observed on a UE4-Like target: global.utoc is 609 bytes
+        with a dash-pattern banner; 6 pakchunks totaling ~18.4 GB
+        carry the actual content. The 0-record IoStore index is a
+        stub; content is loaded from the classic .pak path.
+    - descriptor: "publisher-attribution-sdks-as-managed-assembly"
+      indicators:
+        - "IL2CPP image table contains a dedicated assembly named after a publisher SDK"
+        - "the SDK assembly has ≥100 typeDefs (full SDK, not a shim)"
+        - "the SDK assembly is separate from the publisher's `Assembly-CSharp.dll`"
+      confidence: "High"
+      note: |
+        B6. Observed on an IL2CPP target where a publisher-SDK
+        assembly is embedded as a managed Unity assembly with 191
+        typeDefs (the entire SDK as a Unity assembly, not the C++
+        runtime). See r03-stress per-binary JSON for the IL2CPP image
+        table count.
+    - descriptor: "shielding-pdb-stem-marker"
+      indicators:
+        - "PE debug_directory PDB filename contains the substring `_shielding`"
+        - "PDB filename may have a leading numeric prefix (e.g. `3. WindowsLauncher_shielding.pdb`)"
+        - "encrypted-VM section family present (Pattern A or Pattern C)"
+      confidence: "High"
+      note: |
+        B7. Observed on an encrypted-VM Pattern-C binary: PDB stem
+        contains `_shielding`. The word "shielding" in the PDB stem is
+        itself an anti-tamper-wrapper indicator; the v10-era wrappers
+        tag their PDBs this way.
+    # ─────────────────────────────────────────────────────────────
+    # v2.8.0 (2026-06-07) — WS-6: 2 entries derived from public
+    # research (named-author repos cited in
+    # docs/re-encrypted-vm-research-notes.md). Catalog stays
+    # vendor-neutral; attribution + URLs live in the docs file.
+    # ─────────────────────────────────────────────────────────────
+    - descriptor: "anti-tamper section-rename map (post-wrap PE)"
+      indicators:
+        - "PE has all of: `.trace`, `.srdata` sections (injected by wrapper)"
+        - "PE has additional injected sections `.text1`, `.rsrc` of unusual size"
+        - "original section names appear under renamed forms: `.code` (would-be `.text`), `.link` (would-be `.rdata`), `.sdata` (would-be `.data`)"
+        - "PE debug_directory has `IMAGE_DEBUG_TYPE_POGO` (10) entry — useful for OEP recovery"
+      confidence: "Medium-High"
+      note: |
+        WS-6. Derived from public research on PE-wrapping anti-tamper
+        section-rename schemes. The OEP can sometimes be recovered
+        from the POGO debug entry (`IMAGE_DEBUG_TYPE_POGO` = 10) even
+        when the standard entry point has been rewritten. See
+        docs/re-encrypted-vm-research-notes.md for the citation chain
+        and the public-research source URLs.
+      consumes:
+        - "PE debug_directory walker (re-lief.get_debug_directory)"
+    - descriptor: "decoy-anti-tamper-signature negative-evidence guard"
+      indicators:
+        - "anti-tamper-tag string present (e.g. vendor-supply-line marker) AND missing the rest of the wrapper's section structure"
+        - "encrypted-VM-shaped section names (`.vmp0`/`.vmp1`/`.vmp2`) AND missing the wrapper's runtime-stub structure"
+        - "obfuscation-tagged section names (`.winlice`/`.themida`) AND missing the wrapper's mutex tag"
+        - "dongle-driver name strings (`skeydrv.dll`, `sense4.dll`, `MARXDEV1.SYS`, `WIBUKEY`, `nethasp.ini`) present in a binary with NO real driver-load symptoms"
+      confidence: "Medium-High"
+      note: |
+        WS-6. Decoy fake-signature patterns injected by an obfuscator
+        to mislead PE-classification tools (Detect-It-Easy, this
+        catalog) into reporting fake packers. Adding this as a
+        NEGATIVE-evidence guard: if you see one of the tagged
+        signatures WITHOUT the corresponding wrapper's full structure,
+        treat as decoy-FP rather than real protection. Derived from
+        public defensive-research; see
+        docs/re-encrypted-vm-research-notes.md.
+      consumes:
+        - "data/drm-indicators.yaml::section_indicators (the real wrapper-section sets)"
+    # ─────────────────────────────────────────────────────────────
+    # v2.9.0 (2026-06-07) — WS-38: 1 entry for the storefront
+    # overlay gateway (the sports-manager-game EOS sibling case
+    # from the v2.9.0 stress test). Catalog stays vendor-neutral;
+    # the per-target walk in
+    # See the RE-AI output directory
+    # is the empirical evidence base.
+    # ─────────────────────────────────────────────────────────────
+    - descriptor: "vendor SDK static-link surface (storefront-overlay)"
+      indicators:
+        - "PE imports a sibling native bridge DLL with the storefront overlay name pattern (e.g. `EOSSDK-Win64-Shipping.dll`, `eossdk.dll`)"
+        - "PE contains a static-link variant of the same export set (when the SDK is compiled into the game binary, the import surface is empty and the export shape lives in `.text`'s high-entropy region)"
+        - "PE has a `.eos` side-file read at startup (the documented storefront-overlay developer escape hatch)"
+        - "PE's import table has ordinal-only imports of the SDK bridge entry points (e.g. `ordinal 100`, `ordinal 101`)"
+      confidence: "High"
+      note: |
+        WS-38. Observed on a v2.9.0 stress test IL2CPP target
+        (a sports-manager game). The static-link variant of
+        the storefront overlay SDK ships as a thin native
+        bridge compiled into the game binary; the .eos
+        side-file is the canonical developer escape hatch
+        (analogous to the Valve `steam_appid.txt` convention,
+        encoded as INI-style `;`-delimited metadata:
+        ProductID + SandboxID). The managed-launcher case
+        (C# / Mono launcher; see B3 `managed launcher
+        store-gate`)
+        is the sibling catalog entry; this entry is the
+        native-bridge case. The bypass skill is
+        `skills/re-eos-bypass/`; the per-target walk is
+        in `See the RE-AI output directory

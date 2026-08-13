@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-vtil"
+version = "0.1.0"
+description = "MCP server for VTIL-Core (Virtual-machine Translation Intermediate Language) — lift, optimize, and emit pseudo-C for VM handler characterization. Vendor-neutral wrapper around the vtil-project/VTIL-Core C++ library."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "vtil", "vm-handler", "lift", "obfuscation", "reverse-engineering", "binary-analysis"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.6",
+]
+
+[project.scripts]
+re-vtil = "re_vtil.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

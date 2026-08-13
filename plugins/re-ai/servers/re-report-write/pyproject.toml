@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-report-write"
+version = "0.1.0"
+description = "MCP server for writing analyst reports: free-text Markdown to a file, structured table to a file. Pure-Python, no system dependencies."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ["mcp", "report", "markdown", "table", "write", "reverse-engineering"]
+authors = [{name = "John"}]
+dependencies = [
+    "mcp[cli]>=1.2",
+    "pydantic>=2.6",
+]
+
+[project.scripts]
+re-report-write = "re_report_write.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"

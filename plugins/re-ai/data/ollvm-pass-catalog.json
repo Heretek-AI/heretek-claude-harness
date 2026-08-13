@@ -1,0 +1,105 @@
+{
+  "_meta": {
+    "version": 1,
+    "last_updated": "2026-06-06",
+    "purpose": "The OLLVM / d810-ng simplification pass catalog. The re-vtil simplify_lifted_il tool takes a pass list and applies it to a lifted IL tree. Vendor-neutral: pass names are the public d810-ng / VTIL pass enum values, no product names.",
+    "pass_categories": {
+      "dead_store_elimination": "Remove stores to a memory location that is overwritten before any read.",
+      "branch_folding": "Fold branches whose condition is provably constant after a previous pass.",
+      "mem_dependency": "Reorder memory accesses to expose dataflow that the prior passes missed.",
+      "mba_fold": "Replace mixed boolean-arithmetic identities with the simpler form. Sources the re-mba-deobfuscate skill's mba_patterns.identities table from drm-indicators.yaml.",
+      "constant_folding": "Fold arithmetic on constants into a single constant.",
+      "opaque_predicate_eval": "Evaluate predicates whose truth is provable from prior dataflow (e.g. `x*x >= 0` for signed x).",
+      "string_decrypt": "Recognize the `ldstr -> call Get<name>(); ret` pattern in .NET IL and replace with the literal string. (Pairs with re-dotnet's run_il_simplification tool.)",
+      "control_flow_unflatten": "Unflatten switch-dispatcher state machines. The d810-ng canonical pass."
+    },
+    "source_credits": [
+      "https://github.com/w00tzenheimer/d810-ng (the d810-ng Ghidra plugin)",
+      "https://github.com/HikariObfuscator/Hikari (the OLLVM fork d810-ng targets)",
+      "https://github.com/can1357/NoVmp (VM-pack deobfuscation; some passes ported from here)"
+    ],
+    "default_pass_order": [
+      "constant_folding",
+      "dead_store_elimination",
+      "branch_folding",
+      "mem_dependency",
+      "mba_fold",
+      "opaque_predicate_eval",
+      "control_flow_unflatten"
+    ]
+  },
+  "passes": [
+    {
+      "id": "p-dse",
+      "name": "dead_store_elimination",
+      "category": "dead_store_elimination",
+      "description": "Remove stores to a memory location that is overwritten before any read.",
+      "vt_il_primitive": "stores",
+      "triggers": ["Always safe; always first pass."],
+      "pairs_with": ["branch_folding", "constant_folding"]
+    },
+    {
+      "id": "p-bf",
+      "name": "branch_folding",
+      "category": "branch_folding",
+      "description": "Fold branches whose condition is provably constant after a previous pass.",
+      "vt_il_primitive": "if",
+      "triggers": ["After constant_folding has simplified the branch condition."],
+      "pairs_with": ["dead_store_elimination", "mba_fold"]
+    },
+    {
+      "id": "p-md",
+      "name": "mem_dependency",
+      "category": "mem_dependency",
+      "description": "Reorder memory accesses to expose dataflow that the prior passes missed.",
+      "vt_il_primitive": "mem,store,load",
+      "triggers": ["After dead_store_elimination."],
+      "pairs_with": ["mba_fold"]
+    },
+    {
+      "id": "p-mba",
+      "name": "mba_fold",
+      "category": "mba_fold",
+      "description": "Replace mixed boolean-arithmetic identities with the simpler form.",
+      "vt_il_primitive": "add,sub,xor,or,and",
+      "triggers": ["When the re-mba-deobfuscate skill's identities table has fired on the same function."],
+      "pairs_with": ["branch_folding", "constant_folding"]
+    },
+    {
+      "id": "p-cf",
+      "name": "constant_folding",
+      "category": "constant_folding",
+      "description": "Fold arithmetic on constants into a single constant.",
+      "vt_il_primitive": "add,sub,imul",
+      "triggers": ["Always safe; always first pass."],
+      "pairs_with": ["branch_folding"]
+    },
+    {
+      "id": "p-ope",
+      "name": "opaque_predicate_eval",
+      "category": "opaque_predicate_eval",
+      "description": "Evaluate predicates whose truth is provable from prior dataflow.",
+      "vt_il_primitive": "if",
+      "triggers": ["When the predicate references only known-constant operands (e.g. x*x, (x | 1))."],
+      "pairs_with": ["branch_folding"]
+    },
+    {
+      "id": "p-sd",
+      "name": "string_decrypt",
+      "category": "string_decrypt",
+      "description": "Recognize the ldstr -> call Get<name>(); ret pattern and replace with the literal string.",
+      "vt_il_primitive": "call,ret",
+      "triggers": ["Only applies to .NET IL lifted to VTIL."],
+      "pairs_with": []
+    },
+    {
+      "id": "p-cfu",
+      "name": "control_flow_unflatten",
+      "category": "control_flow_unflatten",
+      "description": "Unflatten switch-dispatcher state machines.",
+      "vt_il_primitive": "jmp,switch",
+      "triggers": ["When a switch-dispatcher pattern is detected (a single basic block with high in-degree + a state-variable update + a switch on the state)."],
+      "pairs_with": ["mba_fold", "branch_folding"]
+    }
+  ]
+}

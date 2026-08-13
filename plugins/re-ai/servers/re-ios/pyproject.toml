@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "re-ios"
+version = "0.1.0"
+description = "MCP server for iOS / Mach-O reverse engineering: IPA parse, ObjC class dump, Swift symbol demangle, Frida-on-iOS session. Wraps re-frida + re-lief. Vendor-neutral."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+keywords = ['mcp', 'ios', 'mach-o', 'objc', 'swift', 'ipa', 'binary-analysis']
+authors = [{name = "John"}]
+dependencies = ['mcp[cli]>=1.2', 'pydantic>=2.6']
+
+[project.scripts]
+re-ios = "re_ios.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
