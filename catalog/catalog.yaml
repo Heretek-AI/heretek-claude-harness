@@ -681,6 +681,63 @@ plugins:
           cve_scan: not-applicable
           review: reviews/java-check.md
 
+  - name: python
+    category: task
+    tags: [python, language]
+    source: { type: relative, path: python }
+    components: [skills, lsp]
+    items:
+      - id: python-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/python.md
+
+  - name: rust
+    category: task
+    tags: [rust, language]
+    source: { type: relative, path: rust }
+    components: [skills, lsp]
+    items:
+      - id: rust-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/rust.md
+
+  - name: typescript
+    category: task
+    tags: [typescript, javascript, language]
+    source: { type: relative, path: typescript }
+    components: [skills, lsp]
+    items:
+      - id: ts-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/typescript.md
+
   - name: best-practices
     category: cross
     tags: [skills, generic, best-practices]

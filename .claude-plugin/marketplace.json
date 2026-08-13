@@ -140,6 +140,34 @@
       ]
     },
     {
+      "category": "task",
+      "name": "python",
+      "source": "./plugins/python",
+      "tags": [
+        "python",
+        "language"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "rust",
+      "source": "./plugins/rust",
+      "tags": [
+        "rust",
+        "language"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "typescript",
+      "source": "./plugins/typescript",
+      "tags": [
+        "typescript",
+        "javascript",
+        "language"
+      ]
+    },
+    {
       "category": "cross",
       "name": "best-practices",
       "source": "./plugins/best-practices",

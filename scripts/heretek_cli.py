@@ -292,12 +292,73 @@ def cmd_telemetry_schema(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_init(args: argparse.Namespace) -> int:
+    """Auto-detect project languages and frameworks, then install matching packs + hooks."""
+    target_dir = Path(args.target).resolve()
+    if not target_dir.is_dir():
+        print(f"error: target directory '{target_dir}' does not exist", file=sys.stderr)
+        return 1
+
+    packs_to_install: set[str] = {"best-practices", "hooks", "pre-commit"}
+
+    # Project Manifest Auto-Detection Rules
+    if any(
+        (target_dir / f).exists()
+        for f in ("pyproject.toml", "setup.py", "requirements.txt", "Pipfile", "poetry.lock")
+    ):
+        packs_to_install.add("python")
+
+    if (target_dir / "Cargo.toml").exists():
+        packs_to_install.add("rust")
+        packs_to_install.add("fallow")
+
+    if (target_dir / "package.json").exists() or (target_dir / "tsconfig.json").exists():
+        packs_to_install.add("typescript")
+        packs_to_install.add("web-frontend")
+        packs_to_install.add("fallow")
+
+    if (target_dir / "go.mod").exists():
+        packs_to_install.add("go")
+
+    if any(
+        (target_dir / f).exists() for f in ("CMakeLists.txt", "Makefile", "compile_commands.json")
+    ):
+        packs_to_install.add("cpp")
+
+    if any((target_dir / f).exists() for f in ("pom.xml", "build.gradle", "build.gradle.kts")):
+        packs_to_install.add("java")
+
+    print(f"heretek init: Auto-detected project at {target_dir}")
+    print(
+        f"Deploying {len(packs_to_install)} matching plugin pack(s): {', '.join(sorted(packs_to_install))}"
+    )
+
+    for pack in sorted(packs_to_install):
+        dummy_args = argparse.Namespace(pack_name=pack, target=str(target_dir))
+        res = cmd_install(dummy_args)
+        if res != 0:
+            print(f"error: failed to install pack '{pack}'", file=sys.stderr)
+            return res
+
+    print("heretek init: Repository initialization complete!")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="heretek",
         description="heretek marketplace & distribution CLI",
     )
     sub = parser.add_subparsers(dest="command", required=True)
+
+    # heretek init [--target TARGET_DIR]
+    init_parser = sub.add_parser(
+        "init", help="auto-detect project language and install matching packs"
+    )
+    init_parser.add_argument(
+        "--target", default=".", help="target project directory (default: current dir)"
+    )
+    init_parser.set_defaults(func=cmd_init)
 
     # heretek install <pack-name> [--target TARGET_DIR]
     install_parser = sub.add_parser("install", help="install a plugin package into target project")

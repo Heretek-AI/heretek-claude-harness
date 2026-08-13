@@ -1,12 +1,10 @@
 {
-	"lspServers": {
-		"python": {
-			"command": "ruff",
-			"args": ["server"],
-			"extensionToLanguage": {
-				".py": "python",
-				".pyi": "python"
-			}
+	"basedpyright": {
+		"command": "basedpyright-langserver",
+		"args": ["--stdio"],
+		"extensionToLanguage": {
+			".py": "python",
+			".pyi": "python"
 		}
 	}
 }

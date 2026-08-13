@@ -236,3 +236,19 @@ def test_cli_build_catalog(tmp_path: Path, capsys: pytest.CaptureFixture) -> Non
     assert output.is_file()
     data = json.loads(output.read_text())
     assert data["name"] == "heretek"
+
+
+def test_cli_init_auto_detects_python_and_rust(
+    tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """heretek init auto-detects pyproject.toml and Cargo.toml, deploying corresponding packs."""
+    (tmp_path / "pyproject.toml").touch()
+    (tmp_path / "Cargo.toml").touch()
+    ret = cli.main(["init", "--target", str(tmp_path)])
+    assert ret == 0
+    captured = capsys.readouterr()
+    assert "Auto-detected project" in captured.out
+    assert "python" in captured.out
+    assert "rust" in captured.out
+    assert (tmp_path / ".claude" / "plugins" / "python" / "plugin.json").is_file()
+    assert (tmp_path / ".claude" / "plugins" / "rust" / "plugin.json").is_file()
