@@ -295,4 +295,3 @@ class ImmuneLearningResult:
             "novel_attacks_flagged": self.novel_attacks_flagged,
             "false_positive_rate": self.false_positive_rate,
         }
-
