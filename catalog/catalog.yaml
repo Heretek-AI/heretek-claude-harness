@@ -154,6 +154,30 @@ plugins:
           last_commit: 2026-08-02
           cve_scan: 2026-08-04
           review: reviews/web-frontend-lighthouse.md
+      - id: frontend-design
+        kind: skill
+        upstream: anthropics/skills
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/web-frontend-design.md
+      - id: web-design-guidelines
+        kind: skill
+        upstream: vercel-labs/agent-skills
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/web-design-guidelines.md
 
   - name: hooks
     category: cross
@@ -735,6 +759,18 @@ plugins:
           last_commit: 2026-08-12
           cve_scan: not-applicable
           review: reviews/best-practices-ponytail.md
+      - id: grilling
+        kind: skill
+        upstream: mattpocock/skills
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/best-practices-grilling.md
 
   - name: quality-audit
     category: cross
