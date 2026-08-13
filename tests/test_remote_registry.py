@@ -37,5 +37,5 @@ def test_package_json_valid_manifest() -> None:
     pkg_file = REPO_ROOT / "package.json"
     assert pkg_file.is_file()
     data = json.loads(pkg_file.read_text())
-    assert data["name"] == "heretek"
+    assert data["name"] == "@heretek-ai/heretek"
     assert data["bin"]["heretek"] == "./bin/heretek.js"

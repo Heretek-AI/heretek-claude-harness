@@ -1,10 +1,22 @@
 {
-	"name": "heretek",
+	"name": "@heretek-ai/heretek",
 	"version": "1.0.0",
 	"description": "Heretek CLI: Distribution and auto-detection harness for Claude Code plugins, LSPs, and quality gates.",
 	"bin": {
 		"heretek": "./bin/heretek.js"
 	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"files": [
+		"bin/",
+		"scripts/",
+		"plugins/",
+		"catalog/",
+		".claude-plugin/",
+		"README.md",
+		"LICENSE"
+	],
 	"scripts": {
 		"test": "node bin/heretek.js validate"
 	},
