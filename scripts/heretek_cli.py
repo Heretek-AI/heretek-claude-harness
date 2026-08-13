@@ -478,6 +478,29 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     return 0 if elapsed_ms < 500.0 else 1
 
 
+def cmd_eval(args: argparse.Namespace) -> int:
+    """Run Harbor TerminalBench 2.0 A/B evaluation suite locally or in CI.
+
+    Args:
+        args: Parsed CLI namespace containing model, tasks, concurrent, and output.
+
+    Returns:
+        0 on evaluation completion pass, 1 on failure.
+    """
+    import os
+    import subprocess
+
+    env = os.environ.copy()
+    env["ANTHROPIC_MODEL"] = args.model
+    env["HERETEK_N_TASKS"] = str(args.tasks)
+    env["HERETEK_N_CONCURRENT"] = str(args.concurrent)
+    env["HERETEK_PLUGIN_DIR"] = str(REPO_ROOT / "plugins")
+
+    script_path = REPO_ROOT / "scripts" / "terminal_bench_ab.sh"
+    res = subprocess.run(["bash", str(script_path)], env=env, cwd=REPO_ROOT)
+    return res.returncode
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build top-level ArgumentParser for Heretek CLI."""
     parser = argparse.ArgumentParser(
@@ -496,6 +519,17 @@ def build_parser() -> argparse.ArgumentParser:
     # heretek metrics
     metrics_parser = sub.add_parser("metrics", help="benchmark fast-gate hook execution latencies")
     metrics_parser.set_defaults(func=cmd_metrics)
+
+    # heretek eval [--model MODEL] [--tasks TASKS] [--concurrent CONCURRENT]
+    eval_parser = sub.add_parser("eval", help="run Harbor TerminalBench 2.0 A/B evaluation harness")
+    eval_parser.add_argument(
+        "--model", default="claude-sonnet-5-20260301", help="evaluation model name"
+    )
+    eval_parser.add_argument(
+        "--tasks", default="8", help="number of tasks ('8' for quick subset, or 'all')"
+    )
+    eval_parser.add_argument("--concurrent", default="8", help="per-agent trial concurrency level")
+    eval_parser.set_defaults(func=cmd_eval)
 
     # heretek init [--target TARGET_DIR]
     init_parser = sub.add_parser(
