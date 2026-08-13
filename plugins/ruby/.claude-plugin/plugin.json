@@ -1,0 +1,13 @@
+{
+	"name": "ruby",
+	"displayName": "Ruby",
+	"description": "Ruby task pack: solargraph LSP configuration and rubocop linter skill.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"skills": "./skills/",
+	"lspServers": "./.lsp.json",
+	"dependencies": []
+}

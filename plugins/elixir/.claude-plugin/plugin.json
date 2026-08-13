@@ -1,0 +1,13 @@
+{
+	"name": "elixir",
+	"displayName": "Elixir",
+	"description": "Elixir task pack: elixir-ls LSP configuration and mix credo linter skill.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"skills": "./skills/",
+	"lspServers": "./.lsp.json",
+	"dependencies": []
+}

@@ -1,0 +1,9 @@
+{
+	"solargraph": {
+		"command": "solargraph",
+		"args": ["stdio"],
+		"extensionToLanguage": {
+			".rb": "ruby"
+		}
+	}
+}

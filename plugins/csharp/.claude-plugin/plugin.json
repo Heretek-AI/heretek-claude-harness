@@ -1,0 +1,13 @@
+{
+	"name": "csharp",
+	"displayName": "C# / .NET",
+	"description": "C# / .NET task pack: csharp-ls LSP configuration and dotnet format quality gate skill.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"skills": "./skills/",
+	"lspServers": "./.lsp.json",
+	"dependencies": []
+}

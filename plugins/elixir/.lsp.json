@@ -1,0 +1,10 @@
+{
+	"elixir-ls": {
+		"command": "language_server.sh",
+		"args": [],
+		"extensionToLanguage": {
+			".ex": "elixir",
+			".exs": "elixir"
+		}
+	}
+}

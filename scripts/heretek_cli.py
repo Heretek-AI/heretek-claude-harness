@@ -328,6 +328,19 @@ def cmd_init(args: argparse.Namespace) -> int:
     if any((target_dir / f).exists() for f in ("pom.xml", "build.gradle", "build.gradle.kts")):
         packs_to_install.add("java")
 
+    if any((target_dir / f).exists() for f in ("Gemfile", ".rubocop.yml", "Rakefile")):
+        packs_to_install.add("ruby")
+
+    if (target_dir / "mix.exs").exists():
+        packs_to_install.add("elixir")
+
+    if (
+        any(target_dir.glob("*.csproj"))
+        or any(target_dir.glob("*.sln"))
+        or (target_dir / "global.json").exists()
+    ):
+        packs_to_install.add("csharp")
+
     print(f"heretek init: Auto-detected project at {target_dir}")
     print(
         f"Deploying {len(packs_to_install)} matching plugin pack(s): {', '.join(sorted(packs_to_install))}"

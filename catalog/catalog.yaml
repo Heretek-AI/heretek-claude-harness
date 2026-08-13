@@ -738,6 +738,63 @@ plugins:
           cve_scan: not-applicable
           review: reviews/typescript.md
 
+  - name: ruby
+    category: task
+    tags: [ruby, language]
+    source: { type: relative, path: ruby }
+    components: [skills, lsp]
+    items:
+      - id: ruby-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/ruby.md
+
+  - name: elixir
+    category: task
+    tags: [elixir, language]
+    source: { type: relative, path: elixir }
+    components: [skills, lsp]
+    items:
+      - id: elixir-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/elixir.md
+
+  - name: csharp
+    category: task
+    tags: [csharp, dotnet, language]
+    source: { type: relative, path: csharp }
+    components: [skills, lsp]
+    items:
+      - id: csharp-check
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/csharp.md
+
   - name: best-practices
     category: cross
     tags: [skills, generic, best-practices]

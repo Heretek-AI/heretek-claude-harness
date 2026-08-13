@@ -168,6 +168,34 @@
       ]
     },
     {
+      "category": "task",
+      "name": "ruby",
+      "source": "./plugins/ruby",
+      "tags": [
+        "ruby",
+        "language"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "elixir",
+      "source": "./plugins/elixir",
+      "tags": [
+        "elixir",
+        "language"
+      ]
+    },
+    {
+      "category": "task",
+      "name": "csharp",
+      "source": "./plugins/csharp",
+      "tags": [
+        "csharp",
+        "dotnet",
+        "language"
+      ]
+    },
+    {
       "category": "cross",
       "name": "best-practices",
       "source": "./plugins/best-practices",
