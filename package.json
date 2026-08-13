@@ -1,0 +1,28 @@
+{
+	"name": "heretek",
+	"version": "1.0.0",
+	"description": "Heretek CLI: Distribution and auto-detection harness for Claude Code plugins, LSPs, and quality gates.",
+	"bin": {
+		"heretek": "./bin/heretek.js"
+	},
+	"scripts": {
+		"test": "node bin/heretek.js validate"
+	},
+	"keywords": [
+		"claude-code",
+		"mcp",
+		"lsp",
+		"quality-gates",
+		"heretek",
+		"linters"
+	],
+	"author": "Heretek-AI",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Heretek-AI/heretek-claude-harness.git"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	}
+}
