@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+  "github": {
+    "description": "Official GitHub MCP",
+    "transport": "stdio",
+    "command": "github-mcp",
+    "args": [
+      "--owner",
+      "Heretek-AI",
+      "--repo",
+      "llama-builds"
+    ],
+    "env": {
+      "GITHUB_TOKEN": null
+    },
+    "timeoutSeconds": 30
+  },
+  "sonarqube": {
+    "description": "SonarCloud MCP",
+    "transport": "stdio",
+    "command": "sonarqube-mcp",
+    "args": [
+      "--project",
+      "Heretek-AI_llama-builds"
+    ],
+    "env": {
+      "SONAR_TOKEN": null,
+      "SONAR_HOST_URL": null
+    }
+  }
+}
+}

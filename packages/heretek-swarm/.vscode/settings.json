@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "heretek-ai",
+        "projectKey": "Heretek-AI_heretek-swarm"
+    }
+}

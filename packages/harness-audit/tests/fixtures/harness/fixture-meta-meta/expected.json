@@ -1,0 +1,5 @@
+{
+  "auto_grade": {
+    "patch_diff_max_bytes": 1000
+  }
+}

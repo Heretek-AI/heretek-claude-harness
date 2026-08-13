@@ -1,0 +1,14 @@
+{
+  "agent": "agent-a-with-heretek",
+  "model": "claude-sonnet-5-20260301",
+  "commit_sha": "local",
+  "heretek_harness": true,
+  "n_tasks": 0,
+  "passed": 0,
+  "failed": 0,
+  "pass_rate": 0.0,
+  "wall_clock_sec_total": 0,
+  "wall_clock_sec_p50": 0,
+  "tokens_total": 0,
+  "per_task": []
+}

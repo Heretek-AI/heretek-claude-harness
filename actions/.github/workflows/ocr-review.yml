@@ -1,0 +1,229 @@
+name: "OCR PR Review"
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+  workflow_call:
+    secrets:
+      ocr_llm_url:
+        description: "LLM API endpoint URL (e.g. https://api.deepseek.com/anthropic)"
+        required: true
+      ocr_llm_token:
+        description: "LLM API authentication token"
+        required: true
+      repo_token:
+        description: "GitHub token with pull-requests: write permission (defaults to GITHUB_TOKEN)"
+        required: false
+      ocr_llm_model:
+        description: "LLM model name (e.g. deepseek-v4-flash). Falls back to input ocr-llm-model, then vars.OCR_LLM_MODEL, then default."
+        required: false
+    inputs:
+      ocr-llm-model:
+        description: "LLM model name override"
+        type: string
+        required: false
+        default: ""
+      ocr-use-anthropic:
+        description: "Set to 'true' for Anthropic protocol, 'false' for OpenAI"
+        type: string
+        required: false
+        default: "true"
+      ocr-concurrency:
+        description: "Number of parallel per-file sub-agents"
+        type: string
+        required: false
+        default: "5"
+      ocr-llm-auth-header:
+        description: "Custom auth header name (default: x-api-key for Anthropic)"
+        type: string
+        required: false
+        default: ""
+
+concurrency:
+  group: >-
+    ${{
+      (github.event_name == 'pull_request_target' ||
+       (github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        github.event.comment.author_association != 'BOT' &&
+        contains(fromJson('["MEMBER","OWNER","COLLABORATOR"]'), github.event.comment.author_association) &&
+        (startsWith(github.event.comment.body, '/open-code-review') ||
+         startsWith(github.event.comment.body, '@open-code-review'))))
+      && format('ocr-{0}', github.event.pull_request.number || github.event.issue.number)
+      || format('noop-{0}', github.run_id)
+    }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  # When triggered by issue_comment, the PR context isn't in the event payload
+  # We need to fetch it via the GitHub API
+  get-pr-context:
+    if: github.event_name == 'issue_comment'
+    runs-on: ubuntu-latest
+    outputs:
+      base_ref: ${{ steps.context.outputs.base_ref }}
+      head_sha: ${{ steps.context.outputs.head_sha }}
+      head_ref: ${{ steps.context.outputs.head_ref }}
+      pr_title: ${{ steps.context.outputs.pr_title }}
+    steps:
+      - name: "Get PR Context"
+        id: context
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.repo_token || secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            core.setOutput('base_ref', pr.data.base.ref);
+            core.setOutput('head_sha', pr.data.head.sha);
+            core.setOutput('head_ref', pr.data.head.ref);
+            core.setOutput('pr_title', pr.data.title);
+
+  ocr-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: >-
+      github.event_name == 'pull_request_target' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       !contains(fromJson('["BOT"]'), github.event.committer.type) &&
+       contains(fromJson('["MEMBER","OWNER","COLLABORATOR"]'), github.event.comment.author_association) &&
+       (startsWith(github.event.comment.body, '/open-code-review') ||
+        startsWith(github.event.comment.body, '@open-code-review')))
+    steps:
+      # Get PR context for issue_comment events
+      - name: "Get PR Context (issue_comment fallback)"
+        id: context
+        if: github.event_name == 'issue_comment'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.repo_token || secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            core.setOutput('base_ref', pr.data.base.ref);
+            core.setOutput('head_sha', pr.data.head.sha);
+            core.setOutput('head_ref', pr.data.head.ref);
+            core.setOutput('pr_title', pr.data.title);
+
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || steps.context.outputs.head_sha }}
+          fetch-depth: 0
+
+      - name: "Install Open Code Review"
+        shell: bash
+        run: |
+          npm install -g @alibaba-group/open-code-review@1.8.1
+          echo "✅ ocr installed: $(ocr --version 2>&1 || true)"
+
+      - name: "Configure LLM"
+        id: config
+        shell: bash
+        env:
+          OCR_LLM_URL: ${{ secrets.ocr_llm_url }}
+          OCR_LLM_TOKEN: ${{ secrets.ocr_llm_token }}
+          OCR_LLM_MODEL: ${{ secrets.ocr_llm_model || inputs.ocr-llm-model || vars.OCR_LLM_MODEL || 'deepseek-v4-flash' }}
+          OCR_USE_ANTHROPIC: ${{ inputs.ocr-use-anthropic || vars.OCR_LLM_USE_ANTHROPIC || 'true' }}
+        run: |
+          # Determine protocol from use_anthropic flag
+          if [ "${OCR_USE_ANTHROPIC}" = "true" ]; then
+            PROTOCOL="anthropic"
+          else
+            PROTOCOL="openai"
+          fi
+          echo "Protocol: ${PROTOCOL}"
+
+          # Configure LLM via custom provider (new recommended pattern)
+          ocr config set provider heretek-deepseek
+          ocr config set custom_providers.heretek-deepseek.url "${OCR_LLM_URL}"
+          ocr config set custom_providers.heretek-deepseek.protocol "${PROTOCOL}"
+          ocr config set custom_providers.heretek-deepseek.model "${OCR_LLM_MODEL}"
+          ocr config set custom_providers.heretek-deepseek.api_key "${OCR_LLM_TOKEN}"
+          ocr config set llm.extra_body '{"thinking": {"type": "disabled"}}'
+
+      - name: "Validate LLM Configuration"
+        shell: bash
+        run: |
+          echo "🔌 Testing LLM connection..."
+          ocr llm test
+
+      - name: "Run OCR Review"
+        id: review
+        shell: bash
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref || steps.context.outputs.base_ref }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref || steps.context.outputs.head_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || steps.context.outputs.head_sha }}
+          PR_TITLE: ${{ github.event.pull_request.title || steps.context.outputs.pr_title }}
+          OCR_CONCURRENCY: ${{ inputs.ocr-concurrency || '5' }}
+        run: |
+          mkdir -p .ocr
+
+          echo "🔍 Reviewing PR: ${BASE_REF} ← ${HEAD_REF} (${HEAD_SHA})"
+          echo "   Title: ${PR_TITLE}"
+          echo "   Concurrency: ${OCR_CONCURRENCY}"
+
+          ocr review \
+            --background "${PR_TITLE}" \
+            --concurrency "${OCR_CONCURRENCY}" \
+            --from "origin/${BASE_REF}" \
+            --to "${HEAD_SHA}" \
+            --format json --audience agent \
+            > .ocr/result.json 2>.ocr/review-stderr.txt
+
+          # Show stderr (if any) for debugging
+          if [ -s .ocr/review-stderr.txt ]; then
+            cat .ocr/review-stderr.txt >&2
+          fi
+
+          if [ -s .ocr/result.json ]; then
+            echo "✅ OCR review results saved to .ocr/result.json"
+          else
+            echo "⚠️ No JSON output from OCR review — review produced no results or failed"
+            rm -f .ocr/result.json
+          fi
+
+      - name: "Build Agent Envelope"
+        uses: ./.github/actions/ocr-envelope
+        with:
+          ocr-command: review
+          ocr-result-file: .ocr/result.json
+          github-token: ${{ secrets.repo_token || secrets.GITHUB_TOKEN }}
+
+      - name: "Upload Agent Output"
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-output-ocr-review
+          path: |
+            .agent/output.json
+            .ocr/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: "Summarize"
+        shell: bash
+        run: |
+          if [ -f .agent/output.json ]; then
+            echo "## OCR Review Results" >> $GITHUB_STEP_SUMMARY
+            jq -r '. | "- **Status**: \(.status)\n- **Summary**: \(.summary)"' .agent/output.json >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            FINDINGS=$(jq '.findings | length' .agent/output.json 2>/dev/null || echo 0)
+            if [ "$FINDINGS" -gt 0 ] && [ "$FINDINGS" -le 20 ]; then
+              echo "### Findings" >> $GITHUB_STEP_SUMMARY
+              jq -r '.findings[] | "- `\(.file // "?")`:\(.line // "?") — \(.message)"' .agent/output.json >> $GITHUB_STEP_SUMMARY
+            fi
+          fi

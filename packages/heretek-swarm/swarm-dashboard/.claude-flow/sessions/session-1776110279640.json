@@ -1,0 +1,14 @@
+{
+  "id": "session-1776110279640",
+  "startedAt": "2026-04-13T19:57:59.640Z",
+  "cwd": "/home/john/Projects/heretek-swarm/dashboard/frontend",
+  "context": {},
+  "metrics": {
+    "edits": 14,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-04-13T20:03:19.471Z",
+  "duration": 319831
+}

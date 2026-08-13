@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heretek-ai.dev/schemas/settings-json.schema.json",
+  "title": ".claude/settings.json contract",
+  "type": "object",
+  "required": ["permissions", "hooks"],
+  "additionalProperties": true,
+  "properties": {
+    "model": { "type": "string", "minLength": 1 },
+    "permissions": {
+      "type": "object",
+      "required": ["allow", "deny"],
+      "properties": {
+        "allow": { "type": "array", "items": { "type": "string" } },
+        "deny": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "hooks": {
+      "type": "object",
+      "required": ["PreToolUse", "PostToolUse", "Stop"],
+      "properties": {
+        "PreToolUse": { "type": "array", "minItems": 1 },
+        "PostToolUse": { "type": "array" },
+        "UserPromptSubmit": { "type": "array" },
+        "Stop": { "type": "array", "minItems": 1 }
+      }
+    }
+  }
+}

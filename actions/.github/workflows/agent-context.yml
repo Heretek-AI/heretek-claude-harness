@@ -1,0 +1,33 @@
+name: "Agent Context"
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  generate-context:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Generate Agent Context"
+        uses: ./.github/actions/agent-context
+
+      - name: "Read Agent Output for Logging"
+        shell: bash
+        run: |
+          set +e
+          if [ -f .agent/output.json ] && [ -s .agent/output.json ]; then
+            if jq -e . .agent/output.json &>/dev/null; then
+              {
+                echo "### Agent Context"
+                jq -r '. | "\(.summary)"' .agent/output.json
+                echo ""
+                echo '```json'
+                cat .agent/output.json
+                echo '```'
+              } >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ Agent output file exists but is not valid JSON" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi

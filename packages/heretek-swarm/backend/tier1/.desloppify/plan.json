@@ -1,0 +1,490 @@
+{
+  "version": 8,
+  "created": "2026-06-24T16:02:30+00:00",
+  "updated": "2026-06-24T16:02:30+00:00",
+  "queue_order": [
+    "subjective::abstraction_fitness",
+    "subjective::ai_generated_debt",
+    "subjective::api_surface_coherence",
+    "subjective::authorization_consistency",
+    "subjective::contract_coherence",
+    "subjective::convention_outlier",
+    "subjective::cross_module_architecture",
+    "subjective::dependency_health",
+    "subjective::design_coherence",
+    "subjective::error_consistency",
+    "subjective::high_level_elegance",
+    "subjective::incomplete_migration",
+    "subjective::initialization_coupling",
+    "subjective::logic_clarity",
+    "subjective::low_level_elegance",
+    "subjective::mid_level_elegance",
+    "subjective::naming_quality",
+    "subjective::package_organization",
+    "subjective::test_strategy",
+    "subjective::type_safety",
+    "unused::tests/conftest.py::os:5",
+    "unused::tests/integration/test_deliberation_no_consensus.py::pytest:5",
+    "unused::tests/integration/test_deliberation_with_interjection.py::pytest:5",
+    "unused::tests/integration/test_deliberation_with_interjection.py::result:55",
+    "unused::tests/integration/test_ws_replay_live_handoff.py::json:23",
+    "unused::tests/integration/test_ws_replay_live_handoff.py::collections.abc.AsyncIterator:26",
+    "unused::tests/unit/test_alpha.py::tier1.deliberation.state.DeliberationState:11",
+    "unused::tests/unit/test_alpha.py::tier1.deliberation.state.next_seq:13",
+    "unused::tests/unit/test_alpha.py::tier1.deliberation.state.now_ts:14",
+    "unused::tests/unit/test_consensus.py::pytest:5",
+    "unused::tests/unit/test_postgres.py::uuid:9",
+    "unused::tests/unit/test_redis.py::tier1.deliberation.state.new_deliberation_id:9",
+    "unused::tests/unit/test_state.py::tier1.deliberation.state.AgentName:7",
+    "unused::tests/unit/test_state.py::tier1.deliberation.state.FinalDecision:11",
+    "unused::tests/unit/test_state.py::tier1.deliberation.state.VerdictPosition:13",
+    "unused::tests/unit/test_steward.py::pytest:5",
+    "unused::tests/unit/test_ws_protocol.py::pytest:5",
+    "unused::tier1/deliberation/nodes/_base.py::json:14",
+    "unused::tier1/deliberation/nodes/_base.py::tier1.llm.garage.StreamChunk:25",
+    "unused::tier1/deliberation/state.py::typing.Annotated:12",
+    "unused::tier1/llm/garage.py::tier1.llm.errors.LLMTimeout:23"
+  ],
+  "deferred": [],
+  "skipped": {},
+  "active_cluster": null,
+  "overrides": {
+    "unused::tests/conftest.py::os:5": {
+      "issue_id": "unused::tests/conftest.py::os:5",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/integration/test_deliberation_no_consensus.py::pytest:5": {
+      "issue_id": "unused::tests/integration/test_deliberation_no_consensus.py::pytest:5",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/integration/test_deliberation_with_interjection.py::pytest:5": {
+      "issue_id": "unused::tests/integration/test_deliberation_with_interjection.py::pytest:5",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/integration/test_deliberation_with_interjection.py::result:55": {
+      "issue_id": "unused::tests/integration/test_deliberation_with_interjection.py::result:55",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/integration/test_ws_replay_live_handoff.py::json:23": {
+      "issue_id": "unused::tests/integration/test_ws_replay_live_handoff.py::json:23",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/integration/test_ws_replay_live_handoff.py::collections.abc.AsyncIterator:26": {
+      "issue_id": "unused::tests/integration/test_ws_replay_live_handoff.py::collections.abc.AsyncIterator:26",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_alpha.py::tier1.deliberation.state.DeliberationState:11": {
+      "issue_id": "unused::tests/unit/test_alpha.py::tier1.deliberation.state.DeliberationState:11",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_alpha.py::tier1.deliberation.state.next_seq:13": {
+      "issue_id": "unused::tests/unit/test_alpha.py::tier1.deliberation.state.next_seq:13",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_alpha.py::tier1.deliberation.state.now_ts:14": {
+      "issue_id": "unused::tests/unit/test_alpha.py::tier1.deliberation.state.now_ts:14",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_consensus.py::pytest:5": {
+      "issue_id": "unused::tests/unit/test_consensus.py::pytest:5",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_postgres.py::uuid:9": {
+      "issue_id": "unused::tests/unit/test_postgres.py::uuid:9",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_redis.py::tier1.deliberation.state.new_deliberation_id:9": {
+      "issue_id": "unused::tests/unit/test_redis.py::tier1.deliberation.state.new_deliberation_id:9",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_state.py::tier1.deliberation.state.AgentName:7": {
+      "issue_id": "unused::tests/unit/test_state.py::tier1.deliberation.state.AgentName:7",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_state.py::tier1.deliberation.state.FinalDecision:11": {
+      "issue_id": "unused::tests/unit/test_state.py::tier1.deliberation.state.FinalDecision:11",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_state.py::tier1.deliberation.state.VerdictPosition:13": {
+      "issue_id": "unused::tests/unit/test_state.py::tier1.deliberation.state.VerdictPosition:13",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_steward.py::pytest:5": {
+      "issue_id": "unused::tests/unit/test_steward.py::pytest:5",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tests/unit/test_ws_protocol.py::pytest:5": {
+      "issue_id": "unused::tests/unit/test_ws_protocol.py::pytest:5",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tier1/deliberation/nodes/_base.py::json:14": {
+      "issue_id": "unused::tier1/deliberation/nodes/_base.py::json:14",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tier1/deliberation/nodes/_base.py::tier1.llm.garage.StreamChunk:25": {
+      "issue_id": "unused::tier1/deliberation/nodes/_base.py::tier1.llm.garage.StreamChunk:25",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tier1/deliberation/state.py::typing.Annotated:12": {
+      "issue_id": "unused::tier1/deliberation/state.py::typing.Annotated:12",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "unused::tier1/llm/garage.py::tier1.llm.errors.LLMTimeout:23": {
+      "issue_id": "unused::tier1/llm/garage.py::tier1.llm.errors.LLMTimeout:23",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "test_coverage::tier1/deliberation/nodes/_base.py::transitive_only": {
+      "issue_id": "test_coverage::tier1/deliberation/nodes/_base.py::transitive_only",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "test_coverage::tier1/dashboard/bridge.py::transitive_only": {
+      "issue_id": "test_coverage::tier1/dashboard/bridge.py::transitive_only",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "test_coverage::tier1/deliberation/nodes/parser.py::transitive_only": {
+      "issue_id": "test_coverage::tier1/deliberation/nodes/parser.py::transitive_only",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "test_coverage::tier1/dashboard/serve.py::transitive_only": {
+      "issue_id": "test_coverage::tier1/dashboard/serve.py::transitive_only",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "test_coverage::tier1/api/deps.py::transitive_only": {
+      "issue_id": "test_coverage::tier1/api/deps.py::transitive_only",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "test_coverage::tier1/api/routes/deliberations.py::transitive_only": {
+      "issue_id": "test_coverage::tier1/api/routes/deliberations.py::transitive_only",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::abstraction_fitness": {
+      "issue_id": "subjective::abstraction_fitness",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::ai_generated_debt": {
+      "issue_id": "subjective::ai_generated_debt",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::api_surface_coherence": {
+      "issue_id": "subjective::api_surface_coherence",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::authorization_consistency": {
+      "issue_id": "subjective::authorization_consistency",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::contract_coherence": {
+      "issue_id": "subjective::contract_coherence",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::convention_outlier": {
+      "issue_id": "subjective::convention_outlier",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::cross_module_architecture": {
+      "issue_id": "subjective::cross_module_architecture",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::dependency_health": {
+      "issue_id": "subjective::dependency_health",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::design_coherence": {
+      "issue_id": "subjective::design_coherence",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::error_consistency": {
+      "issue_id": "subjective::error_consistency",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::high_level_elegance": {
+      "issue_id": "subjective::high_level_elegance",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::incomplete_migration": {
+      "issue_id": "subjective::incomplete_migration",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::initialization_coupling": {
+      "issue_id": "subjective::initialization_coupling",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::logic_clarity": {
+      "issue_id": "subjective::logic_clarity",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::low_level_elegance": {
+      "issue_id": "subjective::low_level_elegance",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::mid_level_elegance": {
+      "issue_id": "subjective::mid_level_elegance",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::naming_quality": {
+      "issue_id": "subjective::naming_quality",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::package_organization": {
+      "issue_id": "subjective::package_organization",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::test_strategy": {
+      "issue_id": "subjective::test_strategy",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    },
+    "subjective::type_safety": {
+      "issue_id": "subjective::type_safety",
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:02:30+00:00"
+    }
+  },
+  "clusters": {
+    "auto/unused": {
+      "name": "auto/unused",
+      "description": "Remove 21 unused issues",
+      "issue_ids": [
+        "unused::tests/conftest.py::os:5",
+        "unused::tests/integration/test_deliberation_no_consensus.py::pytest:5",
+        "unused::tests/integration/test_deliberation_with_interjection.py::pytest:5",
+        "unused::tests/integration/test_deliberation_with_interjection.py::result:55",
+        "unused::tests/integration/test_ws_replay_live_handoff.py::json:23",
+        "unused::tests/integration/test_ws_replay_live_handoff.py::collections.abc.AsyncIterator:26",
+        "unused::tests/unit/test_alpha.py::tier1.deliberation.state.DeliberationState:11",
+        "unused::tests/unit/test_alpha.py::tier1.deliberation.state.next_seq:13",
+        "unused::tests/unit/test_alpha.py::tier1.deliberation.state.now_ts:14",
+        "unused::tests/unit/test_consensus.py::pytest:5",
+        "unused::tests/unit/test_postgres.py::uuid:9",
+        "unused::tests/unit/test_redis.py::tier1.deliberation.state.new_deliberation_id:9",
+        "unused::tests/unit/test_state.py::tier1.deliberation.state.AgentName:7",
+        "unused::tests/unit/test_state.py::tier1.deliberation.state.FinalDecision:11",
+        "unused::tests/unit/test_state.py::tier1.deliberation.state.VerdictPosition:13",
+        "unused::tests/unit/test_steward.py::pytest:5",
+        "unused::tests/unit/test_ws_protocol.py::pytest:5",
+        "unused::tier1/deliberation/nodes/_base.py::json:14",
+        "unused::tier1/deliberation/nodes/_base.py::tier1.llm.garage.StreamChunk:25",
+        "unused::tier1/deliberation/state.py::typing.Annotated:12",
+        "unused::tier1/llm/garage.py::tier1.llm.errors.LLMTimeout:23"
+      ],
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "updated_at": "2026-06-24T16:02:30+00:00",
+      "auto": true,
+      "cluster_key": "auto::unused",
+      "action": "desloppify autofix unused-imports --dry-run",
+      "execution_status": "active",
+      "user_modified": false,
+      "action_type": "auto_fix",
+      "execution_policy": "ephemeral_autopromote"
+    },
+    "auto/test_coverage-transitive_only": {
+      "name": "auto/test_coverage-transitive_only",
+      "description": "Fix 6 test coverage issues",
+      "issue_ids": [
+        "test_coverage::tier1/deliberation/nodes/_base.py::transitive_only",
+        "test_coverage::tier1/dashboard/bridge.py::transitive_only",
+        "test_coverage::tier1/deliberation/nodes/parser.py::transitive_only",
+        "test_coverage::tier1/dashboard/serve.py::transitive_only",
+        "test_coverage::tier1/api/deps.py::transitive_only",
+        "test_coverage::tier1/api/routes/deliberations.py::transitive_only"
+      ],
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "updated_at": "2026-06-24T16:02:30+00:00",
+      "auto": true,
+      "cluster_key": "detector::test_coverage::transitive_only",
+      "action": "review test coverage gaps",
+      "execution_status": "review",
+      "user_modified": false,
+      "action_type": "refactor",
+      "execution_policy": "planned_only"
+    },
+    "auto/initial-review": {
+      "name": "auto/initial-review",
+      "description": "Initial review of 20 unscored subjective dimensions",
+      "issue_ids": [
+        "subjective::abstraction_fitness",
+        "subjective::ai_generated_debt",
+        "subjective::api_surface_coherence",
+        "subjective::authorization_consistency",
+        "subjective::contract_coherence",
+        "subjective::convention_outlier",
+        "subjective::cross_module_architecture",
+        "subjective::dependency_health",
+        "subjective::design_coherence",
+        "subjective::error_consistency",
+        "subjective::high_level_elegance",
+        "subjective::incomplete_migration",
+        "subjective::initialization_coupling",
+        "subjective::logic_clarity",
+        "subjective::low_level_elegance",
+        "subjective::mid_level_elegance",
+        "subjective::naming_quality",
+        "subjective::package_organization",
+        "subjective::test_strategy",
+        "subjective::type_safety"
+      ],
+      "created_at": "2026-06-24T16:02:30+00:00",
+      "updated_at": "2026-06-24T16:02:30+00:00",
+      "auto": true,
+      "cluster_key": "subjective::unscored",
+      "action": "desloppify review --prepare --dimensions abstraction_fitness,ai_generated_debt,api_surface_coherence,authorization_consistency,contract_coherence,convention_outlier,cross_module_architecture,dependency_health,design_coherence,error_consistency,high_level_elegance,incomplete_migration,initialization_coupling,logic_clarity,low_level_elegance,mid_level_elegance,naming_quality,package_organization,test_strategy,type_safety",
+      "execution_status": "review",
+      "user_modified": false,
+      "action_type": "manual_fix",
+      "execution_policy": "planned_only"
+    }
+  },
+  "superseded": {},
+  "promoted_ids": [],
+  "plan_start_scores": {
+    "strict": 21.9,
+    "overall": 21.9,
+    "objective": 87.7,
+    "verified": 87.7
+  },
+  "refresh_state": {
+    "_subjective_migration_pruned": true,
+    "lifecycle_phase": "plan"
+  },
+  "execution_log": [
+    {
+      "timestamp": "2026-06-24T16:02:30+00:00",
+      "action": "sync_subjective",
+      "issue_ids": [],
+      "cluster_name": null,
+      "actor": "system",
+      "note": null,
+      "detail": {
+        "changes": true
+      }
+    },
+    {
+      "timestamp": "2026-06-24T16:02:30+00:00",
+      "action": "auto_cluster",
+      "issue_ids": [],
+      "cluster_name": null,
+      "actor": "system",
+      "note": null,
+      "detail": {
+        "changes": true
+      }
+    },
+    {
+      "timestamp": "2026-06-24T16:02:30+00:00",
+      "action": "sync_lifecycle_phase",
+      "issue_ids": [],
+      "cluster_name": null,
+      "actor": "system",
+      "note": null,
+      "detail": {
+        "phase": "review_initial"
+      }
+    },
+    {
+      "timestamp": "2026-06-24T16:02:30+00:00",
+      "action": "seed_start_scores",
+      "issue_ids": [],
+      "cluster_name": null,
+      "actor": "system",
+      "note": null,
+      "detail": {}
+    }
+  ],
+  "epic_triage_meta": {},
+  "commit_log": [],
+  "uncommitted_issues": [],
+  "commit_tracking_branch": null,
+  "scan_count_at_plan_start": 1
+}

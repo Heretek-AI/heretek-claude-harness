@@ -1,0 +1,27 @@
+# SOPS configuration for Heretek Swarm
+# =============================================================================
+# Age key generation:  age-keygen -o key.txt
+# The public key below is an EXAMPLE. Each operator must generate their own
+# age keypair and add their public key to the `age` list below.  Multiple
+# recipients are supported — just add each public key on its own line.
+#
+# Key format:          age1...
+# Example public key:  age1lm4gvvhheqjhcy26arw79zxa909pvqcd63ew9c02qx3rspzjufcqe30r65
+#
+# Decryption requires the SOPS_AGE_KEY environment variable set to the
+# corresponding AGE-SECRET-KEY-... value.
+# =============================================================================
+
+creation_rules:
+  # All YAML secrets (e.g. secrets/production.yaml, secrets/ci.yaml)
+  - path_regex: secrets/.*\.ya?ml$
+    age: >-
+      age1lm4gvvhheqjhcy26arw79zxa909pvqcd63ew9c02qx3rspzjufcqe30r65
+
+  # Encrypted .env files (e.g. secrets/encrypted.env)
+  - path_regex: secrets/.*\.env$
+    age: >-
+      age1lm4gvvhheqjhcy26arw79zxa909pvqcd63ew9c02qx3rspzjufcqe30r65
+
+# Files ending with _unencrypted are never encrypted (e.g. templates)
+unencrypted_suffix: _unencrypted

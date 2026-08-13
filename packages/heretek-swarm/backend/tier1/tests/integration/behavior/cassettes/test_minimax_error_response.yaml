@@ -1,0 +1,52 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"user","content":"trigger-401"}],"model":"MiniMax-Text-01","stream":true}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '95'
+      content-type:
+      - application/json
+      host:
+      - api.minimax.io
+      user-agent:
+      - AsyncOpenAI/Python 2.43.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.43.0
+      x-stainless-read-timeout:
+      - '60.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.15
+    method: POST
+    uri: https://api.minimax.io/v1/chat/completions
+  response:
+    body:
+      string: '{"error":{"message":"Invalid API key","type":"invalid_request_error","param":null,"code":"invalid_api_key"}}'
+    headers:
+      content-type:
+      - application/json
+      date:
+      - Thu, 25 Jun 2026 19:01:00 GMT
+      x-request-id:
+      - cassette-error-1
+    status:
+      code: 401
+      message: Unauthorized
+version: 1

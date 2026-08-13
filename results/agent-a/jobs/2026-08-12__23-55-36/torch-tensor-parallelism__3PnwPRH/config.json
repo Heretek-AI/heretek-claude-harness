@@ -1,0 +1,31 @@
+{
+    "task": {
+        "path": "torch-tensor-parallelism",
+        "git_url": "https://github.com/laude-institute/terminal-bench-2.git",
+        "git_commit_id": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c",
+        "source": "terminal-bench"
+    },
+    "trial_name": "torch-tensor-parallelism__3PnwPRH",
+    "trials_dir": "results/agent-a/jobs/2026-08-12__23-55-36",
+    "agent": {
+        "name": "claude-code",
+        "model_name": "claude-sonnet-5-20260301",
+        "kwargs": {
+            "config": {
+                "plugin_dir": "/tmp/heretek-plugins"
+            }
+        }
+    },
+    "environment": {
+        "type": "docker",
+        "mounts": [
+            {
+                "type": "bind",
+                "source": "/home/john/Projects/heretek-claude-harness/plugins",
+                "target": "/tmp/heretek-plugins",
+                "read_only": true
+            }
+        ]
+    },
+    "job_id": "cbe40749-fb24-4e7c-b050-d0d876ed4058"
+}

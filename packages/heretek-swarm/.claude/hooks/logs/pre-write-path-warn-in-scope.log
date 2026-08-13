@@ -1,0 +1,1 @@
+{"ts": "2026-06-23T04:13:19Z", "event": "PreToolUse", "tool": "Write", "args": {"file_path":"/home/john/Projects/Peace-History/.superpowers/sdd/test.md"}, "decision": "allow", "duration_ms": 0, "note": "Triggered via Write to in-scope path — hook should silently allow (no WARN)"}

@@ -1,0 +1,175 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '22'
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install SOPS
+        uses: nhedger/setup-sops@v2
+        with:
+          version: latest
+
+      - name: Decrypt CI secrets
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          if [ -f secrets/ci.yaml ]; then
+            sops --decrypt secrets/ci.yaml > secrets/ci_decrypted.yaml
+            echo "✅ CI secrets decrypted"
+          else
+            echo "⚠️  secrets/ci.yaml not found — skipping decryption"
+          fi
+
+      - name: Run Bandit Security Scan
+        run: |
+          pip install bandit[toml]
+          bandit -r backend/ -f json -o bandit-report.json -ll
+
+      - name: Bandit Severity Gate (HIGH only)
+        run: |
+          python3 scripts/check-bandit-severity.py --input bandit-report.json --severity HIGH --verbose
+
+      - name: Run TruffleHog Secrets Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified --no-update
+
+  lint-python:
+    name: Python Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Run Ruff
+        run: ruff check backend/ tests/
+
+      - name: Ruff Warning Gate (< 50 findings)
+        run: |
+          COUNT=$(ruff check backend/ tests/ --quiet --output-format=concise 2>&1 | wc -l || true)
+          echo "Ruff findings: $COUNT"
+          if [ "$COUNT" -ge 50 ]; then
+            echo "❌ Ruff gate failed: $COUNT findings (limit 49)"
+            exit 1
+          else
+            echo "✅ Ruff gate passed: $COUNT findings"
+          fi
+
+      - name: Run MyPy
+        run: mypy backend/ --ignore-missing-imports
+
+  lint-frontend:
+    name: Frontend Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: swarm-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: swarm-dashboard
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: swarm-dashboard
+        run: npm run lint || true
+
+      - name: Run TypeScript check
+        working-directory: swarm-dashboard
+        run: npm run type-check || true
+
+  test-python:
+    name: Python Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Install SOPS
+        uses: nhedger/setup-sops@v2
+        with:
+          version: latest
+
+      - name: Decrypt CI secrets for tests
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          if [ -f secrets/ci.yaml ]; then
+            sops --decrypt secrets/ci.yaml > secrets/ci_decrypted.yaml
+            echo "✅ CI secrets decrypted for test suite"
+          else
+            echo "⚠️  secrets/ci.yaml not found — skipping decryption"
+          fi
+
+      - name: Run unit tests with coverage
+        run: |
+          pytest -m "not integration" -x -q --cov=backend --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v6
+        if: always()
+        with:
+          file: ./coverage.xml
+          flags: python
+          name: codecov-umbrella
+
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: swarm-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: swarm-dashboard
+        run: npm ci
+
+      - name: Run tests
+        working-directory: swarm-dashboard
+        run: npm test -- --coverage --watchAll=false || true

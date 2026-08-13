@@ -1,0 +1,29 @@
+{
+  "skills": [
+  {
+    "name": "heretek-strix-halo-audit",
+    "description": "Audit host hardware and recommend a backend.",
+    "allowed-tools": [
+      "Bash"
+    ],
+    "requiredSkills": []
+  },
+  {
+    "name": "heretek-symlink-swap",
+    "description": "Apply the atomic symlink swap recipe.",
+    "allowed-tools": [
+      "Bash",
+      "Edit"
+    ],
+    "requiredSkills": []
+  },
+  {
+    "name": "heretek-manifest-fetch",
+    "description": "Fetch the llama-builds manifest with retries.",
+    "allowed-tools": [
+      "Bash"
+    ],
+    "requiredSkills": []
+  }
+]
+}

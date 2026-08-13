@@ -1,0 +1,8 @@
+[desloppify]
+src = ["src/", "tests/"]
+max_file_lines = 500
+exclude_patterns = ["node_modules/", "dist/", "playwright-report/"]
+override_marker = "// override-dlfl"
+
+[desloppify.dead_code]
+enabled = true

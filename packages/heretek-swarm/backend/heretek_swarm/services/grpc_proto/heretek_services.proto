@@ -1,0 +1,226 @@
+// Heretek Swarm — Sovereign Services gRPC Protocol
+//
+// Phase 5 of PLAN.md (§1.13 "Graduated sovereign services —
+// only pursue if 24/7 autonomy pressure demands it").
+//
+// This file is the canonical .proto definition for the
+// four services that can be extracted into independent
+// processes. The Python implementation lives in
+// backend/heretek_swarm/services/*_grpc.py and is the
+// server-side counterpart to the in-process service
+// stubs (consensus_svc, memory_svc, realtime_svc,
+// observability_svc).
+//
+// Wire protocol:
+//  * gRPC over HTTP/2
+//  * mTLS via the existing
+//    heretek_swarm.infrastructure.nats.ca cert machinery
+//  * Three-tier NATS fallback still works across
+//    service boundaries (NATS at the edge, gRPC inside
+//    the core)
+//
+// Activating the gRPC service means:
+//   1. Generate Python stubs:
+//        python -m grpc_tools.protoc -I backend/heretek_swarm/services/grpc_proto \
+//          --python_out=backend/heretek_swarm/services/grpc_proto \
+//          --grpc_python_out=backend/heretek_swarm/services/grpc_proto \
+//          backend/heretek_swarm/services/grpc_proto/heretek_services.proto
+//   2. Run the server:
+//        python -m heretek_swarm.services.consensus_grpc --port 50051
+//   3. The api process swaps the in-process stub for a
+//      gRPC client. The interface is identical; only the
+//      transport changes.
+//
+// Exit criteria (per docs/SOVEREIGN_SERVICES.md):
+//   5.1 consensus: p99 latency in monolith is unacceptable
+//       AND 1 week of side-by-side parity
+//   5.2 memory: memory read/write is the dominant LLM-call
+//       cost AND ≥95% of cognee extraction quality is
+//       preserved
+//   5.3 realtime: F-010 from PRIME_DIRECTIVE.md is fixed AND
+//       ≥10k concurrent WebSocket clients
+//   5.4 observability: load test shows ≥10% per-request
+//       latency drop when OTel exporter is moved to
+//       sidecar
+
+syntax = "proto3";
+
+package heretek.services.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// =============================================================================
+// Consensus Service (Phase 5.1)
+// =============================================================================
+
+service ConsensusService {
+    // Create a new consensus round.
+    rpc CreateRound(CreateRoundRequest) returns (RoundId);
+
+    // Submit a vote to an existing round.
+    rpc AddVote(AddVoteRequest) returns (VoteAck);
+
+    // Compute the final result for a round.
+    rpc Compute(ComputeRequest) returns (ConsensusResult);
+
+    // Server-streaming: live updates as rounds progress.
+    rpc StreamRounds(StreamRequest) returns (stream Round);
+
+    // Cancel an in-flight round.
+    rpc Cancel(CancelRequest) returns (google.protobuf.Empty);
+}
+
+message CreateRoundRequest {
+    string topic = 1;
+    repeated string participants = 2;
+    string consensus_id = 3;  // optional; generated if empty
+    map<string, string> metadata = 4;
+}
+
+message RoundId {
+    string consensus_id = 1;
+    string state = 2;
+}
+
+message AddVoteRequest {
+    string consensus_id = 1;
+    string agent_id = 2;
+    string decision = 3;
+    double confidence = 4;
+}
+
+message VoteAck {
+    string consensus_id = 1;
+    string state = 2;  // ACCEPTED, REJECTED
+}
+
+message ComputeRequest {
+    string consensus_id = 1;
+}
+
+message ConsensusResult {
+    string consensus_id = 1;
+    string state = 2;
+    string decision = 3;
+    double score = 4;
+    map<string, string> votes = 5;
+    google.protobuf.Timestamp completed_at = 6;
+}
+
+message StreamRequest {
+    string filter = 1;  // empty = all rounds
+}
+
+message Round {
+    string consensus_id = 1;
+    string topic = 2;
+    repeated string participants = 3;
+    string state = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
+
+message CancelRequest {
+    string consensus_id = 1;
+}
+
+// =============================================================================
+// Memory Service (Phase 5.2)
+// =============================================================================
+
+service MemoryService {
+    rpc Add(AddMemoryRequest) returns (AddMemoryAck);
+    rpc Read(ReadMemoryRequest) returns (MemoryEntry);
+    rpc Search(SearchMemoryRequest) returns (SearchMemoryResponse);
+    rpc Health(google.protobuf.Empty) returns (HealthResponse);
+}
+
+message AddMemoryRequest {
+    string content = 1;
+    string memory_type = 2;  // episodic | semantic | procedural | working
+    string identifier = 3;
+    map<string, string> metadata = 4;
+}
+
+message AddMemoryAck {
+    string memory_id = 1;
+    bool accepted = 2;
+}
+
+message ReadMemoryRequest {
+    string memory_id = 1;
+    string memory_type = 2;
+}
+
+message MemoryEntry {
+    string id = 1;
+    string content = 2;
+    string memory_type = 3;
+    map<string, string> metadata = 4;
+    google.protobuf.Timestamp created_at = 5;
+}
+
+message SearchMemoryRequest {
+    string query = 1;
+    string memory_type = 2;  // optional
+    int32 top_k = 3;
+    double threshold = 4;
+    string identifier = 5;  // optional
+}
+
+message SearchMemoryResponse {
+    repeated MemoryEntry entries = 1;
+}
+
+message HealthResponse {
+    bool healthy = 1;
+    string backend = 2;  // cognee | mem0 | null
+}
+
+// =============================================================================
+// Realtime Service (Phase 5.3)
+// =============================================================================
+
+service RealtimeService {
+    rpc BroadcastDashboard(BroadcastRequest) returns (google.protobuf.Empty);
+    rpc BroadcastA2A(BroadcastRequest) returns (google.protobuf.Empty);
+    rpc BroadcastExternalCall(BroadcastRequest) returns (google.protobuf.Empty);
+    rpc BroadcastAgentUpdate(BroadcastRequest) returns (google.protobuf.Empty);
+}
+
+message BroadcastRequest {
+    string event_type = 1;  // agent_position_submitted | deliberation_started | ...
+    string payload_json = 2;  // JSON-encoded payload
+    map<string, string> metadata = 3;
+}
+
+// =============================================================================
+// Observability Service (Phase 5.4)
+// =============================================================================
+
+service ObservabilityService {
+    rpc EmitSpan(SpanRequest) returns (google.protobuf.Empty);
+    rpc TrackMetric(MetricRequest) returns (google.protobuf.Empty);
+    rpc FireAlert(AlertRequest) returns (google.protobuf.Empty);
+    rpc Health(google.protobuf.Empty) returns (HealthResponse);
+}
+
+message SpanRequest {
+    string name = 1;
+    map<string, string> tags = 2;
+    string inputs_json = 3;
+    google.protobuf.Timestamp started_at = 4;
+}
+
+message MetricRequest {
+    string name = 1;
+    double value = 2;
+    map<string, string> tags = 3;
+}
+
+message AlertRequest {
+    string name = 1;
+    string severity = 2;  // info | warning | error | critical
+    string message = 3;
+    map<string, string> tags = 4;
+}

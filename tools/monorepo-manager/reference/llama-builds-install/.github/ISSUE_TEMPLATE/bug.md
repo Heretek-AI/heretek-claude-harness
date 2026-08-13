@@ -1,0 +1,24 @@
+---
+name: Bug
+about: Report a defect or unexpected behaviour.
+labels: ["type/bug"]
+---
+
+## Summary
+<one paragraph>
+
+## Environment
+- OS / arch:
+- Stack version:
+- Manifest version (heretek-manager only):
+- Build SHA (llama-builds only):
+
+## Repro
+1. <step>
+2. <step>
+3. <expected vs actual>
+
+## Logs
+```text
+<paste>
+```

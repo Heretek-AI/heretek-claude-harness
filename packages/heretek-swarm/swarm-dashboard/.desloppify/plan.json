@@ -1,0 +1,1300 @@
+{
+  "version": 8,
+  "created": "2026-06-24T16:04:05+00:00",
+  "updated": "2026-06-24T16:04:05+00:00",
+  "queue_order": [
+    "subjective::abstraction_fitness",
+    "subjective::ai_generated_debt",
+    "subjective::api_surface_coherence",
+    "subjective::authorization_consistency",
+    "subjective::contract_coherence",
+    "subjective::convention_outlier",
+    "subjective::cross_module_architecture",
+    "subjective::dependency_health",
+    "subjective::design_coherence",
+    "subjective::error_consistency",
+    "subjective::high_level_elegance",
+    "subjective::incomplete_migration",
+    "subjective::initialization_coupling",
+    "subjective::logic_clarity",
+    "subjective::low_level_elegance",
+    "subjective::mid_level_elegance",
+    "subjective::naming_quality",
+    "subjective::package_organization",
+    "subjective::test_strategy",
+    "subjective::type_safety",
+    "logs::src/hooks/useA2AMessages.ts::useA2AMessages",
+    "logs::src/hooks/useConsciousnessWebSocket.ts::useConsciousnessWebSocket",
+    "unused::src/App.tsx::Routes:15",
+    "unused::src/App.tsx::Route:15",
+    "unused::src/App.tsx::useNavigate:15",
+    "unused::src/App.tsx::Navigate:15",
+    "unused::src/api/client.ts::useToast:12",
+    "unused::src/components/Agents/AgentsPage.tsx::getRegistryStats:26",
+    "unused::src/components/Agents/AgentsPage.tsx::AgentInstanceType:31",
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::Panel:25",
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::selectedNode:158",
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::loadWorkflow:225",
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::executeWorkflow:240",
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::event:306",
+    "unused::src/components/Consciousness/ConsciousnessGauge.tsx::index:151",
+    "unused::src/components/Consciousness/ConsciousnessGauge.tsx::index:208",
+    "unused::src/components/Consciousness/__tests__/ConsciousnessGauge.test.tsx::screen:9",
+    "unused::src/components/Setup/SetupWizard.tsx::useMemo:12",
+    "unused::src/components/Setup/SetupWizard.tsx::currentStep:123",
+    "unused::src/components/UI/DebugPanel.tsx::getLogHistory:16",
+    "unused::src/components/UI/PerformanceOverlay.tsx::useCallback:13",
+    "unused::src/components/WorkflowBuilder/AgentNode.tsx::getHandleColor:16",
+    "unused::src/components/WorkflowBuilder/AgentNode.tsx::AgentHandle:16",
+    "unused::src/components/WorkflowBuilder/AgentNode.tsx::handleId:102",
+    "unused::src/components/WorkflowBuilder/ConnectorNode.tsx::ConnectorType:10",
+    "unused::src/components/WorkflowBuilder/DecisionNode.tsx::DecisionNodeData:10",
+    "unused::src/components/WorkflowBuilder/DecisionNode.tsx::index:82",
+    "unused::src/components/WorkflowBuilder/MemoryNode.tsx::MemoryType:10",
+    "unused::src/components/WorkflowBuilder/NodeGroup.tsx::GroupColorScheme:19",
+    "unused::src/components/WorkflowBuilder/ToolNode.tsx::ToolType:10",
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::api:32",
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::WorkflowTemplate:42",
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::WorkflowHistory:43",
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::wsExecutionState:122",
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::event:694",
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::afterEach:14",
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::(entire import):15",
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::React:16",
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnOpen:247",
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnClose:248",
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnError:249",
+    "unused::src/hooks/__tests__/useAgentHandles.test.tsx::act:15",
+    "unused::src/hooks/__tests__/useConsciousnessWebSocket.test.tsx::React:15",
+    "unused::src/hooks/__tests__/useConsensusWebSocket.test.ts::React:19",
+    "unused::src/hooks/__tests__/useRealTimeAgentUpdates.test.tsx::waitFor:14",
+    "unused::src/hooks/useAgentHandles.ts::offset:104",
+    "unused::src/hooks/useAgentHandles.ts::totalInputs:222",
+    "unused::src/hooks/useAgentHandles.ts::totalOutputs:225",
+    "unused::src/hooks/useAgentHandles.ts::inputIndex:230",
+    "unused::src/hooks/useConsciousnessWebSocket.ts::ConsciousnessWebSocketEvent:17",
+    "unused::src/hooks/useConsciousnessWebSocket.ts::now:149"
+  ],
+  "deferred": [],
+  "skipped": {},
+  "active_cluster": null,
+  "overrides": {
+    "logs::src/hooks/useA2AMessages.ts::useA2AMessages": {
+      "issue_id": "logs::src/hooks/useA2AMessages.ts::useA2AMessages",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/logs",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "logs::src/hooks/useConsciousnessWebSocket.ts::useConsciousnessWebSocket": {
+      "issue_id": "logs::src/hooks/useConsciousnessWebSocket.ts::useConsciousnessWebSocket",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/logs",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/App.tsx::Routes:15": {
+      "issue_id": "unused::src/App.tsx::Routes:15",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/App.tsx::Route:15": {
+      "issue_id": "unused::src/App.tsx::Route:15",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/App.tsx::useNavigate:15": {
+      "issue_id": "unused::src/App.tsx::useNavigate:15",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/App.tsx::Navigate:15": {
+      "issue_id": "unused::src/App.tsx::Navigate:15",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/api/client.ts::useToast:12": {
+      "issue_id": "unused::src/api/client.ts::useToast:12",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Agents/AgentsPage.tsx::getRegistryStats:26": {
+      "issue_id": "unused::src/components/Agents/AgentsPage.tsx::getRegistryStats:26",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Agents/AgentsPage.tsx::AgentInstanceType:31": {
+      "issue_id": "unused::src/components/Agents/AgentsPage.tsx::AgentInstanceType:31",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::Panel:25": {
+      "issue_id": "unused::src/components/Canvas/EnhancedCanvas.tsx::Panel:25",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::selectedNode:158": {
+      "issue_id": "unused::src/components/Canvas/EnhancedCanvas.tsx::selectedNode:158",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::loadWorkflow:225": {
+      "issue_id": "unused::src/components/Canvas/EnhancedCanvas.tsx::loadWorkflow:225",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::executeWorkflow:240": {
+      "issue_id": "unused::src/components/Canvas/EnhancedCanvas.tsx::executeWorkflow:240",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Canvas/EnhancedCanvas.tsx::event:306": {
+      "issue_id": "unused::src/components/Canvas/EnhancedCanvas.tsx::event:306",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Consciousness/ConsciousnessGauge.tsx::index:151": {
+      "issue_id": "unused::src/components/Consciousness/ConsciousnessGauge.tsx::index:151",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Consciousness/ConsciousnessGauge.tsx::index:208": {
+      "issue_id": "unused::src/components/Consciousness/ConsciousnessGauge.tsx::index:208",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Consciousness/__tests__/ConsciousnessGauge.test.tsx::screen:9": {
+      "issue_id": "unused::src/components/Consciousness/__tests__/ConsciousnessGauge.test.tsx::screen:9",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Setup/SetupWizard.tsx::useMemo:12": {
+      "issue_id": "unused::src/components/Setup/SetupWizard.tsx::useMemo:12",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/Setup/SetupWizard.tsx::currentStep:123": {
+      "issue_id": "unused::src/components/Setup/SetupWizard.tsx::currentStep:123",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/UI/DebugPanel.tsx::getLogHistory:16": {
+      "issue_id": "unused::src/components/UI/DebugPanel.tsx::getLogHistory:16",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/UI/PerformanceOverlay.tsx::useCallback:13": {
+      "issue_id": "unused::src/components/UI/PerformanceOverlay.tsx::useCallback:13",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/AgentNode.tsx::getHandleColor:16": {
+      "issue_id": "unused::src/components/WorkflowBuilder/AgentNode.tsx::getHandleColor:16",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/AgentNode.tsx::AgentHandle:16": {
+      "issue_id": "unused::src/components/WorkflowBuilder/AgentNode.tsx::AgentHandle:16",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/AgentNode.tsx::handleId:102": {
+      "issue_id": "unused::src/components/WorkflowBuilder/AgentNode.tsx::handleId:102",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/ConnectorNode.tsx::ConnectorType:10": {
+      "issue_id": "unused::src/components/WorkflowBuilder/ConnectorNode.tsx::ConnectorType:10",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/DecisionNode.tsx::DecisionNodeData:10": {
+      "issue_id": "unused::src/components/WorkflowBuilder/DecisionNode.tsx::DecisionNodeData:10",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/DecisionNode.tsx::index:82": {
+      "issue_id": "unused::src/components/WorkflowBuilder/DecisionNode.tsx::index:82",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/MemoryNode.tsx::MemoryType:10": {
+      "issue_id": "unused::src/components/WorkflowBuilder/MemoryNode.tsx::MemoryType:10",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/NodeGroup.tsx::GroupColorScheme:19": {
+      "issue_id": "unused::src/components/WorkflowBuilder/NodeGroup.tsx::GroupColorScheme:19",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/ToolNode.tsx::ToolType:10": {
+      "issue_id": "unused::src/components/WorkflowBuilder/ToolNode.tsx::ToolType:10",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::api:32": {
+      "issue_id": "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::api:32",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::WorkflowTemplate:42": {
+      "issue_id": "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::WorkflowTemplate:42",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::WorkflowHistory:43": {
+      "issue_id": "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::WorkflowHistory:43",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::wsExecutionState:122": {
+      "issue_id": "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::wsExecutionState:122",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::event:694": {
+      "issue_id": "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::event:694",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::afterEach:14": {
+      "issue_id": "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::afterEach:14",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::(entire import):15": {
+      "issue_id": "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::(entire import):15",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::React:16": {
+      "issue_id": "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::React:16",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnOpen:247": {
+      "issue_id": "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnOpen:247",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnClose:248": {
+      "issue_id": "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnClose:248",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnError:249": {
+      "issue_id": "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnError:249",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useAgentHandles.test.tsx::act:15": {
+      "issue_id": "unused::src/hooks/__tests__/useAgentHandles.test.tsx::act:15",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useConsciousnessWebSocket.test.tsx::React:15": {
+      "issue_id": "unused::src/hooks/__tests__/useConsciousnessWebSocket.test.tsx::React:15",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useConsensusWebSocket.test.ts::React:19": {
+      "issue_id": "unused::src/hooks/__tests__/useConsensusWebSocket.test.ts::React:19",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/__tests__/useRealTimeAgentUpdates.test.tsx::waitFor:14": {
+      "issue_id": "unused::src/hooks/__tests__/useRealTimeAgentUpdates.test.tsx::waitFor:14",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/useAgentHandles.ts::offset:104": {
+      "issue_id": "unused::src/hooks/useAgentHandles.ts::offset:104",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/useAgentHandles.ts::totalInputs:222": {
+      "issue_id": "unused::src/hooks/useAgentHandles.ts::totalInputs:222",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/useAgentHandles.ts::totalOutputs:225": {
+      "issue_id": "unused::src/hooks/useAgentHandles.ts::totalOutputs:225",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/useAgentHandles.ts::inputIndex:230": {
+      "issue_id": "unused::src/hooks/useAgentHandles.ts::inputIndex:230",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/useConsciousnessWebSocket.ts::ConsciousnessWebSocketEvent:17": {
+      "issue_id": "unused::src/hooks/useConsciousnessWebSocket.ts::ConsciousnessWebSocketEvent:17",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "unused::src/hooks/useConsciousnessWebSocket.ts::now:149": {
+      "issue_id": "unused::src/hooks/useConsciousnessWebSocket.ts::now:149",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/unused",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/DecisionNode.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/DecisionNode.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Canvas/MetricsOverlay.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Canvas/MetricsOverlay.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/stores/middleware/debugMiddleware.ts::untested_module": {
+      "issue_id": "test_coverage::src/stores/middleware/debugMiddleware.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Canvas/NodePalette.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Canvas/NodePalette.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Agents/AgentCard.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Agents/AgentCard.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/App.tsx::untested_module": {
+      "issue_id": "test_coverage::src/App.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Observability/A2AMessageFlow.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Observability/A2AMessageFlow.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/LLMNode.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/LLMNode.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/hooks/useDockerDetection.tsx::untested_module": {
+      "issue_id": "test_coverage::src/hooks/useDockerDetection.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/pages/home-page.tsx::untested_module": {
+      "issue_id": "test_coverage::src/pages/home-page.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/main.tsx::untested_module": {
+      "issue_id": "test_coverage::src/main.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/events.ts::untested_module": {
+      "issue_id": "test_coverage::src/api/events.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/ValidationPanel.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/ValidationPanel.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/AgentNode.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/AgentNode.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/stores/metricsStore.ts::untested_module": {
+      "issue_id": "test_coverage::src/stores/metricsStore.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/utils/setupValidation.ts::untested_module": {
+      "issue_id": "test_coverage::src/utils/setupValidation.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Agents/DeployAgentModal.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Agents/DeployAgentModal.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Setup/SetupWizard.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Setup/SetupWizard.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/deliberations/verdict-card.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/deliberations/verdict-card.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Chat/AgentChat.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Chat/AgentChat.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/pages/deliberation-list-page.tsx::untested_module": {
+      "issue_id": "test_coverage::src/pages/deliberation-list-page.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Chat/MessageInput.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Chat/MessageInput.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/ToolNode.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/ToolNode.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Canvas/ConnectionEdge.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Canvas/ConnectionEdge.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Dashboard/Layout.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Dashboard/Layout.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/stores/setupStore.ts::untested_module": {
+      "issue_id": "test_coverage::src/stores/setupStore.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/UI/DataTable.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/UI/DataTable.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Observability/LLMTrace.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Observability/LLMTrace.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Workflow/NodeConfigPanel.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Workflow/NodeConfigPanel.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Canvas/useMetrics.ts::untested_module": {
+      "issue_id": "test_coverage::src/components/Canvas/useMetrics.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/ConsciousnessMetricsPanel.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/ConsciousnessMetricsPanel.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/pages/deliberation-page.tsx::untested_module": {
+      "issue_id": "test_coverage::src/pages/deliberation-page.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/hooks/useWorkflowProgress.ts::untested_module": {
+      "issue_id": "test_coverage::src/hooks/useWorkflowProgress.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Logs/LogsPage.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Logs/LogsPage.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/UI/DebugPanel.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/UI/DebugPanel.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/wizard.ts::untested_module": {
+      "issue_id": "test_coverage::src/api/wizard.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/stores/canvasStore.ts::untested_module": {
+      "issue_id": "test_coverage::src/stores/canvasStore.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/utils/logger.ts::untested_module": {
+      "issue_id": "test_coverage::src/utils/logger.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Canvas/AgentNode.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Canvas/AgentNode.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/ConnectorNode.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/ConnectorNode.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/metrics.ts::untested_module": {
+      "issue_id": "test_coverage::src/api/metrics.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Consciousness/types.ts::untested_module": {
+      "issue_id": "test_coverage::src/components/Consciousness/types.ts::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/NodeGroup.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/NodeGroup.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/WorkflowBuilder.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/WorkflowBuilder.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Home/HomePage.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Home/HomePage.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Canvas/CanvasToolbar.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Canvas/CanvasToolbar.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Canvas/EnhancedCanvas.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Canvas/EnhancedCanvas.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Agents/AgentConfigPanel.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Agents/AgentConfigPanel.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/WorkflowList.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/WorkflowList.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Chat/MessageList.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Chat/MessageList.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/UI/PerformanceOverlay.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/UI/PerformanceOverlay.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/WorkflowBuilder/MemoryNode.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/WorkflowBuilder/MemoryNode.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Agents/AgentsPage.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Agents/AgentsPage.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Agents/AgentControls.tsx::untested_module": {
+      "issue_id": "test_coverage::src/components/Agents/AgentControls.tsx::untested_module",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-untested_module",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Autonomous/ActiveTasks.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Autonomous/ActiveTasks.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/deliberations.ts::transitive_only": {
+      "issue_id": "test_coverage::src/api/deliberations.ts::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/UI/EmptyState.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/UI/EmptyState.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/mcp.ts::transitive_only": {
+      "issue_id": "test_coverage::src/api/mcp.ts::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Settings/AgentDefaultsSection.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Settings/AgentDefaultsSection.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Observability/A2ATracker.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Observability/A2ATracker.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/UI/StatusBadge.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/UI/StatusBadge.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Autonomous/EventsTimeline.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Autonomous/EventsTimeline.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Settings/MCPToolsSection.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Settings/MCPToolsSection.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/consensus.ts::transitive_only": {
+      "issue_id": "test_coverage::src/api/consensus.ts::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Deliberation/HistoricalDeliberations.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Deliberation/HistoricalDeliberations.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Settings/SystemConfigSection.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Settings/SystemConfigSection.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/UI/LoadingSpinner.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/UI/LoadingSpinner.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/UI/MetricCard.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/UI/MetricCard.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/UI/ErrorBoundary.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/UI/ErrorBoundary.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Settings/ModelGarage.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Settings/ModelGarage.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Autonomous/GoalPipeline.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Autonomous/GoalPipeline.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Settings/DeveloperModeToggle.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Settings/DeveloperModeToggle.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/observability.ts::transitive_only": {
+      "issue_id": "test_coverage::src/api/observability.ts::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Settings/ImportExportSection.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Settings/ImportExportSection.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/client.ts::transitive_only": {
+      "issue_id": "test_coverage::src/api/client.ts::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/components/Autonomous/AnalysisHistory.tsx::transitive_only": {
+      "issue_id": "test_coverage::src/components/Autonomous/AnalysisHistory.tsx::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "test_coverage::src/api/configuration.ts::transitive_only": {
+      "issue_id": "test_coverage::src/api/configuration.ts::transitive_only",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/test_coverage-transitive_only",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "security::src/App.tsx::security::dev_credentials_env::src/App.tsx::101": {
+      "issue_id": "security::src/App.tsx::security::dev_credentials_env::src/App.tsx::101",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/security-dev_credentials_env",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "security::src/api/agents.ts::security::dev_credentials_env::src/api/agents.ts::19": {
+      "issue_id": "security::src/api/agents.ts::security::dev_credentials_env::src/api/agents.ts::19",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/security-dev_credentials_env",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "security::src/api/autonomous.ts::security::dev_credentials_env::src/api/autonomous.ts::18": {
+      "issue_id": "security::src/api/autonomous.ts::security::dev_credentials_env::src/api/autonomous.ts::18",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/security-dev_credentials_env",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "security::src/api/consciousness.ts::security::dev_credentials_env::src/api/consciousness.ts::19": {
+      "issue_id": "security::src/api/consciousness.ts::security::dev_credentials_env::src/api/consciousness.ts::19",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/security-dev_credentials_env",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::abstraction_fitness": {
+      "issue_id": "subjective::abstraction_fitness",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::ai_generated_debt": {
+      "issue_id": "subjective::ai_generated_debt",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::api_surface_coherence": {
+      "issue_id": "subjective::api_surface_coherence",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::authorization_consistency": {
+      "issue_id": "subjective::authorization_consistency",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::contract_coherence": {
+      "issue_id": "subjective::contract_coherence",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::convention_outlier": {
+      "issue_id": "subjective::convention_outlier",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::cross_module_architecture": {
+      "issue_id": "subjective::cross_module_architecture",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::dependency_health": {
+      "issue_id": "subjective::dependency_health",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::design_coherence": {
+      "issue_id": "subjective::design_coherence",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::error_consistency": {
+      "issue_id": "subjective::error_consistency",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::high_level_elegance": {
+      "issue_id": "subjective::high_level_elegance",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::incomplete_migration": {
+      "issue_id": "subjective::incomplete_migration",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::initialization_coupling": {
+      "issue_id": "subjective::initialization_coupling",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::logic_clarity": {
+      "issue_id": "subjective::logic_clarity",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::low_level_elegance": {
+      "issue_id": "subjective::low_level_elegance",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::mid_level_elegance": {
+      "issue_id": "subjective::mid_level_elegance",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::naming_quality": {
+      "issue_id": "subjective::naming_quality",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::package_organization": {
+      "issue_id": "subjective::package_organization",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::test_strategy": {
+      "issue_id": "subjective::test_strategy",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    },
+    "subjective::type_safety": {
+      "issue_id": "subjective::type_safety",
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "cluster": "auto/initial-review",
+      "updated_at": "2026-06-24T16:04:05+00:00"
+    }
+  },
+  "clusters": {
+    "auto/logs": {
+      "name": "auto/logs",
+      "description": "Remove 2 logs issues",
+      "issue_ids": [
+        "logs::src/hooks/useA2AMessages.ts::useA2AMessages",
+        "logs::src/hooks/useConsciousnessWebSocket.ts::useConsciousnessWebSocket"
+      ],
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "updated_at": "2026-06-24T16:04:05+00:00",
+      "auto": true,
+      "cluster_key": "auto::logs",
+      "action": "desloppify autofix debug-logs --dry-run",
+      "execution_status": "active",
+      "user_modified": false,
+      "action_type": "auto_fix",
+      "execution_policy": "ephemeral_autopromote"
+    },
+    "auto/unused": {
+      "name": "auto/unused",
+      "description": "Remove 49 unused issues",
+      "issue_ids": [
+        "unused::src/App.tsx::Routes:15",
+        "unused::src/App.tsx::Route:15",
+        "unused::src/App.tsx::useNavigate:15",
+        "unused::src/App.tsx::Navigate:15",
+        "unused::src/api/client.ts::useToast:12",
+        "unused::src/components/Agents/AgentsPage.tsx::getRegistryStats:26",
+        "unused::src/components/Agents/AgentsPage.tsx::AgentInstanceType:31",
+        "unused::src/components/Canvas/EnhancedCanvas.tsx::Panel:25",
+        "unused::src/components/Canvas/EnhancedCanvas.tsx::selectedNode:158",
+        "unused::src/components/Canvas/EnhancedCanvas.tsx::loadWorkflow:225",
+        "unused::src/components/Canvas/EnhancedCanvas.tsx::executeWorkflow:240",
+        "unused::src/components/Canvas/EnhancedCanvas.tsx::event:306",
+        "unused::src/components/Consciousness/ConsciousnessGauge.tsx::index:151",
+        "unused::src/components/Consciousness/ConsciousnessGauge.tsx::index:208",
+        "unused::src/components/Consciousness/__tests__/ConsciousnessGauge.test.tsx::screen:9",
+        "unused::src/components/Setup/SetupWizard.tsx::useMemo:12",
+        "unused::src/components/Setup/SetupWizard.tsx::currentStep:123",
+        "unused::src/components/UI/DebugPanel.tsx::getLogHistory:16",
+        "unused::src/components/UI/PerformanceOverlay.tsx::useCallback:13",
+        "unused::src/components/WorkflowBuilder/AgentNode.tsx::getHandleColor:16",
+        "unused::src/components/WorkflowBuilder/AgentNode.tsx::AgentHandle:16",
+        "unused::src/components/WorkflowBuilder/AgentNode.tsx::handleId:102",
+        "unused::src/components/WorkflowBuilder/ConnectorNode.tsx::ConnectorType:10",
+        "unused::src/components/WorkflowBuilder/DecisionNode.tsx::DecisionNodeData:10",
+        "unused::src/components/WorkflowBuilder/DecisionNode.tsx::index:82",
+        "unused::src/components/WorkflowBuilder/MemoryNode.tsx::MemoryType:10",
+        "unused::src/components/WorkflowBuilder/NodeGroup.tsx::GroupColorScheme:19",
+        "unused::src/components/WorkflowBuilder/ToolNode.tsx::ToolType:10",
+        "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::api:32",
+        "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::WorkflowTemplate:42",
+        "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::WorkflowHistory:43",
+        "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::wsExecutionState:122",
+        "unused::src/components/WorkflowBuilder/WorkflowBuilder.tsx::event:694",
+        "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::afterEach:14",
+        "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::(entire import):15",
+        "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::React:16",
+        "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnOpen:247",
+        "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnClose:248",
+        "unused::src/hooks/__tests__/useA2ATrackerWebSocket.test.ts::mockOnError:249",
+        "unused::src/hooks/__tests__/useAgentHandles.test.tsx::act:15",
+        "unused::src/hooks/__tests__/useConsciousnessWebSocket.test.tsx::React:15",
+        "unused::src/hooks/__tests__/useConsensusWebSocket.test.ts::React:19",
+        "unused::src/hooks/__tests__/useRealTimeAgentUpdates.test.tsx::waitFor:14",
+        "unused::src/hooks/useAgentHandles.ts::offset:104",
+        "unused::src/hooks/useAgentHandles.ts::totalInputs:222",
+        "unused::src/hooks/useAgentHandles.ts::totalOutputs:225",
+        "unused::src/hooks/useAgentHandles.ts::inputIndex:230",
+        "unused::src/hooks/useConsciousnessWebSocket.ts::ConsciousnessWebSocketEvent:17",
+        "unused::src/hooks/useConsciousnessWebSocket.ts::now:149"
+      ],
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "updated_at": "2026-06-24T16:04:05+00:00",
+      "auto": true,
+      "cluster_key": "auto::unused",
+      "action": "desloppify autofix unused-imports --dry-run",
+      "execution_status": "active",
+      "user_modified": false,
+      "action_type": "auto_fix",
+      "execution_policy": "ephemeral_autopromote"
+    },
+    "auto/test_coverage-untested_module": {
+      "name": "auto/test_coverage-untested_module",
+      "description": "Fix 54 test coverage issues",
+      "issue_ids": [
+        "test_coverage::src/components/WorkflowBuilder/DecisionNode.tsx::untested_module",
+        "test_coverage::src/components/Canvas/MetricsOverlay.tsx::untested_module",
+        "test_coverage::src/stores/middleware/debugMiddleware.ts::untested_module",
+        "test_coverage::src/components/Canvas/NodePalette.tsx::untested_module",
+        "test_coverage::src/components/Agents/AgentCard.tsx::untested_module",
+        "test_coverage::src/App.tsx::untested_module",
+        "test_coverage::src/components/Observability/A2AMessageFlow.tsx::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/LLMNode.tsx::untested_module",
+        "test_coverage::src/hooks/useDockerDetection.tsx::untested_module",
+        "test_coverage::src/pages/home-page.tsx::untested_module",
+        "test_coverage::src/main.tsx::untested_module",
+        "test_coverage::src/api/events.ts::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/ValidationPanel.tsx::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/AgentNode.tsx::untested_module",
+        "test_coverage::src/stores/metricsStore.ts::untested_module",
+        "test_coverage::src/utils/setupValidation.ts::untested_module",
+        "test_coverage::src/components/Agents/DeployAgentModal.tsx::untested_module",
+        "test_coverage::src/components/Setup/SetupWizard.tsx::untested_module",
+        "test_coverage::src/components/deliberations/verdict-card.tsx::untested_module",
+        "test_coverage::src/components/Chat/AgentChat.tsx::untested_module",
+        "test_coverage::src/pages/deliberation-list-page.tsx::untested_module",
+        "test_coverage::src/components/Chat/MessageInput.tsx::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/ToolNode.tsx::untested_module",
+        "test_coverage::src/components/Canvas/ConnectionEdge.tsx::untested_module",
+        "test_coverage::src/components/Dashboard/Layout.tsx::untested_module",
+        "test_coverage::src/stores/setupStore.ts::untested_module",
+        "test_coverage::src/components/UI/DataTable.tsx::untested_module",
+        "test_coverage::src/components/Observability/LLMTrace.tsx::untested_module",
+        "test_coverage::src/components/Workflow/NodeConfigPanel.tsx::untested_module",
+        "test_coverage::src/components/Canvas/useMetrics.ts::untested_module",
+        "test_coverage::src/components/ConsciousnessMetricsPanel.tsx::untested_module",
+        "test_coverage::src/pages/deliberation-page.tsx::untested_module",
+        "test_coverage::src/hooks/useWorkflowProgress.ts::untested_module",
+        "test_coverage::src/components/Logs/LogsPage.tsx::untested_module",
+        "test_coverage::src/components/UI/DebugPanel.tsx::untested_module",
+        "test_coverage::src/api/wizard.ts::untested_module",
+        "test_coverage::src/stores/canvasStore.ts::untested_module",
+        "test_coverage::src/utils/logger.ts::untested_module",
+        "test_coverage::src/components/Canvas/AgentNode.tsx::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/ConnectorNode.tsx::untested_module",
+        "test_coverage::src/api/metrics.ts::untested_module",
+        "test_coverage::src/components/Consciousness/types.ts::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/NodeGroup.tsx::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/WorkflowBuilder.tsx::untested_module",
+        "test_coverage::src/components/Home/HomePage.tsx::untested_module",
+        "test_coverage::src/components/Canvas/CanvasToolbar.tsx::untested_module",
+        "test_coverage::src/components/Canvas/EnhancedCanvas.tsx::untested_module",
+        "test_coverage::src/components/Agents/AgentConfigPanel.tsx::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/WorkflowList.tsx::untested_module",
+        "test_coverage::src/components/Chat/MessageList.tsx::untested_module",
+        "test_coverage::src/components/UI/PerformanceOverlay.tsx::untested_module",
+        "test_coverage::src/components/WorkflowBuilder/MemoryNode.tsx::untested_module",
+        "test_coverage::src/components/Agents/AgentsPage.tsx::untested_module",
+        "test_coverage::src/components/Agents/AgentControls.tsx::untested_module"
+      ],
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "updated_at": "2026-06-24T16:04:05+00:00",
+      "auto": true,
+      "cluster_key": "detector::test_coverage::untested_module",
+      "action": "review test coverage gaps",
+      "execution_status": "review",
+      "user_modified": false,
+      "action_type": "refactor",
+      "execution_policy": "planned_only"
+    },
+    "auto/test_coverage-transitive_only": {
+      "name": "auto/test_coverage-transitive_only",
+      "description": "Fix 23 test coverage issues",
+      "issue_ids": [
+        "test_coverage::src/components/Autonomous/ActiveTasks.tsx::transitive_only",
+        "test_coverage::src/api/deliberations.ts::transitive_only",
+        "test_coverage::src/components/UI/EmptyState.tsx::transitive_only",
+        "test_coverage::src/api/mcp.ts::transitive_only",
+        "test_coverage::src/components/Settings/AgentDefaultsSection.tsx::transitive_only",
+        "test_coverage::src/components/Observability/A2ATracker.tsx::transitive_only",
+        "test_coverage::src/components/UI/StatusBadge.tsx::transitive_only",
+        "test_coverage::src/components/Autonomous/EventsTimeline.tsx::transitive_only",
+        "test_coverage::src/components/Settings/MCPToolsSection.tsx::transitive_only",
+        "test_coverage::src/api/consensus.ts::transitive_only",
+        "test_coverage::src/components/Deliberation/HistoricalDeliberations.tsx::transitive_only",
+        "test_coverage::src/components/Settings/SystemConfigSection.tsx::transitive_only",
+        "test_coverage::src/components/UI/LoadingSpinner.tsx::transitive_only",
+        "test_coverage::src/components/UI/MetricCard.tsx::transitive_only",
+        "test_coverage::src/components/UI/ErrorBoundary.tsx::transitive_only",
+        "test_coverage::src/components/Settings/ModelGarage.tsx::transitive_only",
+        "test_coverage::src/components/Autonomous/GoalPipeline.tsx::transitive_only",
+        "test_coverage::src/components/Settings/DeveloperModeToggle.tsx::transitive_only",
+        "test_coverage::src/api/observability.ts::transitive_only",
+        "test_coverage::src/components/Settings/ImportExportSection.tsx::transitive_only",
+        "test_coverage::src/api/client.ts::transitive_only",
+        "test_coverage::src/components/Autonomous/AnalysisHistory.tsx::transitive_only",
+        "test_coverage::src/api/configuration.ts::transitive_only"
+      ],
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "updated_at": "2026-06-24T16:04:05+00:00",
+      "auto": true,
+      "cluster_key": "detector::test_coverage::transitive_only",
+      "action": "review test coverage gaps",
+      "execution_status": "review",
+      "user_modified": false,
+      "action_type": "refactor",
+      "execution_policy": "planned_only"
+    },
+    "auto/security-dev_credentials_env": {
+      "name": "auto/security-dev_credentials_env",
+      "description": "Fix 4 security issues",
+      "issue_ids": [
+        "security::src/App.tsx::security::dev_credentials_env::src/App.tsx::101",
+        "security::src/api/agents.ts::security::dev_credentials_env::src/api/agents.ts::19",
+        "security::src/api/autonomous.ts::security::dev_credentials_env::src/api/autonomous.ts::18",
+        "security::src/api/consciousness.ts::security::dev_credentials_env::src/api/consciousness.ts::19"
+      ],
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "updated_at": "2026-06-24T16:04:05+00:00",
+      "auto": true,
+      "cluster_key": "detector::security::dev_credentials_env",
+      "action": "review and fix security issues",
+      "execution_status": "review",
+      "user_modified": false,
+      "action_type": "manual_fix",
+      "execution_policy": "planned_only"
+    },
+    "auto/initial-review": {
+      "name": "auto/initial-review",
+      "description": "Initial review of 20 unscored subjective dimensions",
+      "issue_ids": [
+        "subjective::abstraction_fitness",
+        "subjective::ai_generated_debt",
+        "subjective::api_surface_coherence",
+        "subjective::authorization_consistency",
+        "subjective::contract_coherence",
+        "subjective::convention_outlier",
+        "subjective::cross_module_architecture",
+        "subjective::dependency_health",
+        "subjective::design_coherence",
+        "subjective::error_consistency",
+        "subjective::high_level_elegance",
+        "subjective::incomplete_migration",
+        "subjective::initialization_coupling",
+        "subjective::logic_clarity",
+        "subjective::low_level_elegance",
+        "subjective::mid_level_elegance",
+        "subjective::naming_quality",
+        "subjective::package_organization",
+        "subjective::test_strategy",
+        "subjective::type_safety"
+      ],
+      "created_at": "2026-06-24T16:04:05+00:00",
+      "updated_at": "2026-06-24T16:04:05+00:00",
+      "auto": true,
+      "cluster_key": "subjective::unscored",
+      "action": "desloppify review --prepare --dimensions abstraction_fitness,ai_generated_debt,api_surface_coherence,authorization_consistency,contract_coherence,convention_outlier,cross_module_architecture,dependency_health,design_coherence,error_consistency,high_level_elegance,incomplete_migration,initialization_coupling,logic_clarity,low_level_elegance,mid_level_elegance,naming_quality,package_organization,test_strategy,type_safety",
+      "execution_status": "review",
+      "user_modified": false,
+      "action_type": "manual_fix",
+      "execution_policy": "planned_only"
+    }
+  },
+  "superseded": {},
+  "promoted_ids": [],
+  "plan_start_scores": {
+    "strict": 18.7,
+    "overall": 18.7,
+    "objective": 74.9,
+    "verified": 74.9
+  },
+  "refresh_state": {
+    "_subjective_migration_pruned": true,
+    "lifecycle_phase": "plan"
+  },
+  "execution_log": [
+    {
+      "timestamp": "2026-06-24T16:04:05+00:00",
+      "action": "sync_subjective",
+      "issue_ids": [],
+      "cluster_name": null,
+      "actor": "system",
+      "note": null,
+      "detail": {
+        "changes": true
+      }
+    },
+    {
+      "timestamp": "2026-06-24T16:04:05+00:00",
+      "action": "auto_cluster",
+      "issue_ids": [],
+      "cluster_name": null,
+      "actor": "system",
+      "note": null,
+      "detail": {
+        "changes": true
+      }
+    },
+    {
+      "timestamp": "2026-06-24T16:04:05+00:00",
+      "action": "sync_lifecycle_phase",
+      "issue_ids": [],
+      "cluster_name": null,
+      "actor": "system",
+      "note": null,
+      "detail": {
+        "phase": "review_initial"
+      }
+    },
+    {
+      "timestamp": "2026-06-24T16:04:05+00:00",
+      "action": "seed_start_scores",
+      "issue_ids": [],
+      "cluster_name": null,
+      "actor": "system",
+      "note": null,
+      "detail": {}
+    }
+  ],
+  "epic_triage_meta": {},
+  "commit_log": [],
+  "uncommitted_issues": [],
+  "commit_tracking_branch": null,
+  "scan_count_at_plan_start": 1
+}

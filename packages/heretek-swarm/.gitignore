@@ -1,0 +1,221 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Secrets and credentials
+# Config directory (user-specific overrides)
+/config/
+# Exception: keep template files
+!config/*.example.json
+!config/litellm_config.yaml
+!config/otel-collector-config.yaml
+*.key
+*.pem
+*.p12
+# SOPS-encrypted secrets are safe to commit; unencrypted suffixes are not
+secrets/*_unencrypted
+credentials/
+
+# Specific secrets (exact filenames)
+HERETEK_API_KEY
+OPENAI_API_KEY
+DATABASE_URL
+REDIS_URL
+QDRANT_HOST
+QDRANT_PORT
+QDRANT_API_KEY
+
+# Configuration templates (allowed)
+!.env.example
+.env.*.example
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Distribution / Packaging
+*.whl
+
+# Logs
+*.log
+logs/
+.roo/schedules.json
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+docs/berk/*
+docs/DEVELOPMENT_PLAN.md
+agent_workspace/error.txt
+.roo/schedules.json
+dashboard/frontend/node_modules/*
+
+# Orchestry state
+.orchestry
+
+# Coverage files (added by CoverLens)
+coverage/
+lcov.info
+coverage.out
+coverage.out.partial
+*.coverprofile
+coverage.xml
+coverage.cobertura.xml
+jacoco.xml
+coverage.json
+coverage-final.json
+
+# Desloppify runtime state (config files in .desloppify.toml are tracked)
+.desloppify/
+.kilocode/*
+.github/agents/*
+.github/copilot-instructions.md
+plans/OVERNIGHT_LOOP.md
+.roo/*
+.claw/sessions/*
+# Claw Code local artifacts
+.claw/settings.local.json
+.claw/sessions/
+.claude/*
+.omc/*
+.claude-flow/*
+.mcp.json
+.actor_states/
+node_modules/*
+node_modules/.bin/*
+.playwright-mcp/*
+
+# Bench result artifacts (ephemeral)
+scripts/bench/results/
+.benchmarks/
+
+# ── GSD baseline (auto-generated) ──
+.gsd
+.gsd-id
+.bg-shell/
+*.code-workspace
+.env.*
+node_modules/
+.next/
+*.pyc
+target/
+vendor/
+.cache/
+tmp/
+swarm-dashboard/playwright-report/data/*
+.gsd.migrating
+
+# Session / agent artifacts
+swarm-dashboard/.claude-flow/
+swarm-dashboard/test-results/
+backend/agent_workspace/
+
+# IDE / editor state
+.cursor/
+
+# Copilot Cockpit local workspace files
+.copilot-cockpit-logs/
+.vscode/.gitignore
+.vscode/mcp.json
+.vscode/scheduler.private.json
+.vscode/copilot-cockpit.db
+.vscode/copilot-cockpit.db-migration.json
+.vscode/copilot-cockpit.private.json
+.vscode/cockpit-prompt-backups/
+.vscode/cockpit-input-uploads/
+.vscode/scheduler-prompt-backups/
+.vscode/scheduler-history/
+.vscode/copilot-cockpit-support/
+.github/hooks/
+.github/agents/todos/
+.github-scheduler-backups/
+.github/cockpit-prompt-backups/
+.github/scheduler-prompt-backups/
+
+# repowise API keys (local)
+.repowise/.env
+.aider*
+opencode.jsonc
+.opencode/openwork.json
+.opencode/agents/openwork.md
+.omo/
+.omo/ralph-loop.local.md
+.forensic/
+# Added by code-review-graph
+.code-review-graph/
+.gemini/
+opencode.jsonc.openchamber.backup
+
+# ── GSD baseline (auto-generated) ──
+nul
+nul.*
+con
+con.*
+prn
+prn.*
+aux
+aux.*
+com[1-9]
+com[1-9].*
+lpt[1-9]
+lpt[1-9].*
+review/
+
+# Tooling artifacts (local knowledge graphs / SDD state)
+.superpowers/
+graphify-out/

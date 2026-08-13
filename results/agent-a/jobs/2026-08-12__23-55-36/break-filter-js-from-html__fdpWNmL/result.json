@@ -1,0 +1,129 @@
+{
+    "id": "a752f017-e7be-48db-87aa-29faeb9e50c8",
+    "task_name": "break-filter-js-from-html",
+    "trial_name": "break-filter-js-from-html__fdpWNmL",
+    "trial_uri": "file:///home/john/Projects/heretek-claude-harness/results/agent-a/jobs/2026-08-12__23-55-36/break-filter-js-from-html__fdpWNmL",
+    "task_id": {
+        "git_url": "https://github.com/laude-institute/terminal-bench-2.git",
+        "git_commit_id": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c",
+        "path": "break-filter-js-from-html"
+    },
+    "source": "terminal-bench",
+    "task_checksum": "b33421492e86b07de2a01bc2205f7e7d2fdc36446a84787265d99e5e138fdaaa",
+    "config": {
+        "task": {
+            "path": "break-filter-js-from-html",
+            "git_url": "https://github.com/laude-institute/terminal-bench-2.git",
+            "git_commit_id": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c",
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": "terminal-bench"
+        },
+        "trial_name": "break-filter-js-from-html__fdpWNmL",
+        "trials_dir": "results/agent-a/jobs/2026-08-12__23-55-36",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "claude-code",
+            "import_path": null,
+            "model_name": "claude-sonnet-5-20260301",
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {
+                "config": {
+                    "plugin_dir": "/tmp/heretek-plugins"
+                }
+            },
+            "mcp_servers": []
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": [
+                {
+                    "type": "bind",
+                    "source": "/home/john/Projects/heretek-claude-harness/plugins",
+                    "target": "/tmp/heretek-plugins",
+                    "read_only": true
+                }
+            ],
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "artifacts": [],
+        "extra_instruction_paths": [],
+        "job_id": "cbe40749-fb24-4e7c-b050-d0d876ed4058",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "claude-code",
+        "version": "2.1.229",
+        "model_info": {
+            "name": "claude-sonnet-5-20260301",
+            "provider": "anthropic"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": null,
+        "n_cache_tokens": null,
+        "n_output_tokens": null,
+        "cost_usd": null,
+        "rollout_details": null,
+        "metadata": null
+    },
+    "verifier_result": null,
+    "verifier_environment_mode": "shared",
+    "exception_info": {
+        "exception_type": "NonZeroAgentExitCodeError",
+        "exception_message": "Command failed (exit 1): mkdir -p $CLAUDE_CONFIG_DIR/debug $CLAUDE_CONFIG_DIR/projects/-app $CLAUDE_CONFIG_DIR/shell-snapshots $CLAUDE_CONFIG_DIR/statsig $CLAUDE_CONFIG_DIR/todos $CLAUDE_CONFIG_DIR/skills && if [ -d ~/.claude/skills ]; then cp -r ~/.claude/skills/. $CLAUDE_CONFIG_DIR/skills/ 2>/dev/null || true; fi && mkdir -p /tmp/claude-code-settings\nstdout: mkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\n\nstderr: None",
+        "exception_traceback": "Traceback (most recent call last):\n  File \"/home/john/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/trial/single_step.py\", line 77, in _run_agent\n    await self._run_agent_phase(\n    ...<5 lines>...\n    )\n  File \"/home/john/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/trial/trial.py\", line 480, in _run_agent_phase\n    await asyncio.wait_for(\n    ...<6 lines>...\n    )\n  File \"/home/linuxbrew/.linuxbrew/opt/python@3.14/lib/python3.14/asyncio/tasks.py\", line 488, in wait_for\n    return await fut\n           ^^^^^^^^^\n  File \"/home/john/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/agents/installed/base.py\", line 175, in wrapper\n    return await fn(self, instruction, *args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/john/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/agents/installed/claude_code.py\", line 1754, in run\n    await self.exec_as_agent(\n    ...<3 lines>...\n    )\n  File \"/home/john/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/agents/installed/base.py\", line 884, in exec_as_agent\n    return await self._exec(\n           ^^^^^^^^^^^^^^^^^\n        environment, command, env=env, cwd=cwd, timeout_sec=timeout_sec\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/home/john/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/agents/installed/base.py\", line 851, in _exec\n    raise self._classify_exec_error(command, result)\nharbor.agents.installed.base.NonZeroAgentExitCodeError: Command failed (exit 1): mkdir -p $CLAUDE_CONFIG_DIR/debug $CLAUDE_CONFIG_DIR/projects/-app $CLAUDE_CONFIG_DIR/shell-snapshots $CLAUDE_CONFIG_DIR/statsig $CLAUDE_CONFIG_DIR/todos $CLAUDE_CONFIG_DIR/skills && if [ -d ~/.claude/skills ]; then cp -r ~/.claude/skills/. $CLAUDE_CONFIG_DIR/skills/ 2>/dev/null || true; fi && mkdir -p /tmp/claude-code-settings\nstdout: mkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\nmkdir: cannot create directory '/logs/agent/sessions': Permission denied\n\nstderr: None\n",
+        "occurred_at": "2026-08-13T03:57:17.423412Z"
+    },
+    "started_at": "2026-08-13T03:55:40.891695Z",
+    "finished_at": "2026-08-13T03:57:30.455442Z",
+    "environment_setup": {
+        "started_at": "2026-08-13T03:55:40.988112Z",
+        "finished_at": "2026-08-13T03:56:07.679139Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-08-13T03:56:07.679167Z",
+        "finished_at": "2026-08-13T03:57:17.334777Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-08-13T03:57:17.334950Z",
+        "finished_at": "2026-08-13T03:57:17.420020Z"
+    },
+    "verifier": {
+        "started_at": "2026-08-13T03:57:17.754342Z",
+        "finished_at": "2026-08-13T03:57:18.010817Z"
+    },
+    "step_results": null
+}

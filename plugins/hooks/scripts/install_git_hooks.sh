@@ -4,11 +4,25 @@
 # current git repository. Idempotent: re-running is safe.
 set -euo pipefail
 
-# 1. Locate the repo root (parent of plugins/hooks where this script lives).
+# 1. Locate the repo root (searching upwards from script dir if REPO_ROOT unset).
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -z "${REPO_ROOT:-}" ]]; then
+    SEARCH_DIR="$SCRIPT_DIR"
+    while [[ "$SEARCH_DIR" != "/" ]]; do
+        if [[ -d "$SEARCH_DIR/.git" || -f "$SEARCH_DIR/.git" ]]; then
+            REPO_ROOT="$SEARCH_DIR"
+            break
+        fi
+        SEARCH_DIR="$(dirname "$SEARCH_DIR")"
+    done
+    REPO_ROOT="${REPO_ROOT:-$(pwd)}"
+fi
+
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-REPO_ROOT="${REPO_ROOT:-$(cd "$PLUGIN_ROOT/../.." && pwd)}"
-PRECOMMIT_CONFIG="$PLUGIN_ROOT/.pre-commit-config.yaml"
+PRECOMMIT_CONFIG="${REPO_ROOT}/.pre-commit-config.yaml"
+if [[ ! -f "$PRECOMMIT_CONFIG" ]]; then
+    PRECOMMIT_CONFIG="$PLUGIN_ROOT/.pre-commit-config.yaml"
+fi
 
 # 2. Sanity: must be inside a git repository.
 if ! git -C "$REPO_ROOT" rev-parse --git-dir >/dev/null 2>&1; then
@@ -29,10 +43,6 @@ if ! python3 -m pre_commit --version >/dev/null 2>&1; then
 fi
 
 # 5. Idempotency check: short-circuit if hooks are already installed (#97).
-# Use `git rev-parse --git-common-dir` because `pre-commit install` writes
-# hooks to the common git dir (shared with the main checkout when running
-# in a worktree). Hardcoding `$REPO_ROOT/.git/hooks/pre-commit` misses the
-# hook when `$REPO_ROOT` is a worktree (where `.git/` is a file).
 HOOK_PATH="$(git -C "$REPO_ROOT" rev-parse --git-common-dir)/hooks/pre-commit"
 if [[ -f "$HOOK_PATH" ]] && grep -q "pre-commit" "$HOOK_PATH" 2>/dev/null; then
     echo "install_git_hooks: pre-commit hooks already installed; skipping" >&2
@@ -40,8 +50,11 @@ if [[ -f "$HOOK_PATH" ]] && grep -q "pre-commit" "$HOOK_PATH" 2>/dev/null; then
     exit 0
 fi
 
-# 6. Run pre-commit install (sets up both pre-commit and pre-push because of
-#    default_install_hook_types in .pre-commit-config.yaml).
-python3 -m pre_commit install --install-hooks --overwrite --config "$PRECOMMIT_CONFIG"
+# 6. Run pre-commit install
+if [[ -f "$PRECOMMIT_CONFIG" ]]; then
+    python3 -m pre_commit install --install-hooks --overwrite --config "$PRECOMMIT_CONFIG"
+else
+    python3 -m pre_commit install --install-hooks --overwrite
+fi
 
 echo "install_git_hooks: OK (pre-commit + pre-push hooks installed in $REPO_ROOT)"

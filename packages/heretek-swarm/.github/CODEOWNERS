@@ -1,0 +1,29 @@
+# These owners will be requested for review when someone opens a pull request.
+# Order matters — the last matching pattern takes precedence.
+
+# Core backend
+backend/heretek_swarm/actors/     @Heretek-AI/core-team
+backend/heretek_swarm/orchestration/ @Heretek-AI/core-team
+backend/heretek_swarm/memory/     @Heretek-AI/core-team
+backend/heretek_swarm/api/        @Heretek-AI/core-team
+
+# Security-sensitive code
+backend/heretek_swarm/gateway/    @Heretek-AI/security-team
+secrets/                          @Heretek-AI/security-team
+certs/                            @Heretek-AI/security-team
+
+# Frontend dashboard
+swarm-dashboard/                  @Heretek-AI/frontend-team
+
+# Infrastructure & DevOps
+docker-compose.yml                @Heretek-AI/devops-team
+docker-compose.test.yml           @Heretek-AI/devops-team
+Dockerfile                        @Heretek-AI/devops-team
+.github/workflows/                @Heretek-AI/devops-team
+
+# Documentation
+docs/                             @Heretek-AI/docs-team
+*.md                              @Heretek-AI/docs-team
+
+# Migrations
+migrations/                       @Heretek-AI/core-team

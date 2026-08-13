@@ -1,0 +1,6 @@
+[permissions]
+allow = ["Edit"]
+
+
+[ui]
+show_reasoning = true

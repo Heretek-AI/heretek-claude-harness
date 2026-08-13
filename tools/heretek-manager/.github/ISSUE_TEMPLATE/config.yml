@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Tracking policy
+    url: https://github.com/Heretek-AI/heretek-manager/blob/main/CONTRIBUTING.md#tracking
+    about: Where design debates and progress notes live.

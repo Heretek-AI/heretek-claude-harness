@@ -87,9 +87,10 @@ def cmd_install(args: argparse.Namespace) -> int:
     # 4. Hooks configuration & scripts (hooks.json -> .claude/hooks.json)
     hooks_src = plugin_src / "hooks.json"
     if not hooks_src.is_file():
-        hooks_src_alt = plugin_src / ".claude-plugin" / "hooks.json"
-        if hooks_src_alt.is_file():
-            hooks_src = hooks_src_alt
+        for alt in (plugin_src / "hooks" / "hooks.json", plugin_src / ".claude-plugin" / "hooks.json"):
+            if alt.is_file():
+                hooks_src = alt
+                break
 
     if hooks_src.is_file():
         hooks_dest = claude_dir / "hooks.json"
@@ -121,6 +122,13 @@ def cmd_install(args: argparse.Namespace) -> int:
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(skill_file, dest)
                 installed_files.append(str(dest.relative_to(target_dir)))
+
+    # 6. Pre-commit configuration (.pre-commit-config.yaml -> .pre-commit-config.yaml)
+    precommit_src = plugin_src / ".pre-commit-config.yaml"
+    if precommit_src.is_file():
+        precommit_dest = target_dir / ".pre-commit-config.yaml"
+        shutil.copy2(precommit_src, precommit_dest)
+        installed_files.append(str(precommit_dest.relative_to(target_dir)))
 
     print(f"Successfully installed '{pack_name}' into {target_dir}")
     print(f"Deployed {len(installed_files)} asset file(s):")

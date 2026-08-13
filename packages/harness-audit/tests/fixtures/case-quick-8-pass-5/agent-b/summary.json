@@ -1,0 +1,63 @@
+{
+  "agent": "agent-b-baseline",
+  "model": "claude-sonnet-5-20260301",
+  "commit_sha": "abc1234",
+  "heretek_harness": false,
+  "n_tasks": 8,
+  "passed": 3,
+  "failed": 5,
+  "pass_rate": 0.375,
+  "wall_clock_sec_total": 400,
+  "wall_clock_sec_p50": 45,
+  "tokens_total": 15000,
+  "per_task": [
+    {
+      "task_id": "cancel-async-tasks",
+      "verdict": "pass",
+      "wall_clock_sec": 40,
+      "tokens": 1800
+    },
+    {
+      "task_id": "chess-best-move",
+      "verdict": "fail",
+      "wall_clock_sec": 50,
+      "tokens": 2200
+    },
+    {
+      "task_id": "configure-git-webserver",
+      "verdict": "pass",
+      "wall_clock_sec": 45,
+      "tokens": 1900
+    },
+    {
+      "task_id": "constraints-scheduling",
+      "verdict": "fail",
+      "wall_clock_sec": 60,
+      "tokens": 2500
+    },
+    {
+      "task_id": "count-dataset-tokens",
+      "verdict": "pass",
+      "wall_clock_sec": 35,
+      "tokens": 1400
+    },
+    {
+      "task_id": "crack-7z-hash",
+      "verdict": "fail",
+      "wall_clock_sec": 60,
+      "tokens": 2400
+    },
+    {
+      "task_id": "extract-elf",
+      "verdict": "fail",
+      "wall_clock_sec": 50,
+      "tokens": 1500
+    },
+    {
+      "task_id": "fix-git",
+      "verdict": "fail",
+      "wall_clock_sec": 60,
+      "tokens": 1300
+    }
+  ]
+}

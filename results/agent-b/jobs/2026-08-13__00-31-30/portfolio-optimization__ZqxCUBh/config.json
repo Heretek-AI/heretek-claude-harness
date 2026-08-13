@@ -1,0 +1,15 @@
+{
+    "task": {
+        "path": "portfolio-optimization",
+        "git_url": "https://github.com/laude-institute/terminal-bench-2.git",
+        "git_commit_id": "69671fbaac6d67a7ef0dfec016cc38a64ef7a77c",
+        "source": "terminal-bench"
+    },
+    "trial_name": "portfolio-optimization__ZqxCUBh",
+    "trials_dir": "results/agent-b/jobs/2026-08-13__00-31-30",
+    "agent": {
+        "name": "claude-code",
+        "model_name": "claude-sonnet-5-20260301"
+    },
+    "job_id": "6e62d2ca-be6b-45a6-9f78-7141d4d5c7d9"
+}

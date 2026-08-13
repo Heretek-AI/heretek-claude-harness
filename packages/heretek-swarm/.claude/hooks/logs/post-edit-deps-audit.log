@@ -1,0 +1,1 @@
+{"ts": "2026-06-23T04:13:52Z", "event": "PostToolUse", "tool": "Edit", "args": {"file_path":"/home/john/Projects/Peace-History/package.json"}, "decision": "allow", "duration_ms": 0, "note": "Dependency file — should run npm audit + npx npm-check-updates"}

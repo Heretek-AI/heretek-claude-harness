@@ -1,0 +1,197 @@
+name: Load Testing
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  API_HOST: localhost
+  API_PORT: 8000
+  BASE_URL: http://localhost:8000
+  TEST_VUS: 50
+  TEST_DURATION: 60s
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --only-binary=":all:" -e .
+          pip install --only-binary=":all:" locust pytest
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-setup
+          path: |
+            tests/load/
+            pyproject.toml
+
+  api-health:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Start API (simulated)
+        run: |
+          python3 -m http.server $API_PORT &
+          sleep 5
+          curl -f http://$API_HOST:$API_PORT || exit 1
+
+      - name: API Health Check
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://$API_HOST:$API_PORT)
+          if [ "$response" -eq 200 ] || [ "$response" -eq 503 ]; then
+            echo "API is healthy (status: $response)"
+          else
+            echo "API health check failed (status: $response)"
+            exit 1
+          fi
+
+  load-test-locust:
+    needs: [setup, api-health]
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Locust
+        run: pip install --only-binary=":all:" locust
+
+      - name: Run Baseline Load Test (Locust)
+        run: |
+          locust -f tests/load/locustfile.py \
+            --host=$BASE_URL \
+            --headless \
+            -u $TEST_VUS \
+            -r 10 \
+            -t 60s \
+            --run-time 60s \
+            --stop-timeout 10 \
+            --csv=results/locust-baseline \
+            --html=results/locust-baseline-report.html || true
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+
+      - name: Upload Locust Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: locust-results
+          path: results/locust-*
+          retention-days: 30
+
+  load-test-k6:
+    needs: [setup, api-health]
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install k6
+        run: |
+          curl -L https://github.com/grafana/k6/releases/download/v1.0.0/k6-v1.0.0-linux-amd64.tar.gz | sudo tar -xz --strip-components 1 -C /usr/local/bin
+
+      - name: Run Baseline Load Test (k6)
+        run: |
+          k6 run --vus $TEST_VUS --duration 60s tests/load/k6/load_test.js
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+
+      - name: Upload k6 Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k6-results
+          path: summary-*.json
+          retention-days: 30
+
+  performance-report:
+    needs: [load-test-locust, load-test-k6]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download Locust Results
+        uses: actions/download-artifact@v8
+        with:
+          name: locust-results
+          path: results/locust
+        continue-on-error: true
+
+      - name: Download k6 Results
+        uses: actions/download-artifact@v8
+        with:
+          name: k6-results
+          path: results/k6
+        continue-on-error: true
+
+      - name: Generate Performance Report
+        run: |
+          echo "# Load Test Performance Report" > results/performance-report.md
+          echo "" >> results/performance-report.md
+          echo "## Test Summary" >> results/performance-report.md
+          echo "" >> results/performance-report.md
+          echo "- **Timestamp:** $(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> results/performance-report.md
+          echo "- **Virtual Users:** $TEST_VUS" >> results/performance-report.md
+          echo "- **Duration:** $TEST_DURATION" >> results/performance-report.md
+          echo "" >> results/performance-report.md
+          echo "## Results" >> results/performance-report.md
+
+          if [ -f results/locust/locust-baseline_stats.csv ]; then
+            echo "### Locust Results" >> results/performance-report.md
+            echo '```' >> results/performance-report.md
+            cat results/locust/locust-baseline_stats.csv >> results/performance-report.md
+            echo '```' >> results/performance-report.md
+          fi
+
+          if [ -f results/k6/summary-*.json ]; then
+            echo "### k6 Results" >> results/performance-report.md
+            echo '```json' >> results/performance-report.md
+            cat results/k6/summary-*.json >> results/performance-report.md
+            echo '```' >> results/performance-report.md
+          fi
+
+      - name: Upload Performance Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: results/performance-report.md
+          retention-days: 90
+
+  notify:
+    needs: performance-report
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - name: Notify Performance Failure
+        run: |
+          echo "::warning::Load test failed or performance thresholds not met!"
+          echo "Check the performance report for details."

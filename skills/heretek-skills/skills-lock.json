@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "brainstorming-research-ideas": {
+      "source": "orchestra-research/ai-research-skills",
+      "sourceType": "github",
+      "skillPath": "21-research-ideation/brainstorming-research-ideas/SKILL.md",
+      "computedHash": "52b90982250c80b21fc3512d7223d28413c0f1b726703f461d6ea8a166d22a1d"
+    },
+    "compatibility-testing": {
+      "source": "proffesor-for-testing/agentic-qe",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/compatibility-testing/SKILL.md",
+      "computedHash": "91f99a08e85eaabf2e4e1bb790ef17f5ce9000f593488db90c4c6fe3d413a0bc"
+    },
+    "skill-authoring": {
+      "source": "grafana/skills",
+      "sourceType": "github",
+      "skillPath": "skills/grafana-core/skill-authoring/SKILL.md",
+      "computedHash": "cd4a3c32213e71229c10eddeff006ab0e7fb9844699108d0a7ac50aad30222a6"
+    }
+  }
+}

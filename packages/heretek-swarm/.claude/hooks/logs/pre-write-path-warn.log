@@ -1,0 +1,1 @@
+{"ts": "2026-06-23T04:13:18Z", "event": "PreToolUse", "tool": "Write", "args": {"file_path":"/tmp/outside-test.txt"}, "decision": "allow", "duration_ms": 0, "note": "Triggered via Write to /tmp — hook should WARN about path outside apps/{web,backend}/src"}

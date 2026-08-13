@@ -54,3 +54,13 @@ review/
 .DS_Store
 *.swp
 *.swo
+
+node_modules/
+**/node_modules/
+.venv/
+**/.venv/
+
+.benchmarks/
+results/
+packages/heretek-swarm/swarm-dashboard/node_modules/
+packages/heretek-swarm/node_modules/
