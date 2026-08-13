@@ -1,1 +1,0 @@
-{"ts": "2026-06-23T04:13:31Z", "event": "SessionStart", "tool": "manual", "args": {}, "decision": "n/a", "duration_ms": 0, "note": "Session start observed at 2026-06-22; settings.local.json SessionStart hook fires git status — observed recent dirty tree (M docs, M web, ?? .github/, ?? HANDOFF.md)"}

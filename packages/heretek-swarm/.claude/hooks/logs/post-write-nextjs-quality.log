@@ -1,1 +1,0 @@
-{"ts": "2026-06-23T04:13:32Z", "event": "PostToolUse", "tool": "Write", "args": {"file_path":"/home/john/Projects/Peace-History/web/app/page.tsx"}, "decision": "allow", "duration_ms": 0, "note": "Triggered via Write to web/app/page.tsx — hook should run Next.js code quality enforcer (page must export default, metadata export, etc.)"}

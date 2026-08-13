@@ -1,1 +1,0 @@
-{"ts": "2026-06-23T04:13:20Z", "event": "PreToolUse", "tool": "Bash", "args": {"command":"rm -rf /tmp/clean"}, "decision": "allow", "duration_ms": 0, "note": "Triggered via Bash rm outside data/presets — should silently allow"}
