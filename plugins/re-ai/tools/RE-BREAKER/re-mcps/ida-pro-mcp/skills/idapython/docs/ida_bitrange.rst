@@ -122,5 +122,3 @@ Module Contents
 
 
    .. py:method:: compare(r: bitrange_t) -> int
-
-

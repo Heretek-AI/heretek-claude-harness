@@ -10755,4 +10755,3 @@ Module Contents
 .. py:data:: place_t_as_simpleline_place_t
 
 .. py:data:: place_t_as_tiplace_t
-

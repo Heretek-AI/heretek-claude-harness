@@ -778,6 +778,3 @@ Module Contents
 .. py:function:: invalidate_regfinder_xrefs_cache(*args) -> None
 
    The data reference to TO has added (DREF!=dr_O) or removed (DREF==dr_O). Update the regtracker xrefs cache after this change. If TO == BADADDR then clear the entire xrefs cache.
-
-
-

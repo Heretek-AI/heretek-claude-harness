@@ -838,4 +838,3 @@ Module Contents
 .. py:data:: DIRTREE_END
 
 .. py:function:: get_std_dirtree(id: dirtree_id_t) -> dirtree_t *
-

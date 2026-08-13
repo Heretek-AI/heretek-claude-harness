@@ -2185,5 +2185,3 @@ Module Contents
 
 
    .. py:method:: OnCommand(cmd_id)
-
-

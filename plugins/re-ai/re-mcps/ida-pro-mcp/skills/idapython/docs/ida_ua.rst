@@ -1826,4 +1826,3 @@ Module Contents
 .. py:function:: outctx_t__from_ptrval__(ptrval: size_t) -> outctx_t *
 
 .. py:data:: ua_mnem
-

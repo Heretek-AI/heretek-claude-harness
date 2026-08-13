@@ -29,4 +29,3 @@ Module Contents
 
 
 .. py:data:: cvar
-

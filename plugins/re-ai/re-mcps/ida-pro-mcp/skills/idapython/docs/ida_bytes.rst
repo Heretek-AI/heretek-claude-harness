@@ -3568,4 +3568,3 @@ Module Contents
 .. py:function:: find_bytes(bs: Union[bytes, bytearray, str], range_start: int, range_size: Optional[int] = None, range_end: Optional[int] = ida_idaapi.BADADDR, mask: Optional[Union[bytes, bytearray]] = None, flags: Optional[int] = BIN_SEARCH_FORWARD | BIN_SEARCH_NOSHOW, radix: Optional[int] = 16, strlit_encoding: Optional[Union[int, str]] = PBSENC_DEF1BPU) -> int
 
 .. py:function:: find_string(_str: str, range_start: int, range_end: Optional[int] = ida_idaapi.BADADDR, range_size: Optional[int] = None, strlit_encoding: Optional[Union[int, str]] = PBSENC_DEF1BPU, flags: Optional[int] = BIN_SEARCH_FORWARD | BIN_SEARCH_NOSHOW) -> int
-

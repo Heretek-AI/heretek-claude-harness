@@ -951,4 +951,3 @@ Module Contents
 .. py:data:: E_PREV
 
 .. py:data:: E_NEXT
-

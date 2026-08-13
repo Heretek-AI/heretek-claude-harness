@@ -459,5 +459,3 @@ Module Contents
 
 
    :returns: success ('false' means that RI was not changed)
-
-

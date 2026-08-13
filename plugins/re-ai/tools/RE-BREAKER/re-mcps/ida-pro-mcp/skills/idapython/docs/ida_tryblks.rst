@@ -446,5 +446,3 @@ Module Contents
 
    :param ea: address to check
    :param flags: combination of flags for is_ea_tryblks()
-
-

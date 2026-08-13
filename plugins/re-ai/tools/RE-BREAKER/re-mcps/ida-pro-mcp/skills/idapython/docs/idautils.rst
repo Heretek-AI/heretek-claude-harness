@@ -468,5 +468,3 @@ Module Contents
        x = idautils.DecodeInstruction(here())
        if x[0] == procregs.Esp:
            print("This operand is the register ESP)
-
-

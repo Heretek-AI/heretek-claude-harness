@@ -693,6 +693,3 @@ Module Contents
    .. py:method:: get_byte()
 
       Reads a single byte from the file. Returns None if EOF or the read byte
-
-
-

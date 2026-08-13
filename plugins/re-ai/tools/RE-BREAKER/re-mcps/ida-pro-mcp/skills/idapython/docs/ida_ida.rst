@@ -3576,4 +3576,3 @@ Module Contents
 .. py:data:: idainfo_comment_get
 
 .. py:data:: idainfo_comment_set
-

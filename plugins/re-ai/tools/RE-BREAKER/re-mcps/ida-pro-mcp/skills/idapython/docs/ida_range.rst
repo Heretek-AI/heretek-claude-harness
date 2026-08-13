@@ -545,6 +545,3 @@ Module Contents
    .. py:method:: as_rangevec() -> rangevec_t const &
 
       Return underlying rangevec_t object.
-
-
-

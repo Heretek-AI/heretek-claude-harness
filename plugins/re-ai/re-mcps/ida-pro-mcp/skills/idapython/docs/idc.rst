@@ -6500,5 +6500,3 @@ Module Contents
 
 
    The command line arguments passed to IDA via the -S switch.
-
-

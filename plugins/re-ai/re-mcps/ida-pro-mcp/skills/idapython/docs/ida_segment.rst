@@ -1456,5 +1456,3 @@ Module Contents
    :param delta: number of bytes to move the program
    :param flags: Move segment flags it is recommended to use MSF_FIXONCE so that the loader takes care of global variables it stored in the database
    :returns: Move segment result codes
-
-

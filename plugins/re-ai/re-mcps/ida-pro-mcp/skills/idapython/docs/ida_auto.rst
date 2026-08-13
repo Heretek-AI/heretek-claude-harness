@@ -417,5 +417,3 @@ Module Contents
    Temporarily enable/disable autoanalyzer. Not user-facing, but rather because IDA sometimes need to turn AA on/off regardless of inf.s_genflags:INFFL_AUTO
 
    :returns: old state
-
-

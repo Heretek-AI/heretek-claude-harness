@@ -183,5 +183,3 @@ Module Contents
 .. py:function:: calc_basevalue(target: ida_idaapi.ea_t, base: ida_idaapi.ea_t) -> ida_idaapi.ea_t
 
    Calculate the value of the reference base.
-
-

@@ -161,4 +161,3 @@ Sponsor link: https://github.com/sponsors/bethington
 - Keep small bugs and straightforward enhancements in normal issues.
 - Add an RFC before implementation when a milestone affects architecture, user workflows, or long-term maintenance.
 - Update statuses when an RFC moves from draft to accepted, in progress, shipped, or deferred.
-

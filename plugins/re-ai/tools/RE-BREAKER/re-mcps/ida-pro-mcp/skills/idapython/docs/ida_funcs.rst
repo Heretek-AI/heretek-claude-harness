@@ -1390,5 +1390,3 @@ Module Contents
    :param pfn: pointer to function (may not be nullptr)
    :param fptr: out: will hold address of a function pointer (if indirect jump)
    :returns: the target function or BADADDR
-
-

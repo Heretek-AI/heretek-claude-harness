@@ -299,4 +299,3 @@ Module Contents
 
 
 .. py:data:: dex
-

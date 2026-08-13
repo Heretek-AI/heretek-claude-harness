@@ -22,4 +22,3 @@ Module Contents
 .. py:function:: get_marked_pos(slot: int) -> ida_idaapi.ea_t
 
 .. py:function:: get_mark_comment(slot: int) -> PyObject *
-

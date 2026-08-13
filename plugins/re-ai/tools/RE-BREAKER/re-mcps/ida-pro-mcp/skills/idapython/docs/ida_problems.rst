@@ -189,5 +189,3 @@ Module Contents
 .. py:data:: PR_END
 
    Number of problem types.
-
-

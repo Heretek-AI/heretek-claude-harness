@@ -825,5 +825,3 @@ Module Contents
 
 
    :returns: success
-
-

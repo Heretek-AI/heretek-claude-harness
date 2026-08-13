@@ -1928,4 +1928,3 @@ Module Contents
 .. py:data:: svalvec_t
 
 .. py:data:: eavec_t
-

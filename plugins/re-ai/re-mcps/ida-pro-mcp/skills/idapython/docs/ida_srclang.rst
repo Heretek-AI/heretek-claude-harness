@@ -150,5 +150,3 @@ Module Contents
    :param is_path: true if input parameter is a path to a source file, false if the input is an in-memory source snippet
    :returns: -1: no parser was found with the given name
    :returns: else: the number of errors encountered in the input source
-
-

@@ -247,4 +247,3 @@ Module Contents
 
 
 .. py:function:: set_registry_name(name: str) -> bool
-

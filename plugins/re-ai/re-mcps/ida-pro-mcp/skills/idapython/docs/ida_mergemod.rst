@@ -55,5 +55,3 @@ Module Contents
 .. py:function:: create_std_modmerge_handlers(mhp: merge_handler_params_t &, helper: moddata_diff_helper_t &, merge_node_info: merge_node_info2_t const * = None) -> None
 
    convinience function to create merge handlers for modules/plugins
-
-

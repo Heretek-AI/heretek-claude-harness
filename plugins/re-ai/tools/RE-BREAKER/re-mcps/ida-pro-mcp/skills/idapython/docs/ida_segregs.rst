@@ -222,5 +222,3 @@ Module Contents
    :param dst_rg: number of destination segment register
    :param src_rg: copy ranges from
    :param map_selector: map selectors to linear addresses using sel2ea()
-
-

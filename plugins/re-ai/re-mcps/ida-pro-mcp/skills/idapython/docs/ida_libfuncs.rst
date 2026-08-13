@@ -186,5 +186,3 @@ Module Contents
 
    :param name: short name of a signature
    :returns: true in case of success
-
-

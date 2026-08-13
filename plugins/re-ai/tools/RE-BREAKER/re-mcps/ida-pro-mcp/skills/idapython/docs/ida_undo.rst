@@ -54,5 +54,3 @@ Module Contents
    Perform redo.
 
    :returns: success
-
-

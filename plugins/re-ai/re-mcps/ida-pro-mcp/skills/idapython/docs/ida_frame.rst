@@ -727,5 +727,3 @@ Module Contents
    :param pfn: the function to scan.
    :param start_offset: start frame structure offset, in bytes
    :param end_offset: end frame structure offset, in bytes
-
-

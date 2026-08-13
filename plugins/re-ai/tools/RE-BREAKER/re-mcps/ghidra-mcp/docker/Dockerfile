@@ -132,4 +132,3 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Default command (can be overridden)
 CMD ["--port", "8089"]
-

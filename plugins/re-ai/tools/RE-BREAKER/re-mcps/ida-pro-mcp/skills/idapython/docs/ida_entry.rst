@@ -147,5 +147,3 @@ Module Contents
 
    :param ord: ordinal number of entry point
    :returns: size of entry forwarder name or -1
-
-

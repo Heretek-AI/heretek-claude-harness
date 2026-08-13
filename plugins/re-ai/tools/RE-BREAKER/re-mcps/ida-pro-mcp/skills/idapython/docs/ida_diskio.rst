@@ -321,4 +321,3 @@ Module Contents
 .. py:function:: create_bytearray_linput(s: str) -> linput_t *
 
 .. py:function:: close_linput(li: linput_t *) -> None
-

@@ -108,5 +108,3 @@ Module Contents
 .. py:function:: get_strlist_item(si: string_info_t, n: size_t) -> bool
 
    Get nth element of the string list (n=0..get_strlist_qty()-1)
-
-

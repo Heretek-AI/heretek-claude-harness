@@ -18288,5 +18288,3 @@ Module Contents
 
    :param callback: handler to uninstall
    :returns: number of uninstalled handlers.
-
-

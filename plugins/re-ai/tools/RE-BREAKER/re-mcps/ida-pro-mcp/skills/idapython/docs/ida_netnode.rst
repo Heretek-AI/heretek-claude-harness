@@ -524,4 +524,3 @@ Module Contents
 .. py:function:: exist(n: netnode) -> bool
 
 .. py:data:: netnode_exist
-

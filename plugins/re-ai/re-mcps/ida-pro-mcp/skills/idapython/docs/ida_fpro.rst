@@ -201,4 +201,3 @@ Module Contents
 .. py:data:: qfile_t_from_capsule
 
 .. py:data:: qfile_t_tmpfile
-

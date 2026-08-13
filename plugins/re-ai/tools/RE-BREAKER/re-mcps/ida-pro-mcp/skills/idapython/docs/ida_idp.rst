@@ -5633,4 +5633,3 @@ Module Contents
 .. py:function:: get_idb_notifier_addr(arg1: PyObject *) -> PyObject *
 
 .. py:function:: get_idb_notifier_ud_addr(hooks: IDB_Hooks) -> PyObject *
-

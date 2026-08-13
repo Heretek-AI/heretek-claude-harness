@@ -1371,5 +1371,3 @@ rule anti_tamper_vendors_denuvo_eac_joint {
             ($sm0 and $sm2) and
             ($sm1 or $sm3)
 }
-
-

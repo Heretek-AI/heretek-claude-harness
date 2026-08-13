@@ -142,4 +142,3 @@ Module Contents
 .. py:function:: find_text(start_ea: ida_idaapi.ea_t, y: int, x: int, ustr: str, sflag: int) -> ida_idaapi.ea_t
 
 .. py:function:: find_reg_access(out: reg_access_t, start_ea: ida_idaapi.ea_t, end_ea: ida_idaapi.ea_t, regname: str, sflag: int) -> ida_idaapi.ea_t
-

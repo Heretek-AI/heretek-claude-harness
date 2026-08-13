@@ -635,5 +635,3 @@ Module Contents
 
 .. py:data:: FC_PREDS
    :value: 0
-
-

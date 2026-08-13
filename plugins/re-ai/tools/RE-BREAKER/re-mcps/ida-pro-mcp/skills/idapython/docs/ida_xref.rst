@@ -620,4 +620,3 @@ Module Contents
 .. py:data:: XREF_ALL
 
 .. py:data:: XREF_FAR
-

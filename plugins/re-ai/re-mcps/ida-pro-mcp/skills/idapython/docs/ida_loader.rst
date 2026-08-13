@@ -996,5 +996,3 @@ Module Contents
    :param is_remote: is the input file remote?
    :returns: true: ok
    :returns: false: something bad happened (error message has been displayed to the user)
-
-

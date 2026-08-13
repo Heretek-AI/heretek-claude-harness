@@ -1074,5 +1074,3 @@ Module Contents
    Get nice name for EA diffpos
 
    :param ea: diffpos
-
-
