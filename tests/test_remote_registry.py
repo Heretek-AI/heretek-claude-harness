@@ -32,6 +32,15 @@ def test_publish_workflow_validates_yaml() -> None:
     assert "upload-pages-artifact" in content
 
 
+def test_publish_npm_workflow_validates_yaml() -> None:
+    """publish-npm.yml exists and is valid YAML."""
+    workflow = REPO_ROOT / ".github" / "workflows" / "publish-npm.yml"
+    assert workflow.is_file()
+    content = workflow.read_text()
+    assert "publish-npm" in content
+    assert "NPM_TOKEN" in content
+
+
 def test_package_json_valid_manifest() -> None:
     """package.json is valid JSON with correct bin path."""
     pkg_file = REPO_ROOT / "package.json"
