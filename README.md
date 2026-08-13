@@ -17,74 +17,82 @@
 These packages enforce deterministic, fast feedback loops (`ruff`, `basedpyright`, `cargo clippy`, `biome`, `fallow`, `semgrep`, `gitleaks`) directly inside target developer repositories to prevent model hallucinations, context bloat, and specification drift.
 
 > [!IMPORTANT]
-> **Key Architecture Principle**: This repository is the **packaging standard, marketplace catalog registry, installer CLI, and distribution engine**. Running `python scripts/heretek_cli.py install <pack>` projects standalone plugin assets, hooks, and LSP/MCP configs into user target repositories.
-
----
-
-## The 9 Logical Quality Packs
-
-`heretek` provides 9 out-of-the-box installable plugin pack categories:
-
-| Package | Category | Description | Key Deployed Assets |
-| :--- | :--- | :--- | :--- |
-| **`plugins/best-practices`** | `cross` | Output & persona quality pack | `humanizer` (anti-slop rules), `i-have-adhd` (Action-First), `ponytail` (7-Rung Lazy Ladder), `caveman` (terse mode), `outline-driven-dev` |
-| **`plugins/quality-audit`** | `cross` | Production audit & decay analysis | `launchworthy` (5-domain audit: Auth, Data, Frontend, Infra, Ops), `brooks-lint` (decay risks R1-R6, T1-T6) |
-| **`plugins/pre-commit`** | `cross` | Git commit/push mechanical gates | SHA-pinned `.pre-commit-config.yaml` (`ruff`, `biome`, `cargo clippy`, `fallow`, `semgrep`, `gitleaks`, `shellcheck`), `install_precommit.sh` |
-| **`plugins/ci-cd`** | `cross` | GitHub Actions workflow templates | `pre-commit.yml`, `security-scan-digest.yml`, `shellcheck.yml`, `validate.yml` |
-| **`plugins/agents`** | `cross` | Specialized subagent team | `architecture-auditor`, `build-error-resolver`, `code-reviewer`, `database-reviewer`, `performance-optimizer`, `security-reviewer`, `test-engineer` |
-| **`plugins/hooks`** | `quality-gate` | Core mechanical interceptor bundle | `ir_shell_parser.py` (IR shell parser & secret/destructive command block), `circuit_breaker.py` (consecutive error filter), `fast_gate.py`, `secrets_pre_tool.py` |
-| **`plugins/mcp-pack`** | `tools` | Token-efficient MCP servers | Pre-configured `.mcp.json` (`codebase-memory-mcp` prefix trees, `context7` live docs, `claude-mem` 3-layer progressive disclosure, `github-mcp-server`) |
-| **`plugins/lsp-pack`** | `tools` | 38+ Language Server suite | Pre-configured `.lsp.json` for 38+ language servers (`basedpyright`, `gopls`, `rust-analyzer`, `clangd`, `jdtls`, `vtsls`, `solidity-ls`) |
-| **`plugins/{lang}`** | `task` | Language-specific task packs | `python`, `rust`, `js-ts`, `go`, `cpp`, `java`, `web-frontend` (LSP server declarations & `check` skills) |
-
----
-
-## Architectural Pillars
-
-1. **Marketplace Registry & Catalog** (`catalog/catalog.yaml`): The central index mapping first-party and curated third-party marketplace packages, version pins, and dependency relationships.
-2. **Packaging Schemas** (`tests/schemas/`): JSON Schema definitions (Draft 2020-12) validating installable package manifests (`plugin.schema.json`, `hooks.schema.json`, `mcp.schema.json`, `lsp.schema.json`, `marketplace.schema.json`).
-3. **Packaging & Distribution CLI** (`scripts/heretek_cli.py`):
-   - `heretek install <pack-name>`: Deploys hooks, configs, LSP/MCP declarations, and interceptor scripts into target project `.claude/` directories.
-   - `heretek validate`: Validates all plugin packages and marketplace manifests against JSON Schemas.
-   - `heretek build-catalog`: Re-indexes `catalog/catalog.yaml` and builds canonical `.claude-plugin/marketplace.json`.
+> **Key Architecture Principle**: This repository is the **packaging standard, marketplace catalog registry, installer CLI, and distribution engine**. Running `npx heretek init` projects standalone plugin assets, hooks, and LSP/MCP configs into user target repositories in under 1 second.
 
 ---
 
 ## Quick Start & Usage
 
-### Installing Plugin Packs into Target Projects
-To deploy a plugin pack into a target developer repository:
+### Zero-Config Auto-Detection (`npx heretek init`)
+To automatically inspect any repository and deploy matching quality packs:
 
 ```bash
-# Install Best Practices pack (Humanizer, Action-First, Ponytail) into target repository
-python scripts/heretek_cli.py install best-practices --target /path/to/target/repo
-
-# Install Production Quality Audit pack into target repository
-python scripts/heretek_cli.py install quality-audit --target /path/to/target/repo
-
-# Install Pre-Commit git hooks into target repository
-python scripts/heretek_cli.py install pre-commit --target /path/to/target/repo
-
-# Install Go language pack into target repository
-python scripts/heretek_cli.py install go --target /path/to/target/repo
+# Auto-detect target repository project type and install matching packs
+npx heretek init --target /path/to/target/repo
 ```
 
-This populates the target workspace's `.claude/` directory with `.lsp.json`, `.mcp.json`, `hooks.json`, and supporting Python/Shell interceptor scripts.
+### Terminal Scorecard TUI (`npx heretek status`)
+To view repository agentic readiness score (0-100 pts), deployed plugins inventory, and pre-commit status:
 
-### Schema Validation & Catalog Building
 ```bash
-# Validate all marketplace and plugin manifests against JSON Schemas
-python scripts/heretek_cli.py validate
-
-# Re-generate .claude-plugin/marketplace.json from catalog/catalog.yaml
-python scripts/heretek_cli.py build-catalog
+npx heretek status --target /path/to/target/repo
 ```
+
+### Latency Benchmark (`npx heretek metrics`)
+To benchmark local fast-gate hook execution latencies:
+
+```bash
+npx heretek metrics
+```
+
+---
+
+## The 16 Marketplace Plugin Packs
+
+`heretek` provides 16 first-party installable plugin packages:
+
+| Package | Category | Description | Key Deployed Assets |
+| :--- | :--- | :--- | :--- |
+| **`python`** | `task` | Python language pack with basedpyright LSP and ruff checker | LSP, `skills/python-check` |
+| **`rust`** | `task` | Rust language pack with rust-analyzer LSP and clippy checker | LSP, `skills/rust-check` |
+| **`typescript`** | `task` | TypeScript/JS pack with vtsls LSP and biome/tsc checker | LSP, `skills/ts-check` |
+| **`go`** | `task` | Go language pack with gopls LSP and go vet checker | LSP, `skills/go-check` |
+| **`cpp`** | `task` | C/C++ language pack with clangd LSP and clang-tidy checker | LSP, `skills/cpp-check` |
+| **`java`** | `task` | Java language pack with jdtls LSP and spotbugs checker | LSP, `skills/java-check` |
+| **`ruby`** | `task` | Ruby language pack with solargraph LSP and rubocop checker | LSP, `skills/ruby-check` |
+| **`elixir`** | `task` | Elixir language pack with elixir-ls LSP and mix credo checker | LSP, `skills/elixir-check` |
+| **`csharp`** | `task` | C# / .NET language pack with csharp-ls LSP and dotnet format | LSP, `skills/csharp-check` |
+| **`web-frontend`** | `task` | Web UI & DevTools pack with Chrome DevTools MCP & skills | MCP, `skills/frontend-design` |
+| **`fallow`** | `task` | Dead code & token blast-radius auditor for Rust & TS | `skills/fallow-check` |
+| **`best-practices`** | `cross` | Quality & communication skills (`caveman`, `humanizer`, etc.) | `skills/*` |
+| **`quality-audit`** | `cross` | Codebase agentic readiness scorecard and quality audit | `skills/agentic-readiness` |
+| **`pre-commit`** | `cross` | Pre-commit guard configuration with SHA-pinned hooks | `scripts/install_precommit.sh` |
+| **`ci-cd`** | `cross` | GitHub Actions workflow templates (`pre-commit.yml`, etc.) | `.github/workflows/` |
+| **`hooks`** | `core` | Fast-gate (<100ms), secrets scanner, circuit breaker, & protection | `hooks.json`, `scripts/*.py` |
+
+---
+
+## 9-Language Task Matrix
+
+Heretek's `init` command auto-detects and configures standard language tools across **9 languages**:
+
+| Language | LSP Server | Linter / Checker Skill | Manifest Detection File(s) |
+| :--- | :--- | :--- | :--- |
+| **Python** | `basedpyright` | `ruff` + `basedpyright` | `pyproject.toml`, `setup.py`, `requirements.txt` |
+| **Rust** | `rust-analyzer` | `cargo clippy` + `rustfmt` | `Cargo.toml` |
+| **TypeScript / JS**| `vtsls` | `biome` / `oxlint` + `tsc` | `package.json`, `tsconfig.json` |
+| **Go** | `gopls` | `go vet` + `staticcheck` | `go.mod` |
+| **C / C++** | `clangd` | `clang-tidy` + `cppcheck` | `CMakeLists.txt`, `Makefile`, `compile_commands.json` |
+| **Java** | `jdtls` | `checkstyle` + `spotbugs` | `pom.xml`, `build.gradle` |
+| **Ruby** | `solargraph` | `rubocop` | `Gemfile`, `.rubocop.yml`, `Rakefile` |
+| **Elixir** | `elixir-ls` | `mix credo` + `mix format` | `mix.exs` |
+| **C# / .NET** | `csharp-ls` | `dotnet format` + `dotnet build` | `*.csproj`, `*.sln`, `global.json` |
 
 ---
 
 ## Developer Workflows
 
-### Quality Protocol & Commands
+### Testing & Quality Protocol
 
 ```bash
 # 1. Run full test suite
@@ -96,7 +104,10 @@ pytest
 # 3. Enforce Ruff code quality rules
 ruff check plugins scripts tests
 
-# 4. Execute full local CI pipeline
+# 4. Validate all plugin manifests against JSON Schemas
+python scripts/heretek_cli.py validate
+
+# 5. Execute full local CI pipeline
 bash scripts/ci.sh
 ```
 

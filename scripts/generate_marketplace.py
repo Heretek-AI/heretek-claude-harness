@@ -1,4 +1,8 @@
-"""Generate .claude-plugin/marketplace.json from catalog/catalog.yaml."""
+"""Generate .claude-plugin/marketplace.json from catalog/catalog.yaml.
+
+Parses catalog package definitions, normalizes relative source paths, and builds
+the canonical Claude Code marketplace manifest used by package indexes.
+"""
 
 from __future__ import annotations
 
@@ -21,6 +25,15 @@ _INTERNAL_FIELDS = {"components", "items"}
 def _normalize_source(
     source: dict[str, Any] | str, plugin_root: str | None = None
 ) -> dict[str, Any] | str:
+    """Normalize source mapping into canonical marketplace relative or external format.
+
+    Args:
+        source: Dictionary or string containing source path definition.
+        plugin_root: Optional relative prefix for local plugin directory.
+
+    Returns:
+        Normalized relative path string (e.g. `./plugins/python`) or dict mapping.
+    """
     if isinstance(source, str):
         return source
     src_type = cast(str, source.get("type"))
@@ -36,6 +49,15 @@ def _normalize_source(
 
 
 def _plugin_entry(catalog_plugin: dict[str, Any], plugin_root: str | None = None) -> dict[str, Any]:
+    """Convert internal catalog.yaml plugin dict into marketplace.json plugin entry.
+
+    Args:
+        catalog_plugin: Raw plugin item dictionary loaded from catalog.yaml.
+        plugin_root: Optional root directory prefix string.
+
+    Returns:
+        Cleaned plugin entry dictionary conformant to marketplace.schema.json.
+    """
     filtered = {k: v for k, v in catalog_plugin.items() if k not in _INTERNAL_FIELDS}
     name_val = cast(str, filtered["name"])
     source_val = cast(dict[str, Any] | str, filtered["source"])
@@ -52,6 +74,17 @@ def _plugin_entry(catalog_plugin: dict[str, Any], plugin_root: str | None = None
 
 
 def _safe_load_catalog(catalog_path: Path) -> dict[str, Any]:
+    """Load YAML catalog file and validate top-level dictionary structure.
+
+    Args:
+        catalog_path: Path to catalog.yaml file.
+
+    Returns:
+        Loaded dictionary structure.
+
+    Raises:
+        ValueError: If file content is not a dictionary.
+    """
     loaded: Any = yaml.safe_load(catalog_path.resolve().read_text())
     if not isinstance(loaded, dict):
         raise ValueError(f"{catalog_path}: root content is not a dict")
@@ -59,6 +92,18 @@ def _safe_load_catalog(catalog_path: Path) -> dict[str, Any]:
 
 
 def generate(catalog_path: Path, output_path: Path) -> dict[str, Any]:
+    """Generate marketplace.json manifest atomically from catalog.yaml.
+
+    Args:
+        catalog_path: Path to catalog.yaml input file.
+        output_path: Path to .claude-plugin/marketplace.json destination file.
+
+    Returns:
+        Generated marketplace dictionary structure.
+
+    Raises:
+        ValueError: If marketplace section or plugin entries are invalid.
+    """
     catalog = _safe_load_catalog(catalog_path)
     if "marketplace" not in catalog or not isinstance(catalog["marketplace"], dict):
         raise ValueError(f"{catalog_path}: top-level 'marketplace' key missing or not a mapping")
@@ -88,6 +133,7 @@ def generate(catalog_path: Path, output_path: Path) -> dict[str, Any]:
 
 
 def main(argv: Iterable[str] | None = None) -> int:
+    """CLI execution entrypoint for catalog builder."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)

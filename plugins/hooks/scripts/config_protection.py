@@ -11,7 +11,8 @@ import json
 import sys
 from pathlib import Path
 
-PROTECTED_CONFIG_PATTERNS = [
+# List of linter/compiler config file basenames protected against agent mutation
+PROTECTED_CONFIG_PATTERNS: list[str] = [
     "ruff.toml",
     ".ruff.toml",
     "biome.json",
@@ -26,6 +27,11 @@ PROTECTED_CONFIG_PATTERNS = [
 
 
 def main() -> int:
+    """Read PreToolUse JSON payload from stdin and block mutations to protected linter configs.
+
+    Returns:
+        1 if file path matches a protected config (deny operation), 0 if clean (allow).
+    """
     try:
         payload = json.load(sys.stdin)
     except Exception:

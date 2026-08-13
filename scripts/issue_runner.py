@@ -27,6 +27,8 @@ log = logging.getLogger("issue_runner")
 
 @dataclass(frozen=True)
 class IssueTask:
+    """Represents an incoming task or issue to resolve."""
+
     task_id: str
     description: str
     target_files: list[str] = field(default_factory=list)
@@ -34,6 +36,8 @@ class IssueTask:
 
 @dataclass
 class RunResult:
+    """Holds the result of executing an IssueTask through the mechanical gate feedback loop."""
+
     task_id: str
     passed: bool
     attempts: int
@@ -45,10 +49,22 @@ class MechanicalGateRunner:
     """Executes Layer 1 and Layer 2 mechanical gates on target files."""
 
     def __init__(self, repo_root: Path | None = None) -> None:
+        """Initialize gate runner with repo root directory.
+
+        Args:
+            repo_root: Optional repository root path override.
+        """
         self.repo_root = (repo_root or Path(__file__).resolve().parents[1]).resolve()
 
     def check_file(self, rel_path: str) -> tuple[bool, str]:
-        """Run fast gate and static checks on target file."""
+        """Run fast gate and static checks on target file.
+
+        Args:
+            rel_path: Target file path relative to repo root.
+
+        Returns:
+            Tuple of (passed: bool, diagnostic_message: str).
+        """
         abs_path = self.repo_root / rel_path
         if not abs_path.exists():
             return False, f"[ERROR] {rel_path} does not exist"
@@ -95,6 +111,12 @@ class IssueRunner:
         gate_runner: MechanicalGateRunner | None = None,
         max_attempts: int = 3,
     ) -> None:
+        """Initialize IssueRunner with gate runner and max attempt count.
+
+        Args:
+            gate_runner: Optional MechanicalGateRunner instance.
+            max_attempts: Maximum retry threshold before declaring failure.
+        """
         self.gate_runner = gate_runner or MechanicalGateRunner()
         self.max_attempts = max_attempts
 
@@ -103,7 +125,15 @@ class IssueRunner:
         task: IssueTask,
         executor_fn: Callable[[IssueTask, list[str]], str],
     ) -> RunResult:
-        """Run feedback loop: executor -> gate check -> translate errors -> retry/pass."""
+        """Run feedback loop: executor -> gate check -> translate errors -> retry/pass.
+
+        Args:
+            task: IssueTask instance containing task metadata.
+            executor_fn: Callable executing task code changes.
+
+        Returns:
+            RunResult detailing pass/fail status, attempt count, and diagnostic output.
+        """
         history_diagnostics: list[str] = []
 
         for attempt in range(1, self.max_attempts + 1):
@@ -143,6 +173,7 @@ class IssueRunner:
 
 
 def main() -> int:
+    """CLI entrypoint for reference runner."""
     parser = argparse.ArgumentParser(description="Heretek Mechanical Issue Runner")
     parser.add_argument("--task-id", default="demo-1", help="Task ID identifier")
     parser.add_argument("--description", default="Sample task description", help="Task prompt")

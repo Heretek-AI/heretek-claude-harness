@@ -1,4 +1,8 @@
-"""Validate the marketplace and every plugin manifest against JSON Schemas."""
+"""Validate the marketplace and every plugin manifest against JSON Schemas.
+
+Performs strict JSON Schema validation (Draft 2020-12) against `marketplace.json`,
+`plugin.json`, `hooks.json`, `.mcp.json`, and `.lsp.json` across all plugins.
+"""
 
 from __future__ import annotations
 
@@ -24,6 +28,19 @@ SCHEMAS = {
 
 
 def _load_schema(name: str, schemas_dir: Path) -> dict[str, Any]:
+    """Load JSON schema file by key name from schemas_dir.
+
+    Args:
+        name: Schema key name (e.g. 'plugin', 'marketplace').
+        schemas_dir: Directory containing JSON Schema files.
+
+    Returns:
+        Loaded JSON schema dict.
+
+    Raises:
+        FileNotFoundError: If schema file is missing.
+        ValueError: If schema file root is not a dictionary.
+    """
     path = schemas_dir / SCHEMAS[name]
     if not path.is_file():
         raise FileNotFoundError(f"schema not found: {path}")
@@ -34,12 +51,30 @@ def _load_schema(name: str, schemas_dir: Path) -> dict[str, Any]:
 
 
 def _validate_one(schema: dict[str, Any], instance: Any, label: str) -> list[str]:
+    """Validate single JSON instance against schema.
+
+    Args:
+        schema: Loaded JSON schema dict.
+        instance: Parsed JSON data to validate.
+        label: Human-readable file label for error reporting.
+
+    Returns:
+        List of formatted validation error strings (empty list = clean).
+    """
     validator = jsonschema.Draft202012Validator(schema)
     return [f"{label}: {e.message}" for e in validator.iter_errors(instance)]  # type: ignore[no-any-expr]
 
 
 def _validate_plugin_manifests(repo_root: Path, schemas: dict[str, dict[str, Any]]) -> list[str]:
-    """Walk plugins/<name>/.claude-plugin/ and validate plugin.json + sibling manifests."""
+    """Walk plugins/<name>/.claude-plugin/ and validate plugin.json + sibling manifests.
+
+    Args:
+        repo_root: Path to repository root directory.
+        schemas: Map of schema name -> loaded schema dict.
+
+    Returns:
+        List of validation error strings across all plugin packages.
+    """
     errors: list[str] = []
     plugins_root = repo_root / "plugins"
     if not plugins_root.is_dir():
@@ -70,7 +105,15 @@ def _validate_plugin_manifests(repo_root: Path, schemas: dict[str, dict[str, Any
 
 
 def validate_all(repo_root: Path, schemas_dir: Path | None = None) -> list[str]:
-    """Return a list of schema-failure messages; empty list = clean."""
+    """Return a list of schema-failure messages; empty list = clean validation pass.
+
+    Args:
+        repo_root: Path to repository root directory.
+        schemas_dir: Optional custom schema directory path.
+
+    Returns:
+        List of error strings. Empty list indicates 100% schema compliance.
+    """
     schemas_dir = schemas_dir or DEFAULT_SCHEMAS_DIR
     try:
         schemas = {name: _load_schema(name, schemas_dir) for name in SCHEMAS}
@@ -97,6 +140,7 @@ def validate_all(repo_root: Path, schemas_dir: Path | None = None) -> list[str]:
 
 
 def main(argv: Iterable[str] | None = None) -> int:
+    """CLI execution entrypoint for schema validator."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=REPO_ROOT)
     parser.add_argument("--schemas-dir", type=Path, default=DEFAULT_SCHEMAS_DIR)

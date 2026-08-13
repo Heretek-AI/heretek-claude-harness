@@ -6,39 +6,47 @@
 
 ## Architectural Pillars
 
-- **Catalog Registry** (`catalog/catalog.yaml`): Source of truth for available marketplace packages and dependency pins.
+- **Catalog Registry** (`catalog/catalog.yaml`): Source of truth for available marketplace packages, dependency pins, and D7 vetting ADRs.
 - **Marketplace Manifest** (`.claude-plugin/marketplace.json`): Generated marketplace index built from `catalog/catalog.yaml`.
 - **Packaging Schemas** (`tests/schemas/`): JSON Schemas validating `plugin.json`, `hooks.json`, `.mcp.json`, `.lsp.json`, and `marketplace.json`.
-- **Distribution CLI** (`scripts/heretek_cli.py`): Package manager installing assets into target repo `.claude/` directories.
-- **Installable Plugin Packages** (`plugins/`): `python`, `rust`, `js-ts`, `hooks`, `mcp-pack`.
+- **Distribution CLI Launcher** (`bin/heretek.js` & `scripts/heretek_cli.py`): Package manager installing assets into target repo `.claude/` directories. Exposes `heretek init`, `status`, `metrics`, `install`, `validate`, `build-catalog`, `telemetry`.
+- **Installable Plugin Packages** (`plugins/`): 16 first-party plugin packages covering Python, Rust, TypeScript, Go, C/C++, Java, Ruby, Elixir, C#, Web Frontend, Fallow, Best Practices, Quality Audit, Pre-commit, CI-CD, Hooks.
 
 ---
 
 ## Developer Workflows & Essential Commands
 
-### Testing & Quality Checks
+### Testing & Verification Suite
 ```bash
 # 1. Run full unit and integration test suite
 pytest
 
 # 2. Run Ruff code quality checks
-ruff check .
+ruff check plugins scripts tests
 
 # 3. Run Pyright strict type checking
 .venv/bin/basedpyright scripts
 
-# 4. Run local CI pipeline (pytest + validate + build-catalog)
+# 4. Validate plugin manifests against JSON Schemas
+python scripts/heretek_cli.py validate
+
+# 5. Run local CI pipeline (pytest + validate + build-catalog)
 bash scripts/ci.sh
 ```
 
-### Marketplace & Installer CLI (`heretek_cli.py`)
+### Marketplace & Installer CLI (`heretek`)
 ```bash
-# Install a plugin pack into a target developer project
-python scripts/heretek_cli.py install python --target /path/to/target/repo
-python scripts/heretek_cli.py install hooks --target /path/to/target/repo
+# Auto-detect target repository project type and install matching packs
+npx heretek init --target /path/to/target/repo
 
-# Validate all marketplace and plugin manifests against JSON Schemas
-python scripts/heretek_cli.py validate
+# View terminal quality scorecard (0-100 pts) and deployed pack inventory
+npx heretek status --target /path/to/target/repo
+
+# Benchmark fast-gate hook execution latencies to enforce <100ms SLA
+npx heretek metrics
+
+# Install a specific plugin pack into a target project
+npx heretek install python --target /path/to/target/repo
 
 # Re-index catalog.yaml and generate .claude-plugin/marketplace.json
 python scripts/heretek_cli.py build-catalog

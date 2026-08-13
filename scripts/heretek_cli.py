@@ -1,12 +1,11 @@
 """heretek CLI — top-level package management & distribution CLI for heretek marketplace.
 
-Commands:
-- install <pack-name> [--target TARGET_DIR]: Installs plugin hooks, configs, MCP/LSP manifests into target repo.
-- validate [--repo-root PATH]: Validates plugin and marketplace manifests against JSON Schemas.
-- build-catalog [--catalog PATH] [--output PATH]: Re-indexes catalog.yaml and generates marketplace.json.
-- telemetry: Local hook event log inspection and configuration.
+Provides end-user subcommands for repository auto-detection (`init`), plugin package
+installation (`install`), terminal quality scorecards (`status`), fast-gate SLA benchmarks (`metrics`),
+schema validation (`validate`), catalog building (`build-catalog`), and telemetry log inspection (`telemetry`).
 
-Top-level entry: `python scripts/heretek_cli.py <command> [args]`
+Top-level CLI execution entry:
+    `npx heretek <command> [args]` or `python scripts/heretek_cli.py <command> [args]`
 """
 
 from __future__ import annotations
@@ -20,6 +19,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+# Resolve repository root directory and append to sys.path for internal imports
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -27,6 +27,7 @@ if str(REPO_ROOT) not in sys.path:
 from scripts.generate_marketplace import generate as generate_marketplace
 from scripts.validate import validate_all
 
+# Directory constants
 PLUGINS_DIR = REPO_ROOT / "plugins"
 TELEMETRY_ROOT = Path(
     os.environ.get("HERETEK_TELEMETRY_ROOT", Path.home() / ".heretek" / "telemetry")
@@ -35,7 +36,14 @@ SCHEMA_PATH = REPO_ROOT / "tests" / "fixtures" / "telemetry_schema.json"
 
 
 def cmd_install(args: argparse.Namespace) -> int:
-    """Install a plugin bundle into a target project directory."""
+    """Install a plugin package bundle into a target project directory.
+
+    Args:
+        args: Parsed CLI namespace containing `pack_name` (str) and `target` (str path).
+
+    Returns:
+        0 on clean installation pass, 1 if plugin source directory does not exist.
+    """
     pack_name: str = args.pack_name
     target_dir = Path(args.target).resolve()
     plugin_src = PLUGINS_DIR / pack_name
@@ -48,7 +56,7 @@ def cmd_install(args: argparse.Namespace) -> int:
     claude_dir.mkdir(parents=True, exist_ok=True)
     installed_files: list[str] = []
 
-    # 1. Manifests under .claude-plugin/
+    # 1. Manifests under .claude-plugin/ (plugin.json, etc.)
     manifest_src = plugin_src / ".claude-plugin"
     if manifest_src.is_dir():
         plugin_dest = claude_dir / "plugins" / pack_name
@@ -59,14 +67,14 @@ def cmd_install(args: argparse.Namespace) -> int:
                 shutil.copy2(item, dest)
                 installed_files.append(str(dest.relative_to(target_dir)))
 
-    # 2. LSP configuration (.lsp.json)
+    # 2. LSP configuration (.lsp.json -> .claude/lsp.json)
     lsp_src = plugin_src / ".lsp.json"
     if lsp_src.is_file():
         lsp_dest = claude_dir / "lsp.json"
         shutil.copy2(lsp_src, lsp_dest)
         installed_files.append(str(lsp_dest.relative_to(target_dir)))
 
-    # 3. MCP configuration (.mcp.json)
+    # 3. MCP configuration (.mcp.json -> .mcp.json and .claude/mcp.json)
     mcp_src = plugin_src / ".mcp.json"
     if mcp_src.is_file():
         mcp_dest_root = target_dir / ".mcp.json"
@@ -76,10 +84,9 @@ def cmd_install(args: argparse.Namespace) -> int:
         installed_files.append(str(mcp_dest_root.relative_to(target_dir)))
         installed_files.append(str(mcp_dest_claude.relative_to(target_dir)))
 
-    # 4. Hooks configuration & scripts (hooks.json, scripts/)
+    # 4. Hooks configuration & scripts (hooks.json -> .claude/hooks.json)
     hooks_src = plugin_src / "hooks.json"
     if not hooks_src.is_file():
-        # Check inside .claude-plugin/
         hooks_src_alt = plugin_src / ".claude-plugin" / "hooks.json"
         if hooks_src_alt.is_file():
             hooks_src = hooks_src_alt
@@ -89,6 +96,7 @@ def cmd_install(args: argparse.Namespace) -> int:
         shutil.copy2(hooks_src, hooks_dest)
         installed_files.append(str(hooks_dest.relative_to(target_dir)))
 
+    # Copy associated interceptor scripts into .claude/scripts/
     scripts_src = plugin_src / "scripts"
     if scripts_src.is_dir():
         scripts_dest = claude_dir / "scripts"
@@ -101,7 +109,7 @@ def cmd_install(args: argparse.Namespace) -> int:
                 shutil.copy2(script_file, dest)
                 installed_files.append(str(dest.relative_to(target_dir)))
 
-    # 5. Skills directory (skills/)
+    # 5. Skills directory (skills/ -> .claude/skills/)
     skills_src = plugin_src / "skills"
     if skills_src.is_dir():
         skills_dest = claude_dir / "skills"
@@ -122,7 +130,14 @@ def cmd_install(args: argparse.Namespace) -> int:
 
 
 def cmd_validate(args: argparse.Namespace) -> int:
-    """Validate all plugin manifests and marketplace.json against JSON Schemas."""
+    """Validate all plugin manifests and marketplace.json against JSON Schemas.
+
+    Args:
+        args: Parsed CLI namespace containing optional `repo_root` and `schemas_dir`.
+
+    Returns:
+        0 on validation pass, 1 if schema validation errors are detected.
+    """
     repo_root = Path(args.repo_root).resolve() if getattr(args, "repo_root", None) else REPO_ROOT
     schemas_dir = (
         Path(args.schemas_dir).resolve()
@@ -140,7 +155,14 @@ def cmd_validate(args: argparse.Namespace) -> int:
 
 
 def cmd_build_catalog(args: argparse.Namespace) -> int:
-    """Build .claude-plugin/marketplace.json from catalog/catalog.yaml."""
+    """Build canonical .claude-plugin/marketplace.json from catalog/catalog.yaml.
+
+    Args:
+        args: Parsed CLI namespace containing optional `catalog` and `output` paths.
+
+    Returns:
+        0 on successful generation, 1 on failure.
+    """
     catalog_path = (
         Path(args.catalog).resolve()
         if getattr(args, "catalog", None)
@@ -161,6 +183,7 @@ def cmd_build_catalog(args: argparse.Namespace) -> int:
 
 
 def _iter_session_files(root: Path) -> list[Path]:
+    """Iterate through session JSONL files under TELEMETRY_ROOT."""
     sessions_dir = root / "sessions"
     if not sessions_dir.exists():
         return []
@@ -168,6 +191,7 @@ def _iter_session_files(root: Path) -> list[Path]:
 
 
 def _read_events(files: list[Path]) -> list[dict[str, object]]:
+    """Read and parse telemetry event dicts from JSONL files."""
     events: list[dict[str, object]] = []
     dropped = 0
     for f in files:
@@ -188,6 +212,7 @@ def _read_events(files: list[Path]) -> list[dict[str, object]]:
 
 
 def cmd_telemetry_show(args: argparse.Namespace) -> int:
+    """Display logged telemetry hook events matching criteria."""
     files = _iter_session_files(TELEMETRY_ROOT)
     session_arg: str | None = args.session
     if session_arg:
@@ -213,6 +238,7 @@ def cmd_telemetry_show(args: argparse.Namespace) -> int:
 
 
 def cmd_telemetry_grep(args: argparse.Namespace) -> int:
+    """Search telemetry events using regex pattern matching."""
     pattern_str: str = args.pattern
     pattern = re.compile(pattern_str)
     files = _iter_session_files(TELEMETRY_ROOT)
@@ -224,6 +250,7 @@ def cmd_telemetry_grep(args: argparse.Namespace) -> int:
 
 
 def cmd_telemetry_diff(args: argparse.Namespace) -> int:
+    """Diff hook-firing decision rates between two telemetry sessions."""
     files = {f.stem: f for f in _iter_session_files(TELEMETRY_ROOT)}
     session_a: str = args.session_a
     session_b: str = args.session_b
@@ -245,6 +272,7 @@ def cmd_telemetry_diff(args: argparse.Namespace) -> int:
 
 
 def cmd_telemetry_export(args: argparse.Namespace) -> int:
+    """Bundle local telemetry session logs into JSONL export payload."""
     pii_reviewed: bool = getattr(args, "i_understand_pii_implications", False)
     if not pii_reviewed:
         print(
@@ -267,6 +295,7 @@ def cmd_telemetry_export(args: argparse.Namespace) -> int:
 
 
 def cmd_telemetry_config(args: argparse.Namespace) -> int:
+    """Set key/value properties in local telemetry config file."""
     config_path = TELEMETRY_ROOT / "config.properties"
     TELEMETRY_ROOT.mkdir(parents=True, exist_ok=True)
     existing: dict[str, str] = {}
@@ -284,6 +313,7 @@ def cmd_telemetry_config(args: argparse.Namespace) -> int:
 
 
 def cmd_telemetry_schema(args: argparse.Namespace) -> int:
+    """Print canonical telemetry JSON Schema."""
     if not SCHEMA_PATH.exists():
         print(f"error: schema file not found: {SCHEMA_PATH}", file=sys.stderr)
         return 1
@@ -293,7 +323,17 @@ def cmd_telemetry_schema(args: argparse.Namespace) -> int:
 
 
 def cmd_init(args: argparse.Namespace) -> int:
-    """Auto-detect project languages and frameworks, then install matching packs + hooks."""
+    """Auto-detect project languages and frameworks, then install matching packs + hooks.
+
+    Inspects target project manifest files across 9 supported language ecosystems
+    and deploys matching language packs, hooks, and best-practice skills.
+
+    Args:
+        args: Parsed CLI namespace containing `target` (str directory path).
+
+    Returns:
+        0 on successful auto-detection & deployment, 1 if target directory missing.
+    """
     target_dir = Path(args.target).resolve()
     if not target_dir.is_dir():
         print(f"error: target directory '{target_dir}' does not exist", file=sys.stderr)
@@ -301,7 +341,7 @@ def cmd_init(args: argparse.Namespace) -> int:
 
     packs_to_install: set[str] = {"best-practices", "hooks", "pre-commit"}
 
-    # Project Manifest Auto-Detection Rules
+    # Project Manifest Auto-Detection Rules across 9 languages
     if any(
         (target_dir / f).exists()
         for f in ("pyproject.toml", "setup.py", "requirements.txt", "Pipfile", "poetry.lock")
@@ -358,7 +398,20 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 
 def cmd_status(args: argparse.Namespace) -> int:
-    """Display Heretek quality status scorecard and deployed plugin inventory."""
+    """Display Heretek quality status scorecard and deployed plugin inventory.
+
+    Calculates the 4-Pillar Agentic Readiness Score (0-100 pts) based on:
+    - Pillar 1: Deterministic Quality Gates (.claude/hooks.json)
+    - Pillar 2: Pre-Commit Guard (.pre-commit-config.yaml)
+    - Pillar 3: Context Hygiene (AGENTS.md / CLAUDE.md / README.md)
+    - Pillar 4: Best Practices & Audit Packs (best-practices / quality-audit)
+
+    Args:
+        args: Parsed CLI namespace containing `target` (str directory path).
+
+    Returns:
+        0 on status calculation pass, 1 if target directory missing.
+    """
     target_dir = Path(args.target).resolve()
     if not target_dir.is_dir():
         print(f"error: target directory '{target_dir}' does not exist", file=sys.stderr)
@@ -373,7 +426,7 @@ def cmd_status(args: argparse.Namespace) -> int:
     if plugins_dir.is_dir():
         installed_plugins = [d.name for d in plugins_dir.iterdir() if d.is_dir()]
 
-    # Calculate 4-Pillar Agentic Readiness Score
+    # Calculate 4-Pillar Agentic Readiness Score (25 pts per pillar)
     score = 0
     if hooks_file.is_file():
         score += 25
@@ -399,7 +452,14 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 
 def cmd_metrics(args: argparse.Namespace) -> int:
-    """Benchmark local fast-gate hook execution latencies to enforce <100ms SLA."""
+    """Benchmark local fast-gate hook execution latencies to enforce <100ms SLA.
+
+    Args:
+        args: Parsed CLI namespace.
+
+    Returns:
+        0 if benchmark latency <500ms, 1 if latency exceeds threshold.
+    """
     import time
 
     from plugins.hooks.scripts.fast_gate import dispatch
@@ -419,6 +479,7 @@ def cmd_metrics(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build top-level ArgumentParser for Heretek CLI."""
     parser = argparse.ArgumentParser(
         prog="heretek",
         description="heretek marketplace & distribution CLI",
@@ -519,6 +580,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """CLI execution entrypoint."""
     parser = build_parser()
     args = parser.parse_args(argv)
     func = getattr(args, "func", None)

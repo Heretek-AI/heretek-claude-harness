@@ -20,7 +20,7 @@ import re
 import sys
 from pathlib import Path
 
-# High-confidence patterns only. False-positive tolerance: medium.
+# High-confidence secret scanning regex patterns (Name, Compiled Pattern)
 PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("AWS access key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("GitHub PAT", re.compile(r"\bghp_[A-Za-z0-9]{36}\b")),
@@ -31,7 +31,7 @@ PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ),
 )
 
-# File extensions we scan. Skip binary / non-text.
+# File extensions scanned for secrets (skip binary files)
 SCAN_EXTS: frozenset[str] = frozenset(
     {
         ".py",
@@ -48,12 +48,16 @@ SCAN_EXTS: frozenset[str] = frozenset(
     }
 )
 
-# Per-extension budget (seconds). Reads single regex sweep over new_string;
-# 200ms is generous.
+# Maximum latency SLA budget (seconds)
 TIMEOUT_S = 0.2
 
 
 def _read_payload() -> dict:
+    """Read JSON payload from standard input.
+
+    Returns:
+        Parsed dictionary payload or empty dict on decode error/empty stdin.
+    """
     raw = sys.stdin.read()
     if not raw.strip():
         return {}
@@ -64,9 +68,16 @@ def _read_payload() -> dict:
 
 
 def _scan_text(file_path: str, new_string: str) -> list[tuple[str, int]]:
-    """Return [(pattern_name, line_no)] for every match in new_string.
+    """Return [(pattern_name, line_no)] for every secret pattern match in new_string.
 
     Line numbers are 1-indexed for human-readable stderr output.
+
+    Args:
+        file_path: Path string of file being edited/written.
+        new_string: String content payload to scan for secrets.
+
+    Returns:
+        List of tuples containing (pattern_name, 1-indexed line_number).
     """
     if not new_string:
         return []
@@ -82,6 +93,11 @@ def _scan_text(file_path: str, new_string: str) -> list[tuple[str, int]]:
 
 
 def main() -> int:  # nosonar — egress point; exit 0/2 per pattern
+    """Main execution function for secrets pre-tool interceptor.
+
+    Returns:
+        2 if secret match found (deny operation), 0 if clean (allow).
+    """
     payload = _read_payload()
     tool_input = payload.get("tool_input") or {}
     file_path = str(tool_input.get("file_path", ""))
@@ -94,7 +110,6 @@ def main() -> int:  # nosonar — egress point; exit 0/2 per pattern
     # and new_string (catches fresh injections).
     hits = _scan_text(file_path, new_string)
     if not hits and old_string:
-        # Old-string hits are advisory; only block on new-string matches.
         old_hits = _scan_text(file_path, old_string)
         if old_hits:
             print(
