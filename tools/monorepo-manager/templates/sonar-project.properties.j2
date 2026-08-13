@@ -1,0 +1,12 @@
+sonar.projectKey={{ sonar_key }}
+sonar.organization=heretek-ai
+sonar.projectName={{ project_name }}
+sonar.sources=src
+sonar.tests=tests
+{% if stack == 'node' %}
+sonar.javascript.lcov.reportPaths=coverage/lcov.info
+{% endif %}
+{% if stack == 'python' %}
+sonar.python.coverage.reportPaths=coverage.xml
+{% endif %}
+sonar.sourceEncoding=UTF-8

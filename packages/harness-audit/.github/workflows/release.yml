@@ -1,0 +1,20 @@
+name: Release Tag Publisher
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  update-major-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Update v1 Major Tag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -fa v1 -m "Update v1 tag to ${GITHUB_REF_NAME}"
+          git push origin v1 --force

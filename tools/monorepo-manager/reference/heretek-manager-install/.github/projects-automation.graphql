@@ -1,0 +1,12 @@
+# GraphQL automation rules for the heretek-manager Project.
+# Apply with: `gh project link --repo Heretek-AI/heretek-manager --project 2`
+# then `gh api graphql -f query @.github/projects-automation.graphql`.
+
+mutation {
+  createProjectV2Field(input: { projectId: "2", dataType: SINGLE_SELECT, name: "Status" }) {
+    projectV2Field { id }
+  }
+}
+
+# Status updates on PR open/merge are configured via the GitHub UI;
+# this file is the source of truth for re-importing them.

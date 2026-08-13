@@ -1,0 +1,6 @@
+# Super-linter reads this as the python-ruff config.
+target-version: py311
+line-length: 100
+lint:
+  select: [E, F, I, W, B, UP]
+  ignore: [E501]

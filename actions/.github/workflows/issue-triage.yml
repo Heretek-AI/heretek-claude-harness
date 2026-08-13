@@ -1,0 +1,27 @@
+name: "Issue Triage"
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Triage Issue"
+        uses: ./.github/actions/issue-triage
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Read Agent Output"
+        shell: bash
+        run: |
+          if [ -f .agent/output.json ]; then
+            echo "### Issue Triage" >> $GITHUB_STEP_SUMMARY
+            jq -r '. | "\(.summary)"' .agent/output.json >> $GITHUB_STEP_SUMMARY
+          fi

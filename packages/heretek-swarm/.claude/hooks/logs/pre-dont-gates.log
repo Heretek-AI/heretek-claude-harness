@@ -1,0 +1,44 @@
+# pre-dont-gates.log — Task 8 verification evidence
+# Date: 2026-06-23
+# Hook: .claude/hooks/pre-dont-gates.sh (PreToolUse Edit|Write|MultiEdit|Bash|Agent)
+# Gates: 64 (review/ Q1), 66 (rebuild-merge Q9), 68 (binary-RE agent), 69 (submodule push)
+
+## Gate 64 — Q1 reference-only (review/pax-historia, review/Phos)
+
+T1  Edit on review/pax-historia/ → BLOCKED exit=2
+    "BLOCKED: don't port code from review/pax-historia or review/Phos (Q1)"
+    "Source: CLAUDE.md:123, docs/superpowers/specs/2026-06-22-hooks-audit.md:row 64"
+T2  Read on review/pax-historia/ → ALLOW exit=0  (Read permitted)
+T3  Edit on backend/src/foo.ts → ALLOW exit=0
+T14 Write on review/Phos/ → BLOCKED exit=2
+    "BLOCKED: don't port code from review/pax-historia or review/Phos (Q1)"
+
+## Gate 66 — Q9 milestone-batch merge
+
+T4  Bash `git merge rebuild/phase1-add-dont-gates` → BLOCKED exit=2
+    "BLOCKED: rebuild-branch merge outside milestone gate (Q9)"
+    "Branch: rebuild/phase1-add-dont-gates"
+    "Fix: set MILESTONE_MERGE=1 or touch .claude/state/MILESTONE"
+T5  Bash `git merge main` → ALLOW exit=0  (not a rebuild branch)
+T6  Bash `git merge rebuild/phase1-add-dont-gates` + MILESTONE_MERGE=1 → ALLOW exit=0
+
+## Gate 68 — don't use binary-RE agents
+
+T7  Agent subagent_type=agent-reverse-engine → BLOCKED exit=2
+    "BLOCKED: binary-RE agent disabled (wrong domain: web app, not binary RE)"
+T8  Agent subagent_type=Explore → ALLOW exit=0
+T9  Agent subagent_type=reverse-engineer-extra → BLOCKED exit=2
+    (regex matches mid-string; ERE anchors `reverse-engine` substring)
+
+## Gate 69 — don't auto-push to submodules
+
+T10 Bash `git push origin main` + cwd=…/backend → BLOCKED exit=2
+    "BLOCKED: don't auto-push to submodules (manual commits only)"
+T11 Bash `git push origin main` + cwd=…/tools/pax-ripper → BLOCKED exit=2
+T12 Bash `git push origin main` + cwd=…/parent-worktree → ALLOW exit=0
+T13 Bash `git status` + cwd=…/backend → ALLOW exit=0  (non-push)
+
+## Off-matcher (sanity)
+
+T15 Bash unrelated command → ALLOW exit=0
+T16 Glob tool (not in matcher) → ALLOW exit=0

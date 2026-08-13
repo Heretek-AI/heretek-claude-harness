@@ -1,0 +1,59 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"user","content":"count to 3"}],"model":"MiniMax-Text-01","stream":true}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      content-length:
+      - '94'
+      content-type:
+      - application/json
+      host:
+      - api.minimax.io
+      user-agent:
+      - AsyncOpenAI/Python 2.43.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - async:asyncio
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 2.43.0
+      x-stainless-read-timeout:
+      - '60.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.11.15
+    method: POST
+    uri: https://api.minimax.io/v1/chat/completions
+  response:
+    body:
+      string: "data: {\"id\":\"chatcmpl-cassette-seq-1\",\"object\":\"chat.completion.chunk\",\"created\":1719321600,\"model\":\"MiniMax-Text-01\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"\"},\"finish_reason\":null}]}\n\ndata:
+        {\"id\":\"chatcmpl-cassette-seq-1\",\"object\":\"chat.completion.chunk\",\"created\":1719321600,\"model\":\"MiniMax-Text-01\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"1\"},\"finish_reason\":null}]}\n\ndata:
+        {\"id\":\"chatcmpl-cassette-seq-1\",\"object\":\"chat.completion.chunk\",\"created\":1719321600,\"model\":\"MiniMax-Text-01\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\".
+        \"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-cassette-seq-1\",\"object\":\"chat.completion.chunk\",\"created\":1719321600,\"model\":\"MiniMax-Text-01\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"2\"},\"finish_reason\":null}]}\n\ndata:
+        {\"id\":\"chatcmpl-cassette-seq-1\",\"object\":\"chat.completion.chunk\",\"created\":1719321600,\"model\":\"MiniMax-Text-01\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\".
+        \"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"chatcmpl-cassette-seq-1\",\"object\":\"chat.completion.chunk\",\"created\":1719321600,\"model\":\"MiniMax-Text-01\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"3\"},\"finish_reason\":null}]}\n\ndata:
+        {\"id\":\"chatcmpl-cassette-seq-1\",\"object\":\"chat.completion.chunk\",\"created\":1719321600,\"model\":\"MiniMax-Text-01\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata:
+        [DONE]\n\n"
+    headers:
+      content-type:
+      - text/event-stream
+      date:
+      - Thu, 25 Jun 2026 19:01:00 GMT
+      x-request-id:
+      - cassette-seq-1
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://heretek-ai.dev/schemas/agents-md.schema.json",
+  "title": "AGENTS.md contract",
+  "type": "object",
+  "required": ["sections"],
+  "properties": {
+    "sections": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "string",
+        "enum": [
+          "Project summary",
+          "Stack & runtime targets",
+          "Build, test, lint, run commands",
+          "Project structure",
+          "Conventions",
+          "Do / Don't list",
+          "Pointer block"
+        ]
+      },
+      "uniqueItems": true
+    }
+  }
+}

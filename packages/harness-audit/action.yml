@@ -1,0 +1,142 @@
+name: 'TerminalBench A/B Evaluation & Readiness Action'
+description: 'Benchmark Claude Code plugins, audit 4-pillar agentic readiness scorecards, and run pre-execution security scans'
+author: 'Heretek-AI'
+branding:
+  icon: 'award'
+  color: 'blue'
+
+inputs:
+  mode:
+    description: 'Execution mode: "score" (readiness scorecard & badge), "security" (secret & injection guard), "bench" (TerminalBench A/B), or "full"'
+    required: false
+    default: 'full'
+  anthropic_api_key:
+    description: 'Anthropic API Key or Auth Token (required for "bench" or "full" mode)'
+    required: false
+    default: ''
+  anthropic_model:
+    description: 'Anthropic Model Name'
+    required: false
+    default: 'claude-sonnet-5-20260301'
+  plugin_dir:
+    description: 'Path to Claude Code plugins directory to benchmark (Agent A)'
+    required: false
+    default: ''
+  n_tasks:
+    description: 'Number of TerminalBench tasks ("8" for quick subset, or "all")'
+    required: false
+    default: '8'
+  n_concurrent:
+    description: 'Per-agent trial concurrency'
+    required: false
+    default: '8'
+  open_issue:
+    description: 'Open GitHub Issue with evaluation report ("true" or "false")'
+    required: false
+    default: 'true'
+
+outputs:
+  harness_score:
+    description: '4-Pillar Agentic Readiness Score (0-100 pts)'
+  pass_rate_delta:
+    description: 'Pass rate improvement delta (Agent A vs Agent B)'
+  markdown_report_path:
+    description: 'Path to generated Markdown comparison report'
+  badge_path:
+    description: 'Path to generated SVG status badge file'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install uv
+      shell: bash
+      run: "pip install uv==0.5.9 --only-binary :all:"
+
+    - name: Run Readiness Scorecard Audit
+      if: ${{ inputs.mode == 'score' || inputs.mode == 'full' }}
+      shell: bash
+      run: |
+        python ${{ github.action_path }}/scripts/scorecard.py \
+          --target "${{ github.workspace }}" \
+          --badge-out "${{ github.workspace }}/harness-score.svg" \
+          --json-out "/tmp/readiness-score.json"
+        SCORE=$(python -c 'import json; print(json.load(open("/tmp/readiness-score.json"))["score"])')
+        echo "harness_score=${SCORE}" >> $GITHUB_OUTPUT
+        echo "badge_path=${{ github.workspace }}/harness-score.svg" >> $GITHUB_OUTPUT
+
+    - name: Run Agent Security Guard Audit
+      if: ${{ inputs.mode == 'security' || inputs.mode == 'full' }}
+      shell: bash
+      run: |
+        python ${{ github.action_path }}/scripts/security_scan.py \
+          --target "${{ github.workspace }}"
+
+    - name: Install Harbor Framework
+      if: ${{ inputs.mode == 'bench' || inputs.mode == 'full' }}
+      shell: bash
+      run: "uv tool install harbor==0.21.0 --no-build"
+
+    - name: Run TerminalBench A/B Evaluation
+      if: ${{ inputs.mode == 'bench' || inputs.mode == 'full' }}
+      shell: bash
+      env:
+        ANTHROPIC_AUTH_TOKEN: ${{ inputs.anthropic_api_key }}
+        ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
+        HERETEK_PLUGIN_DIR: ${{ inputs.plugin_dir }}
+        HERETEK_N_TASKS: ${{ inputs.n_tasks }}
+        HERETEK_N_CONCURRENT: ${{ inputs.n_concurrent }}
+        RESULTS_DIR: ${{ github.workspace }}/results
+      run: "bash ${{ github.action_path }}/scripts/terminal_bench_ab.sh"
+
+    - name: Render Comparison Report
+      if: ${{ inputs.mode == 'bench' || inputs.mode == 'full' }}
+      shell: bash
+      env:
+        ANTHROPIC_MODEL: ${{ inputs.anthropic_model }}
+        RESULTS_DIR: ${{ github.workspace }}/results
+      run: |
+        python ${{ github.action_path }}/scripts/comparison_report.py \
+          --results-dir "$RESULTS_DIR" \
+          --commit-sha "${{ github.sha }}" \
+          --trigger "${{ github.event_name }}" \
+          --actor "${{ github.actor }}" \
+          --tier "${{ inputs.n_tasks == '8' && 'quick' || 'full' }}" \
+          --model "${{ inputs.anthropic_model }}" \
+          --base-url "https://api.anthropic.com" \
+          --output /tmp/comparison.md
+        echo "markdown_report_path=/tmp/comparison.md" >> $GITHUB_OUTPUT
+
+    - name: Ensure Issue Labels Exist
+      if: ${{ (inputs.mode == 'bench' || inputs.mode == 'full') && inputs.open_issue == 'true' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh label create terminal-bench-ab \
+          --color 1d76db \
+          --description "Terminal-Bench A/B evaluation run" \
+          --force || true
+        gh label create automated \
+          --color ededed \
+          --description "Generated automatically; no human review required" \
+          --force || true
+
+    - name: Open Comparison Report Issue
+      if: ${{ (inputs.mode == 'bench' || inputs.mode == 'full') && inputs.open_issue == 'true' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        if [ -f /tmp/comparison.md ]; then
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --label terminal-bench-ab \
+            --label automated \
+            --title "Terminal-Bench A/B Evaluation Report — $(date -u +%Y-%m-%d)" \
+            --body-file /tmp/comparison.md || true
+        fi

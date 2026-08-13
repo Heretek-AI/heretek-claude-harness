@@ -1,0 +1,21 @@
+{
+  "skills": [
+  {
+    "name": "heretek-manifest-codegen",
+    "description": "Generate manifest.json from targets/*/build.sh.",
+    "allowed-tools": [
+      "Bash",
+      "Read"
+    ],
+    "requiredSkills": []
+  },
+  {
+    "name": "heretek-upstream-sync",
+    "description": "Test a new llama.cpp upstream SHA before promoting to a release.",
+    "allowed-tools": [
+      "Bash"
+    ],
+    "requiredSkills": []
+  }
+]
+}

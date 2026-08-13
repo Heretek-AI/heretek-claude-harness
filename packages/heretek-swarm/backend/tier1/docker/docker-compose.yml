@@ -1,0 +1,95 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tier1
+      POSTGRES_PASSWORD: tier1
+      POSTGRES_DB: tier1
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tier1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  nats:
+    image: nats:2.10-alpine
+    command: ["--jetstream", "--store_dir=/data", "-m", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  cognee:
+    image: cognee/cognee:latest
+    ports:
+      - "8001:8001"
+    environment:
+      LLM_API_KEY: ${TIER1_MINIMAX_API_KEY:-}
+      LLM_MODEL: ${TIER1_LLM_MODEL:-MiniMax/M3}
+
+  mem0:
+    image: mem0/mem0:latest
+    ports:
+      - "8002:8002"
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    environment:
+      TIER1_NATS_URL: nats://nats:4222
+      TIER1_POSTGRES_DSN: postgresql://tier1:tier1@postgres:5432/tier1
+      TIER1_REDIS_URL: redis://redis:6379/0
+      TIER1_QDRANT_URL: http://qdrant:6333
+      TIER1_COGNEE_URL: http://cognee:8001
+      TIER1_MEM0_URL: http://mem0:8002
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
+  nats_data:
+  qdrant_data:

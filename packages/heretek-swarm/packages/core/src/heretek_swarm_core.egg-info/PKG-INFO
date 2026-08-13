@@ -1,0 +1,71 @@
+Metadata-Version: 2.4
+Name: heretek-swarm-core
+Version: 0.2.0
+Summary: Heretek Swarm v2.0 - sovereign service library (actors, consensus, memory, runtime)
+Author-email: Heretek AI <engineering@heretek.ai>
+License: MIT
+Project-URL: Homepage, https://github.com/heretek-ai/heretek-swarm
+Project-URL: Repository, https://github.com/heretek-ai/heretek-swarm
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic>=2.13.4
+Requires-Dist: structlog>=25.5.0
+Requires-Dist: tenacity>=9.1.4
+Requires-Dist: cognee<2.0,>=1.1.2
+Requires-Dist: langgraph>=1.2.4
+Requires-Dist: opik>=1.0.0
+Requires-Dist: headroom-ai>=0.1.9
+Requires-Dist: slowapi>=0.1.9
+Requires-Dist: mem0ai>=2.0.4
+Requires-Dist: nats-py>=2.14.0
+Requires-Dist: opentelemetry-api>=1.42.1
+Requires-Dist: PyJWT>=2.13.0
+Requires-Dist: httpx>=0.28.1
+
+# heretek-swarm-core
+
+Sovereign service library for the Heretek Swarm.
+
+Phase 4 of `PLAN.md` (Zero-Trust Architecture Audit, 2026-06-03)
+carves this package out of the single `heretek-swarm` pip
+package. Today, the corresponding code lives under
+`backend/heretek_swarm/` in the same repo. Activating the
+split is a multi-PR effort; this directory is the destination.
+
+## What lives here
+
+- `actors/` — 23 agent implementations across 6 tiers, plus the
+  `AgentActor` base class and 10 mixins
+- `consensus/` — MAKER, EnhancedMAKER, SwarmDeliberation, and
+  Deliberation engines, all behind the `ConsensusEngine` Protocol
+  (Phase 3.1)
+- `memory/` — `MemoryStore` Protocol + cognee / mem0 / null
+  adapters
+- `gateway/` — Bearer auth, `TokenStore`, A2A protocol
+- `runtime/` — `main_loop`, `wiring`, autonomous runtime
+- `security/` — immune, rate_limiter
+- `llm/` — LLM router, `headroom_compat`, `hindsight_compat`
+- `embeddings/`, `models/`, `schemas/`, `swarm_logging/`,
+  `config/` (lib portion), `utils/`, `validation/`, `channels/`
+
+## What does NOT live here
+
+- `api/` — FastAPI application, all 22+ routers
+- `mcp/`, `integrations/`, `plugins/` — request-handling layers
+- `rag/` (orchestration-specific bits)
+- `security/zero_trust.py` (auth is in core; the zero-trust
+  middleware lives in the api package)
+
+## Dependencies (this package does NOT depend on FastAPI)
+
+```
+pydantic, structlog, tenacity,
+cognee, langgraph, opik, headroom-ai, slowapi, mem0ai,
+nats-py, opentelemetry-api, PyJWT, httpx
+```
+
+## Status
+
+Stub. The actual split is a multi-PR effort; this directory
+exists so the workspace structure is in place and the audit's
+Phase 4 deliverable is structurally committed.

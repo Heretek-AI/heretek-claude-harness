@@ -1,0 +1,243 @@
+name: "OCR Full Codebase Scan"
+on:
+  workflow_dispatch:
+    inputs:
+      scan-path:
+        description: "Path to scan (default: entire repository)"
+        type: string
+        default: "."
+        required: false
+      ocr-llm-model:
+        description: "LLM model override"
+        type: string
+        required: false
+        default: ""
+      ocr-concurrency:
+        description: "Number of parallel per-file sub-agents"
+        type: string
+        required: false
+        default: "5"
+      ocr-no-plan:
+        description: "Skip PLAN_TASK pre-pass ('true' for speed, 'false' for max quality)"
+        type: string
+        required: false
+        default: "true"
+  workflow_call:
+    secrets:
+      ocr_llm_url:
+        description: "LLM API endpoint URL (e.g. https://api.deepseek.com/anthropic)"
+        required: true
+      ocr_llm_token:
+        description: "LLM API authentication token"
+        required: true
+      repo_token:
+        description: "GitHub token (defaults to GITHUB_TOKEN)"
+        required: false
+      ocr_llm_model:
+        description: "LLM model name (e.g. deepseek-v4-flash). Falls back to input ocr-llm-model, then vars.OCR_LLM_MODEL, then default."
+        required: false
+    inputs:
+      scan-path:
+        description: "Path to scan (default: entire repository)"
+        type: string
+        required: false
+        default: "."
+      ocr-llm-model:
+        description: "LLM model override"
+        type: string
+        required: false
+        default: ""
+      ocr-use-anthropic:
+        description: "Set to 'true' for Anthropic protocol, 'false' for OpenAI"
+        type: string
+        required: false
+        default: "true"
+      ocr-concurrency:
+        description: "Number of parallel per-file sub-agents"
+        type: string
+        required: false
+        default: "5"
+      ocr-no-plan:
+        description: "Skip PLAN_TASK pre-pass ('true' for speed, 'false' for max quality)"
+        type: string
+        required: false
+        default: "true"
+      ocr-llm-auth-header:
+        description: "Custom auth header name (default: x-api-key for Anthropic)"
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  ocr-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: "0"
+
+      - name: "Install Open Code Review"
+        shell: bash
+        run: |
+          npm install -g @alibaba-group/open-code-review@1.8.1
+          echo "✅ ocr installed: $(ocr --version 2>&1 || true)"
+
+      - name: "Configure LLM"
+        id: config
+        shell: bash
+        env:
+          OCR_LLM_URL: ${{ secrets.ocr_llm_url }}
+          OCR_LLM_TOKEN: ${{ secrets.ocr_llm_token }}
+          OCR_LLM_MODEL: ${{ secrets.ocr_llm_model || inputs.ocr-llm-model || vars.OCR_LLM_MODEL || 'deepseek-v4-flash' }}
+          OCR_USE_ANTHROPIC: ${{ inputs.ocr-use-anthropic || vars.OCR_LLM_USE_ANTHROPIC || 'true' }}
+        run: |
+          # Verify scan subcommand exists
+          if ! ocr scan --help >/dev/null 2>&1; then
+            echo "❌ 'ocr scan' subcommand not found"
+            exit 1
+          fi
+
+          # Determine protocol from use_anthropic flag
+          if [ "${OCR_USE_ANTHROPIC}" = "true" ]; then
+            PROTOCOL="anthropic"
+          else
+            PROTOCOL="openai"
+          fi
+          echo "Protocol: ${PROTOCOL}"
+
+          # Configure LLM via custom provider (new recommended pattern)
+          ocr config set provider heretek-deepseek
+          ocr config set custom_providers.heretek-deepseek.url "${OCR_LLM_URL}"
+          ocr config set custom_providers.heretek-deepseek.protocol "${PROTOCOL}"
+          ocr config set custom_providers.heretek-deepseek.model "${OCR_LLM_MODEL}"
+          ocr config set custom_providers.heretek-deepseek.api_key "${OCR_LLM_TOKEN}"
+          ocr config set llm.extra_body '{"thinking": {"type": "disabled"}}'
+
+      - name: "Validate LLM Configuration"
+        shell: bash
+        run: |
+          echo "🔌 Testing LLM connection..."
+          ocr llm test
+
+      - name: "Run OCR Scan"
+        id: scan
+        shell: bash
+        env:
+          SCAN_PATH: ${{ inputs.scan-path || github.event.inputs.scan-path || '.' }}
+          OCR_CONCURRENCY: ${{ inputs.ocr-concurrency || '5' }}
+          OCR_NO_PLAN: ${{ inputs.ocr-no-plan || 'true' }}
+        run: |
+          mkdir -p .ocr
+
+          echo "🔍 Scanning: ${SCAN_PATH}"
+          echo "   Concurrency: ${OCR_CONCURRENCY}"
+          echo "   No-Plan: ${OCR_NO_PLAN}"
+
+          # Build file list for scan.
+          # On a fresh CI checkout (actions/checkout), git diff is empty, so
+          # ocr scan's auto-discovery finds 0 files. Explicitly enumerate
+          # all files under SCAN_PATH to ensure every file is reviewed.
+          if [ "${SCAN_PATH}" = "." ]; then
+            FILE_LIST=$(find . -type f -not -path './.git/*' \
+              -not -path './node_modules/*' -not -path './target/*' \
+              -not -path './.venv/*' -not -path './__pycache__/*' \
+              2>/dev/null | head -500 | paste -sd ',' -)
+          elif [ -d "${SCAN_PATH}" ]; then
+            FILE_LIST=$(find "${SCAN_PATH}" -type f \
+              -not -path './.git/*' -not -path './node_modules/*' \
+              2>/dev/null | head -500 | paste -sd ',' -)
+          else
+            FILE_LIST="${SCAN_PATH}"
+          fi
+          echo "   Files: $(echo "${FILE_LIST}" | tr ',' '\n' | wc -l)" >&2
+
+          if [ "${OCR_NO_PLAN}" = "true" ]; then
+            NO_PLAN="--no-plan"
+          else
+            NO_PLAN=""
+          fi
+
+          # Run scan — JSON output to stdout, stderr to file
+          ocr scan \
+            --path "${FILE_LIST}" \
+            --concurrency "${OCR_CONCURRENCY}" \
+            --format json --audience agent \
+            ${NO_PLAN:+--no-plan} \
+            > .ocr/result.json 2>.ocr/scan-stderr.txt
+
+          # Show stderr (if any) for debugging
+          if [ -s .ocr/scan-stderr.txt ]; then
+            cat .ocr/scan-stderr.txt >&2
+          fi
+
+          if [ -s .ocr/result.json ]; then
+            echo "✅ OCR scan results saved to .ocr/result.json"
+          else
+            echo "⚠️ No JSON output from OCR scan — scan produced no results or failed"
+            rm -f .ocr/result.json
+          fi
+
+      - name: "Build Agent Envelope"
+        uses: ./.github/actions/ocr-envelope
+        with:
+          ocr-command: scan
+          ocr-result-file: .ocr/result.json
+          github-token: ${{ secrets.repo_token || secrets.GITHUB_TOKEN }}
+
+      - name: "Upload Agent Output"
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-output-ocr-scan
+          path: |
+            .agent/output.json
+            .ocr/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: "Create Issues from Findings (opt-in)"
+        if: ${{ false }}  # Disabled by default — enable by changing to 'if: true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.repo_token || secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f .agent/output.json ]; then
+            FINDINGS=$(jq -c '.findings[] | select(.severity == "error")' .agent/output.json)
+            echo "$FINDINGS" | while IFS= read -r finding; do
+              FILE=$(echo "$finding" | jq -r '.file // "unknown"')
+              MESSAGE=$(echo "$finding" | jq -r '.message // ""')
+              RULE=$(echo "$finding" | jq -r '.rule // "ocr-finding"')
+              TITLE="[OCR] ${RULE}: ${MESSAGE:0:80}"
+              BODY="**File:** \`${FILE}\`\n\n**Finding:** ${MESSAGE}\n\n_Generated by Open Code Review full scan_"
+
+              gh issue create \
+                --title "$TITLE" \
+                --body "$BODY" \
+                --label "ocr,automated" \
+                2>/dev/null || true
+            done
+          fi
+
+      - name: "Summarize"
+        shell: bash
+        run: |
+          if [ -f .agent/output.json ]; then
+            echo "## OCR Full Scan Results" >> $GITHUB_STEP_SUMMARY
+            jq -r '. | "- **Status**: \(.status)\n- **Summary**: \(.summary)"' .agent/output.json >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            FINDINGS_COUNT=$(jq '.findings | length' .agent/output.json 2>/dev/null || echo 0)
+            echo "**Total findings: ${FINDINGS_COUNT}**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$FINDINGS_COUNT" -gt 0 ] && [ "$FINDINGS_COUNT" -le 30 ]; then
+              echo "| Severity | Rule | File |" >> $GITHUB_STEP_SUMMARY
+              echo "|----------|------|------|" >> $GITHUB_STEP_SUMMARY
+              jq -r '.findings[] | "| \(.severity) | \(.rule) | `\(.file)` |"' .agent/output.json >> $GITHUB_STEP_SUMMARY
+            fi
+          fi

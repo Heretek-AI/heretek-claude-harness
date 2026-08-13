@@ -1,0 +1,137 @@
+# Pre-commit hooks configuration for Heretek Swarm
+# Run: pip install pre-commit && pre-commit install
+
+repos:
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(.github/|\.git/|\.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+      - id: end-of-file-fixer
+        exclude: ^(.github/|\.git/|\.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+      - id: check-yaml
+        exclude: ^(.github/|\.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+      - id: check-json
+        exclude: ^(.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+      - id: check-toml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Python hooks
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        language_version: python3.11
+        exclude: ^(.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.0
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        exclude: ^(.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+      - id: ruff-format
+        exclude: ^(.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - pydantic>=2.0
+          - types-redis
+          - types-requests
+        args: [--ignore-missing-imports, --no-strict-optional]
+        exclude: ^(.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/|tests/)
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.3
+    hooks:
+      - id: bandit
+        args: ['-c', 'pyproject.toml']
+        exclude: ^(.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/|tests/)
+
+  # Security hooks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: ^(package-lock.json|pnpm-lock.yaml|yarn.lock|secrets/.*\.ya?ml$|secrets/.*\.env$|\.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+
+  # Frontend hooks
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.0.0
+    hooks:
+      - id: eslint
+        files: \.(ts|tsx|js|jsx)$
+        types: [file]
+        additional_dependencies:
+          - eslint@^8.57.0
+          - typescript-eslint@^7.0.0
+          - eslint-config-prettier@^9.1.0
+          - eslint-plugin-react@^7.34.0
+          - eslint-plugin-react-hooks@^4.6.0
+        args: [--fix, --max-warnings=0]
+        exclude: ^(.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+
+  # Markdown hooks
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]
+        exclude: ^(.roo/|agent_workspace/|\.benchmarks/|\.dist-rig/)
+
+  # Docker hooks
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: [--ignore, DL3008, --ignore, DL3009]
+
+  # Commit message hooks
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
+
+  # Local repo hooks (SOPS encryption verification)
+  - repo: local
+    hooks:
+      - id: sops-verify
+        name: SOPS encryption verification
+        description: Verify SOPS-encrypted files are valid, keys match .sops.yaml, and no plaintext secrets are committed
+        entry: scripts/verify-sops-encryption.sh
+        language: script
+
+  # GitLeaks — detect hardcoded secrets
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.0
+    hooks:
+      - id: gitleaks
+        types: [text]
+        pass_filenames: false
+        verbose: true
+
+# CI configuration
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: []
+  submodules: false

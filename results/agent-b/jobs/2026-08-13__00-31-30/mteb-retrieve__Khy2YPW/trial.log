@@ -1,0 +1,10 @@
+Running command: apt-get update && apt-get install -y curl bash nodejs npm procps
+Command outputs captured
+Running command: set -euo pipefail; if command -v apk &> /dev/null; then  npm install -g @anthropic-ai/claude-code; else  curl -fsSL https://downloads.claude.ai/claude-code-releases/bootstrap.sh | bash -s --; fi && echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && export PATH="$HOME/.local/bin:$PATH" && claude --version
+Command failed
+Classified failed command as NetworkConnectionError (pattern: 'Could not resolve host')
+Trial mteb-retrieve__Khy2YPW failed: Command failed (exit 6): set -euo pipefail; if command -v apk &> /dev/null; then  npm install -g @anthropic-ai/claude-code; else  curl -fsSL https://downloads.claude.ai/claude-code-releases/bootstrap.sh | bash -s --; fi && echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && export PATH="$HOME/.local/bin:$PATH" && claude --version
+stdout: curl: (6) Could not resolve host: downloads.claude.ai
+
+stderr: None
+Collecting main service artifacts

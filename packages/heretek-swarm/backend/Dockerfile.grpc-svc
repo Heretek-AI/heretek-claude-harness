@@ -1,0 +1,62 @@
+# Dockerfile for the gRPC sovereign services (Phase 5).
+#
+# Builds one of the four sovereign services as a separate
+# container. Use:
+#
+#   docker build -f backend/Dockerfile.grpc-svc \
+#          --build-arg SERVICE=consensus \
+#          -t heretek-swarm-consensus-svc .
+#   docker run --rm -p 50051:50051 heretek-swarm-consensus-svc
+#
+# The four services and their default ports (per
+# services/grpc_servers.py):
+#   consensus     → 50051
+#   memory        → 50052
+#   realtime      → 50053
+#   observability → 50054
+#
+# Phase 5 of PLAN.md (§1.13 'Graduated sovereign services')
+# captures the full design.
+
+FROM python:3.11-slim
+
+ARG SERVICE=consensus
+ENV SERVICE=${SERVICE}
+
+WORKDIR /app
+
+# Install system deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps
+COPY pyproject.toml uv.lock* ./
+RUN pip install --no-cache-dir \
+        "grpcio>=1.66" \
+        "grpcio-tools>=1.66" \
+        "protobuf>=5.0" \
+        "pydantic>=2.13" \
+        "structlog>=25.5" \
+        "fastapi>=0.110" \
+        "httpx>=0.28" \
+        "cognee>=1.1" \
+        "mem0ai>=2.0"
+
+# Install the heretek_swarm package in editable mode
+COPY backend/ ./backend/
+RUN pip install --no-cache-dir -e .
+
+# Generate the gRPC stubs from the .proto
+COPY backend/heretek_swarm/services/grpc_proto /app/grpc_proto
+RUN python -m grpc_tools.protoc -I /app/grpc_proto \
+        --python_out=/app/grpc_proto \
+        --grpc_python_out=/app/grpc_proto \
+        /app/grpc_proto/heretek_services.proto
+RUN sed -i 's/^import heretek_services_pb2 as/from . import heretek_services_pb2 as/' /app/grpc_proto/heretek_services_pb2_grpc.py
+RUN touch /app/grpc_proto/__init__.py
+
+# Run the gRPC server
+EXPOSE 50051-50054
+ENTRYPOINT ["python", "-m", "heretek_swarm.services.grpc_servers"]
+CMD ["--service", "${SERVICE}", "--port", "50051"]

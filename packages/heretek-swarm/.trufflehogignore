@@ -1,0 +1,37 @@
+# TruffleHog exclusion patterns for Heretek Swarm
+# =============================================================================
+# These patterns are intentionally excluded from TruffleHog scanning to avoid
+# false positives from SOPS-encrypted blobs, known baselines, and test fixtures.
+
+# detect-secrets baseline — contains known false positive hashes
+.secrets.baseline
+
+# SOPS-encrypted secrets (the encrypted blobs produce false positives)
+secrets/*.yaml
+secrets/*.yml
+secrets/*.env
+
+# Test fixtures with embedded test credentials
+tests/fixtures/*.json
+tests/fixtures/*.yaml
+
+# Node modules and lockfiles (scanned separately by npm audit)
+node_modules/
+swarm-dashboard/node_modules/
+package-lock.json
+swarm-dashboard/package-lock.json
+
+# IDE and tooling
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Git internal
+.git/

@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# heretek-swarm-core — the sovereign service library.
+#
+# Phase 4 of PLAN.md (§1.13) carves this out of the single
+# heretek-swarm package. The contents listed below are the
+# sub-packages that move from backend/heretek_swarm/ into the
+# new core package's src/heretek_swarm_core/ namespace:
+#
+#   actors/      — agent implementations (23 agents, 6 tiers)
+#   actors/base/ — AgentActor base class + 10 mixins
+#   agents/      — agent registration and skills
+#   consensus/   — MAKER / EnhancedMAKER / SwarmDeliberation /
+#                  Deliberation engines (4 implementations behind
+#                  the ConsensusEngine Protocol from Phase 3.1)
+#   config/      — ConfigurationService lib (crud, models,
+#                  service, providers, tiers, crud_io, etc.)
+#   embedding/   — Embedding providers
+#   gateway/     — Bearer auth, TokenStore, A2A protocol
+#   infrastructure/nats/, infrastructure/otel/ — transport
+#                  and tracing primitives
+#   llm/         — LLM router, headroom_compat, hindsight_compat
+#   memory/      — MemoryStore Protocol + cognee / mem0 / null
+#                  adapters
+#   models/      — Pydantic models
+#   orchestrations/ — LangGraph workflow
+#   runtime/     — main_loop, wiring, autonomous runtime
+#   schemas/     — Cross-package contracts
+#   security/    — immune, rate_limiter
+#   swarm_logging/ — structlog setup
+#   utils/       — utility helpers
+#   validation/  — message validation
+#   channels/    — A2A channels
+#
+# The package depends on: cognee, langgraph, opik, headroom,
+# slowapi, mem0. It does NOT depend on FastAPI (the api
+# package owns the FastAPI surface).
+#
+# This pyproject.toml is a stub. Activating the split requires:
+#   1. Moving the listed sub-packages from backend/heretek_swarm/
+#      into src/heretek_swarm_core/
+#   2. Updating internal imports to use the new namespace
+#   3. Setting [tool.uv.workspace] members in the root
+#      pyproject.toml to include this directory
+#   4. Adding heretek-swarm-core to heretek-swarm-api's deps
+
+[project]
+name = "heretek-swarm-core"
+version = "0.2.0"
+description = "Heretek Swarm v2.0 - sovereign service library (actors, consensus, memory, runtime)"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+authors = [
+    {name = "Heretek AI", email = "engineering@heretek.ai"}
+]
+
+# Stub dependencies — the real list is inherited from the
+# root pyproject.toml today; the actual split would re-derive
+# it from the moved sub-packages' import graph.
+dependencies = [
+    "pydantic>=2.13.4",
+    "structlog>=25.5.0",
+    "tenacity>=9.1.4",
+    "cognee>=1.1.2,<2.0",
+    "langgraph>=1.2.4",
+    "opik>=1.0.0",
+    "headroom-ai>=0.1.9",
+    "slowapi>=0.1.9",
+    "mem0ai>=2.0.4",
+    "nats-py>=2.14.0",
+    "opentelemetry-api>=1.42.1",
+    "PyJWT>=2.13.0",
+    "httpx>=0.28.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/heretek-ai/heretek-swarm"
+Repository = "https://github.com/heretek-ai/heretek-swarm"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["heretek_swarm_core*"]

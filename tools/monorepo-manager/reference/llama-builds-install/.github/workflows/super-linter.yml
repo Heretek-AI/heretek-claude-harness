@@ -1,0 +1,28 @@
+name: super-linter
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  super-linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: github/super-linter/super-linter@v6
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+          DISABLE_ERRORS: false
+          VALIDATE_PYTHON: "true"
+          VALIDATE_JAVASCRIPT: "false"
+          VALIDATE_TYPESCRIPT: "false"
+          VALIDATE_YAML: true
+          VALIDATE_JSON: true
+          VALIDATE_SHELL: true
+          VALIDATE_MARKDOWN: true
+          VALIDATE_GITHUB_ACTIONS: true

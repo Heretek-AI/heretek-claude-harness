@@ -1,0 +1,17 @@
+# Auto-add labels based on changed paths.
+area/build:
+  - targets/**/*
+  - scripts/generate_manifest.py
+  - scripts/audit_matrix.py
+area/client:
+  - src/server/**
+  - src/webui/**
+  - bin/**
+area/infra:
+  - .github/**
+  - .claude/**
+  - .pre-commit-config.yaml
+  - sonar-project.properties
+area/docs:
+  - docs/**/*
+  - '**/*.md'
