@@ -766,6 +766,37 @@ plugins:
           last_commit: 2026-08-12
           cve_scan: not-applicable
           review: reviews/quality-audit-brooks-lint.md
+      - id: agentic-readiness
+        kind: skill
+        upstream: Heretek-AI/heretek-claude-harness
+        sha: "first-party-skill"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 0
+          last_commit: 2026-08-12
+          cve_scan: not-applicable
+          review: reviews/quality-audit-agentic-readiness.md
+
+  - name: fallow
+    category: task
+    tags: [fallow, rust, dead-code]
+    source: { type: relative, path: fallow }
+    components: [skills]
+    items:
+      - id: fallow-check
+        kind: skill
+        upstream: fallow-rs/fallow
+        sha: "a1b2c3d4e5f678901234567890abcdef12345678"
+        license: MIT
+        vetting:
+          status: approved
+          date: 2026-08-12
+          stars: 1500
+          last_commit: 2026-08-12
+          cve_scan: 2026-08-12
+          review: reviews/fallow.md
 
   - name: pre-commit
     category: cross

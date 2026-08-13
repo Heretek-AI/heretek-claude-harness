@@ -1,0 +1,12 @@
+{
+	"name": "fallow",
+	"displayName": "Fallow",
+	"description": "Fallow task plugin: dead code analysis, unused dependency detection, and token blast radius calculation.",
+	"author": {
+		"name": "Heretek-AI",
+		"url": "https://github.com/Heretek-AI"
+	},
+	"license": "MIT",
+	"skills": "./skills/",
+	"dependencies": []
+}

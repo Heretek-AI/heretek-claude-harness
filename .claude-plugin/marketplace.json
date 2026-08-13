@@ -160,6 +160,16 @@
       ]
     },
     {
+      "category": "task",
+      "name": "fallow",
+      "source": "./plugins/fallow",
+      "tags": [
+        "fallow",
+        "rust",
+        "dead-code"
+      ]
+    },
+    {
       "category": "cross",
       "name": "pre-commit",
       "source": "./plugins/pre-commit",
