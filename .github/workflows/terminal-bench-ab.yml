@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Run TerminalBench A/B & Quality Audit
         uses: Heretek-AI/harness-audit@v1
