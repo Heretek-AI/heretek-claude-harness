@@ -4,5 +4,5 @@ pip==26.1.2
 # Standalone tools that some CI workflows install on their own.
 # Pinned here so the dev-deps lock file (requirements-dev.lock.txt)
 # carries hashes for them and CI can install via --require-hashes.
-ruff==0.16.1
+ruff==0.16.3
 ast-grep-cli==0.45.1
