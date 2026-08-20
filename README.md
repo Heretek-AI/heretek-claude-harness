@@ -1,4 +1,10 @@
-# `heretek-claude-harness`
+# `heretek-claude-harness` (DEPRECATED & ARCHIVED)
+
+> [!WARNING]
+> **This repository is deprecated, superseded, and archived.**
+> Please use **[`@heretek-ai/agent-proof`](https://github.com/Heretek-AI/Agent-Proof)** ([npm: `@heretek-ai/agent-proof`](https://www.npmjs.com/package/@heretek-ai/agent-proof)) for sub-second mechanical hard-gate AI governance, LSP diagnostic streaming, and zero-dependency pre-commit enforcement.
+
+---
 
 > Open-source **plugin marketplace framework and distribution CLI** that installs mechanical quality guardrails, Claude Code hooks, MCP servers, and language packs into **target developer repositories**.
 
